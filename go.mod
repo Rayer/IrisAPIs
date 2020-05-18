@@ -17,6 +17,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/moogar0880/problems v0.1.1
+	github.com/rayer/chatbot v0.5.0
 	github.com/sirupsen/logrus v1.6.0
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tealeg/xlsx v1.0.5 // indirect

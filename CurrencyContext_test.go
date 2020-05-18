@@ -1,6 +1,8 @@
 package IrisAPIs
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestSyncToDb(t *testing.T) {
 	tests := []struct {
