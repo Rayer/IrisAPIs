@@ -21,28 +21,31 @@ func GetDatabaseContext() *DatabaseContext {
 	mutex.Lock()
 	if databaseContext == nil {
 		log.Debugln("Database Initializing")
-		//var mutex = &sync.Mutex{}
-		//mutex.Lock()
 		databaseContext = &DatabaseContext{}
 		var err error
 		databaseContext.DbObject, err = initDatabaseContext()
 		if err != nil {
 			//Do something panic
-			panic("Fail to init Database Object!")
+			panic("Fail to init Database Object, error is : " + err.Error())
 		}
-		//mutex.Unlock()
 	}
 	log.Debugf("Out with database object : %+v", databaseContext)
 	mutex.Unlock()
 	return databaseContext
 }
 
-func initDatabaseContext() (engine *xorm.Engine, err error){
-	engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Asia%2FTaipei&parseTime=true")
+func initDatabaseContext() (engine *xorm.Engine, err error) {
+	//engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Asia%2FTaipei&parseTime=true")
+	engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Local&parseTime=true")
+
+	if err != nil {
+		return nil, err
+	}
+
 	engine.ShowSQL(true)
 	//engine.SetLogger(log.Logger{})
 	if err != nil {
 		return nil, err
 	}
-	return engine,nil
+	return engine, nil
 }
