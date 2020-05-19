@@ -33,7 +33,7 @@ func GetMostRecentCurrencyDataRaw() (string, error) {
 }
 
 func SyncToDb() error {
-	log.Debugf("Trying connecting to currency server....")
+	log.Debugf("Trying connecting to currency server.....")
 	resp, err := http.Get("http://data.fixer.io/api/latest?access_key=676ac77e5ce5d4b9a57ee6464ff84433")
 	if err != nil {
 		return err
