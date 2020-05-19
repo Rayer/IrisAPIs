@@ -5,10 +5,15 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
 func main() {
+
+	//Init logger
+	log.SetLevel(log.DebugLevel)
+
 	r := gin.Default()
 	r.Use(cors.Default())
 
@@ -65,13 +70,13 @@ func main() {
 
 		utx, _ := chatbot.GetUserContext(conv.User)
 
-		prompt, keywords_v, keywords_iv, err := utx.RenderMessageWithDetail()
+		prompt, keywordsV, keywordsIv, err := utx.RenderMessageWithDetail()
 		str, err := utx.HandleMessage(conv.Input)
 		next, err := utx.RenderMessage()
 		c.JSON(http.StatusOK, gin.H{
 			"prompt":           prompt,
-			"keywords":         keywords_v,
-			"invalid_keywords": keywords_iv,
+			"keywords":         keywordsV,
+			"invalid_keywords": keywordsIv,
 			"message":          str,
 			"error":            err,
 			"next":             next,
