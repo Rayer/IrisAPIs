@@ -15,13 +15,13 @@ func main() {
 	chatbot := IrisAPIs.NewChatbotContext()
 
 	r.NoRoute(func(c *gin.Context) {
-		err404 := problems.NewStatusProblem(404)
+		err404 := problems.NewStatusProblem(http.StatusNotFound)
 		err404.Detail = "No such route!"
 		c.JSON(404, err404)
 	})
 
 	r.NoMethod(func(c *gin.Context) {
-		err404 := problems.NewStatusProblem(404)
+		err404 := problems.NewStatusProblem(http.StatusNotFound)
 		err404.Detail = "No such method!"
 		c.JSON(404, err404)
 	})
@@ -35,7 +35,7 @@ func main() {
 	r.GET("/currency", func(c *gin.Context) {
 		result, err := IrisAPIs.GetMostRecentCurrencyDataRaw()
 		if err != nil {
-			err500 := problems.NewDetailedProblem(500, err.Error())
+			err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 			c.JSON(500, err500)
 			return
 		}
@@ -46,13 +46,13 @@ func main() {
 	r.GET("/ip2nation", func(c *gin.Context) {
 		ipAddr := c.Query("ip")
 		if ipAddr == "" {
-			err400 := problems.NewDetailedProblem(400, "No query parameter : ip")
+			err400 := problems.NewDetailedProblem(http.StatusBadRequest, "No query parameter : ip")
 			c.JSON(400, err400)
 			return
 		}
 		res, err := IrisAPIs.GetIPNation(ipAddr)
 		if err != nil {
-			err500 := problems.NewDetailedProblem(500, err.Error())
+			err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 			c.JSON(500, err500)
 			return
 		}
