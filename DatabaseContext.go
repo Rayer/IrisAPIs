@@ -35,8 +35,8 @@ func GetDatabaseContext() *DatabaseContext {
 }
 
 func initDatabaseContext() (engine *xorm.Engine, err error) {
-	//engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Asia%2FTaipei&parseTime=true")
-	engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Local&parseTime=true")
+	engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Asia%2FTaipei&parseTime=true")
+	//engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Local&parseTime=true")
 
 	if err != nil {
 		return nil, err
@@ -44,8 +44,8 @@ func initDatabaseContext() (engine *xorm.Engine, err error) {
 
 	engine.ShowSQL(true)
 	//engine.SetLogger(log.Logger{})
-	if err != nil {
-		return nil, err
-	}
+	//if err != nil {
+	//	return nil, err
+	//}
 	return engine, nil
 }
