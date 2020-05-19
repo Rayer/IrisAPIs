@@ -90,6 +90,11 @@ func main() {
 
 	})
 
+	//Run daemon threads
 	IrisAPIs.CurrencySyncRoutine()
-	r.Run()
+
+	err := r.Run()
+	if err != nil {
+		panic(err.Error())
+	}
 }
