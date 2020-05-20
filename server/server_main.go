@@ -37,8 +37,11 @@ func main() {
 		})
 	})
 
+	//Currency Rate
+	currencyContext := IrisAPIs.NewCurrencyContext("676ac77e5ce5d4b9a57ee6464ff84433")
+
 	r.GET("/currency", func(c *gin.Context) {
-		result, err := IrisAPIs.GetMostRecentCurrencyDataRaw()
+		result, err := currencyContext.GetMostRecentCurrencyDataRaw()
 		if err != nil {
 			err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 			c.JSON(500, err500)
@@ -96,7 +99,7 @@ func main() {
 	})
 
 	//Run daemon threads
-	IrisAPIs.CurrencySyncRoutine()
+	currencyContext.CurrencySyncRoutine()
 
 	err := r.Run()
 	if err != nil {

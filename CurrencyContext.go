@@ -8,6 +8,22 @@ import (
 	"time"
 )
 
+type CurrencyContext struct {
+	ApiKey                 string
+	Database               *DatabaseContext
+	UpdateAfterLastSuccess int
+	UpdateAfterLastFail    int
+}
+
+func NewCurrencyContext(apiKey string) *CurrencyContext {
+	return &CurrencyContext{
+		ApiKey:                 apiKey,
+		Database:               GetDatabaseContext(),
+		UpdateAfterLastSuccess: 12,
+		UpdateAfterLastFail:    3,
+	}
+}
+
 type CurrencyBatch struct {
 	Batch   int64     `xorm:"autoincr"`
 	Exec    time.Time `xorm:"created"`
@@ -22,8 +38,8 @@ type CurrencyEntry struct {
 	Rate   float64
 }
 
-func GetMostRecentCurrencyDataRaw() (string, error) {
-	db := GetDatabaseContext().DbObject
+func (c *CurrencyContext) GetMostRecentCurrencyDataRaw() (string, error) {
+	db := c.Database.DbObject
 	lastSuccess := &CurrencyBatch{}
 	_, err := db.Where("success=?", 1).Desc("exec").Limit(1).Get(lastSuccess)
 	if err != nil {
@@ -32,9 +48,9 @@ func GetMostRecentCurrencyDataRaw() (string, error) {
 	return lastSuccess.Raw, nil
 }
 
-func SyncToDb() error {
+func (c *CurrencyContext) SyncToDb() error {
 	log.Debugf("Trying connecting to currency server....")
-	resp, err := http.Get("http://data.fixer.io/api/latest?access_key=676ac77e5ce5d4b9a57ee6464ff84433")
+	resp, err := http.Get("http://data.fixer.io/api/latest?access_key=" + c.ApiKey)
 	if err != nil {
 		return err
 	}
@@ -48,7 +64,7 @@ func SyncToDb() error {
 		return err
 	}
 
-	err = saveCurrencyEntries(string(raw))
+	err = c.saveCurrencyEntries(string(raw))
 	if err != nil {
 		return err
 	}
@@ -56,7 +72,7 @@ func SyncToDb() error {
 	return nil
 }
 
-func saveCurrencyEntries(raw string) error {
+func (c *CurrencyContext) saveCurrencyEntries(raw string) error {
 	engine := GetDatabaseContext().DbObject
 	var data map[string]interface{}
 	err := json.Unmarshal([]byte(raw), &data)
@@ -96,11 +112,11 @@ type CurrencySyncResult struct {
 	lastSyncSuccess bool
 }
 
-func CurrencySyncRoutine() {
+func (c *CurrencyContext) CurrencySyncRoutine() {
 	go func() {
 		for {
 			log.Infoln("Starting another round of CurrencySyncWorker...")
-			_, err := CurrencySyncWorker()
+			_, err := c.CurrencySyncWorker()
 			if err != nil {
 				log.Warnf("CurrencySyncWorker ends with an error : %s", err.Error())
 			}
@@ -108,7 +124,7 @@ func CurrencySyncRoutine() {
 	}()
 }
 
-func CurrencySyncWorker() (*CurrencySyncResult, error) {
+func (c *CurrencyContext) CurrencySyncWorker() (*CurrencySyncResult, error) {
 
 	db := GetDatabaseContext().DbObject
 
@@ -139,9 +155,9 @@ func CurrencySyncWorker() (*CurrencySyncResult, error) {
 	var next time.Time
 
 	if lastFail.Batch > lastSuccess.Batch {
-		next = lastFail.Exec.Add(time.Hour * 3)
+		next = lastFail.Exec.Add(time.Hour * time.Duration(c.UpdateAfterLastFail))
 	} else {
-		next = lastSuccess.Exec.Add(time.Hour * 12)
+		next = lastSuccess.Exec.Add(time.Hour * time.Duration(c.UpdateAfterLastSuccess))
 	}
 
 	invoke := next.Sub(time.Now())
@@ -151,7 +167,7 @@ func CurrencySyncWorker() (*CurrencySyncResult, error) {
 	log.Infof("DB Sync will be executed after : %v", invoke)
 
 	<-timer.C
-	err = SyncToDb()
+	err = c.SyncToDb()
 
 	log.Infof("DB Sync has been executed : %v", time.Now())
 	if err != nil {
