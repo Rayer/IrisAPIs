@@ -12,5 +12,4 @@ COPY --from=build-env /IrisAPIs/serverInfo/serverInfo.app /app
 COPY --from=build-env /usr/share/zoneinfo /usr/share/zoneinfo
 ENV TZ=Asia/Taipei
 EXPOSE 8080
-CMD ["/app/serverInfo.app"]
 ENTRYPOINT ["/app/server.app"]
