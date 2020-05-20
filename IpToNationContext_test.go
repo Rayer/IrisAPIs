@@ -1,12 +1,29 @@
 package IrisAPIs
 
 import (
+	"errors"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/suite"
 	"reflect"
 	"testing"
 )
 
-func Test_isCorrectIPAddress(t *testing.T) {
+type IpToNationContextTestSuite struct {
+	suite.Suite
+	db              *DatabaseContext
+	ipNationContext *IpNationContext
+}
+
+func TestIpToNationContextSuite(t *testing.T) {
+	suite.Run(t, new(IpToNationContextTestSuite))
+}
+
+func (c *IpToNationContextTestSuite) SetupTest() {
+	c.db, _ = NewDatabaseContext("acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps_test?charset=utf8&loc=Asia%2FTaipei&parseTime=true", true)
+	c.ipNationContext = NewIpNationContext(c.db)
+}
+
+func (c *IpToNationContextTestSuite) Test_isCorrectIPAddress() {
 	type args struct {
 		ip string
 	}
@@ -39,15 +56,15 @@ func Test_isCorrectIPAddress(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		c.Run(tt.name, func() {
 			if got := isCorrectIPAddress(tt.args.ip); got != tt.want {
-				t.Errorf("isCorrectIPAddress() = %v, want %v", got, tt.want)
+				c.Errorf(errors.New("Fail in test"), "isCorrectIPAddress() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestGetIPNation(t *testing.T) {
+func (c *IpToNationContextTestSuite) TestGetIPNation() {
 	logrus.SetLevel(logrus.DebugLevel)
 	type args struct {
 		ip string
@@ -75,14 +92,14 @@ func TestGetIPNation(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetIPNation(tt.args.ip)
+		c.Run(tt.name, func() {
+			got, err := c.ipNationContext.GetIPNation(tt.args.ip)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetIPNation() error = %v, wantErr %v", err, tt.wantErr)
+				c.Errorf(err, "GetIPNation() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetIPNation() got = %v, want %v", got, tt.want)
+				c.Errorf(errors.New(""), "GetIPNation() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

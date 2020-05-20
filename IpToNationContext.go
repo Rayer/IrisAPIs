@@ -4,12 +4,21 @@ import (
 	"encoding/binary"
 	"errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/xormplus/xorm"
 	"net"
 	"regexp"
 )
 
+type IpNationContext struct {
+	Db *xorm.Engine
+}
+
+func NewIpNationContext(db *DatabaseContext) *IpNationContext {
+	return &IpNationContext{Db: db.DbObject}
+}
+
 type IpNation struct {
-	Ip int64
+	Ip      int64
 	Country string
 }
 
@@ -31,19 +40,19 @@ func ip2int(ip net.IP) uint32 {
 	return binary.BigEndian.Uint32(ip)
 }
 
-func int2ip(nn uint32) net.IP {
-	ip := make(net.IP, 4)
-	binary.BigEndian.PutUint32(ip, nn)
-	return ip
-}
+//func int2ip(nn uint32) net.IP {
+//	ip := make(net.IP, 4)
+//	binary.BigEndian.PutUint32(ip, nn)
+//	return ip
+//}
 
 func isCorrectIPAddress(ip string) bool {
 	ipReg := regexp.MustCompile(`^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$`)
 	return ipReg.MatchString(ip)
 }
 
-func GetIPNation(ip string) (*IpNationCountries, error){
-	db := GetDatabaseContext().DbObject
+func (i *IpNationContext) GetIPNation(ip string) (*IpNationCountries, error) {
+	db := i.Db
 	if isCorrectIPAddress(ip) == false {
 		return nil, errors.New("Invalid IP address : " + ip)
 	}

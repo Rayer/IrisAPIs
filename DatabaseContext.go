@@ -2,50 +2,36 @@ package IrisAPIs
 
 import (
 	_ "github.com/go-sql-driver/mysql"
-	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
-	"sync"
 )
 
 type DatabaseContext struct {
-	DbObject *xorm.Engine
+	init             bool
+	DbObject         *xorm.Engine
+	ConnectionString string
+	ShowSql          bool
 }
 
-var databaseContext *DatabaseContext = nil
-
-func GetDatabaseContext() *DatabaseContext {
-
-	log.Debugf("Trying fetching DB : %+v", databaseContext)
-
-	var mutex = &sync.Mutex{}
-	mutex.Lock()
-	if databaseContext == nil {
-		log.Debugln("Database Initializing")
-		databaseContext = &DatabaseContext{}
-		var err error
-		databaseContext.DbObject, err = initDatabaseContext()
-		if err != nil {
-			//Do something panic
-			panic("Fail to init Database Object, error is : " + err.Error())
-		}
+func NewDatabaseContext(connectionString string, showSql bool) (*DatabaseContext, error) {
+	engine, err := initDatabaseContext(connectionString, showSql)
+	if err != nil {
+		return nil, err
 	}
-	log.Debugf("Out with database object : %+v", databaseContext)
-	mutex.Unlock()
-	return databaseContext
+	return &DatabaseContext{
+		init:             true,
+		DbObject:         engine,
+		ConnectionString: connectionString,
+	}, nil
 }
 
-func initDatabaseContext() (engine *xorm.Engine, err error) {
-	engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Asia%2FTaipei&parseTime=true")
-	//engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Local&parseTime=true")
+func initDatabaseContext(connectionString string, showSql bool) (engine *xorm.Engine, err error) {
+	//engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Asia%2FTaipei&parseTime=true")
+	engine, err = xorm.NewEngine("mysql", connectionString)
 
 	if err != nil {
 		return nil, err
 	}
 
-	engine.ShowSQL(true)
-	//engine.SetLogger(log.Logger{})
-	//if err != nil {
-	//	return nil, err
-	//}
+	engine.ShowSQL(showSql)
 	return engine, nil
 }

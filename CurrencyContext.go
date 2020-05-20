@@ -3,6 +3,7 @@ package IrisAPIs
 import (
 	"encoding/json"
 	log "github.com/sirupsen/logrus"
+	"github.com/xormplus/xorm"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -11,15 +12,15 @@ import (
 
 type CurrencyContext struct {
 	ApiKey                 string
-	Database               *DatabaseContext
+	Db                     *xorm.Engine
 	UpdateAfterLastSuccess int
 	UpdateAfterLastFail    int
 }
 
-func NewCurrencyContext(apiKey string) *CurrencyContext {
+func NewCurrencyContext(apiKey string, db *DatabaseContext) *CurrencyContext {
 	return &CurrencyContext{
 		ApiKey:                 apiKey,
-		Database:               GetDatabaseContext(),
+		Db:                     db.DbObject,
 		UpdateAfterLastSuccess: 12,
 		UpdateAfterLastFail:    3,
 	}
@@ -41,9 +42,8 @@ type CurrencyEntry struct {
 }
 
 func (c *CurrencyContext) GetMostRecentCurrencyDataRaw() (string, error) {
-	db := c.Database.DbObject
 	lastSuccess := &CurrencyBatch{}
-	_, err := db.Where("success=?", 1).Desc("exec").Limit(1).Get(lastSuccess)
+	_, err := c.Db.Where("success=?", 1).Desc("exec").Limit(1).Get(lastSuccess)
 	if err != nil {
 		return "", err
 	}
@@ -75,7 +75,6 @@ func (c *CurrencyContext) SyncToDb() error {
 }
 
 func (c *CurrencyContext) saveCurrencyEntries(raw string) error {
-	engine := GetDatabaseContext().DbObject
 	var data map[string]interface{}
 	err := json.Unmarshal([]byte(raw), &data)
 
@@ -91,7 +90,7 @@ func (c *CurrencyContext) saveCurrencyEntries(raw string) error {
 		Success: data["success"].(bool),
 		Host:    hostName,
 	}
-	_, err = engine.Insert(batch)
+	_, err = c.Db.Insert(batch)
 
 	var entries = make([]*CurrencyEntry, 0, 0)
 
@@ -111,7 +110,7 @@ func (c *CurrencyContext) saveCurrencyEntries(raw string) error {
 		})
 	}
 
-	aff, err := engine.Insert(entries)
+	aff, err := c.Db.Insert(entries)
 
 	log.Printf("aff : %v", aff)
 	return err
@@ -136,16 +135,14 @@ func (c *CurrencyContext) CurrencySyncRoutine() {
 
 func (c *CurrencyContext) CurrencySyncWorker() (*CurrencySyncResult, error) {
 
-	db := GetDatabaseContext().DbObject
-
-	log.Printf("Database Object : %+v", db)
+	log.Printf("Database Object : %+v", c.Db)
 
 	lastSuccess := &CurrencyBatch{}
 	lastFail := &CurrencyBatch{}
 	var err error
 
-	_, err = db.Where("success=?", 1).Desc("exec").Limit(1).Get(lastSuccess)
-	_, err = db.Where("success=?", 0).Desc("exec").Limit(1).Get(lastFail)
+	_, err = c.Db.Where("success=?", 1).Desc("exec").Limit(1).Get(lastSuccess)
+	_, err = c.Db.Where("success=?", 0).Desc("exec").Limit(1).Get(lastFail)
 
 	if err != nil {
 		return nil, err
@@ -154,13 +151,6 @@ func (c *CurrencyContext) CurrencySyncWorker() (*CurrencySyncResult, error) {
 	log.Infoln("Fetched last exec time from database.")
 	log.Infof("Last success : %s", lastSuccess.Exec)
 	log.Infof("Last failed : %s", lastFail.Exec)
-
-	/*
-		Rules :
-		1. Exec every 12hr
-		2. If last one is success, exec + 12hr
-		3. If last one is failed, exec + 3hr
-	*/
 
 	var next time.Time
 

@@ -17,6 +17,10 @@ func main() {
 	r := gin.Default()
 	r.Use(cors.Default())
 
+	db, err := IrisAPIs.NewDatabaseContext("acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Asia%2FTaipei&parseTime=true", true)
+	if err != nil {
+		panic(err.Error())
+	}
 	chatbot := IrisAPIs.NewChatbotContext()
 
 	r.NoRoute(func(c *gin.Context) {
@@ -38,7 +42,7 @@ func main() {
 	})
 
 	//Currency Rate
-	currencyContext := IrisAPIs.NewCurrencyContext("676ac77e5ce5d4b9a57ee6464ff84433")
+	currencyContext := IrisAPIs.NewCurrencyContext("676ac77e5ce5d4b9a57ee6464ff84433", db)
 
 	r.GET("/currency", func(c *gin.Context) {
 		result, err := currencyContext.GetMostRecentCurrencyDataRaw()
@@ -51,6 +55,8 @@ func main() {
 		c.Data(http.StatusOK, "application/json", []byte(result))
 	})
 
+	ipNation := IrisAPIs.NewIpNationContext(db)
+
 	r.GET("/ip2nation", func(c *gin.Context) {
 		ipAddr := c.Query("ip")
 		if ipAddr == "" {
@@ -58,7 +64,7 @@ func main() {
 			c.JSON(400, err400)
 			return
 		}
-		res, err := IrisAPIs.GetIPNation(ipAddr)
+		res, err := ipNation.GetIPNation(ipAddr)
 		if err != nil {
 			err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 			c.JSON(500, err500)
@@ -101,7 +107,7 @@ func main() {
 	//Run daemon threads
 	currencyContext.CurrencySyncRoutine()
 
-	err := r.Run()
+	err = r.Run()
 	if err != nil {
 		panic(err.Error())
 	}

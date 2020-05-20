@@ -19,6 +19,8 @@ require (
 	github.com/moogar0880/problems v0.1.1
 	github.com/rayer/chatbot v0.5.0
 	github.com/sirupsen/logrus v1.6.0
+	github.com/spf13/viper v1.7.0 // indirect
+	github.com/stretchr/testify v1.5.1
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tealeg/xlsx v1.0.5 // indirect
 	github.com/xormplus/builder v0.0.0-20200331055651-240ff40009be // indirect
