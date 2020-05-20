@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -29,6 +30,7 @@ type CurrencyBatch struct {
 	Exec    time.Time `xorm:"created"`
 	Raw     string
 	Success bool
+	Host    string
 }
 
 type CurrencyEntry struct {
@@ -77,9 +79,17 @@ func (c *CurrencyContext) saveCurrencyEntries(raw string) error {
 	var data map[string]interface{}
 	err := json.Unmarshal([]byte(raw), &data)
 
+	hostName, err := os.Hostname()
+
+	if err != nil {
+		log.Warnf("Error while getting host name : %s", err.Error())
+		err = nil
+	}
+
 	batch := &CurrencyBatch{
 		Raw:     raw,
 		Success: data["success"].(bool),
+		Host:    hostName,
 	}
 	_, err = engine.Insert(batch)
 
