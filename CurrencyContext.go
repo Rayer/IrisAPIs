@@ -21,8 +21,17 @@ func NewCurrencyContext(apiKey string, db *DatabaseContext) *CurrencyContext {
 	return &CurrencyContext{
 		ApiKey:                 apiKey,
 		Db:                     db.DbObject,
-		UpdateAfterLastSuccess: 12,
-		UpdateAfterLastFail:    3,
+		UpdateAfterLastSuccess: 43200,
+		UpdateAfterLastFail:    10800,
+	}
+}
+
+func NewCurrencyContextWithConfig(c *Configuration, db *DatabaseContext) *CurrencyContext {
+	return &CurrencyContext{
+		ApiKey:                 c.FixerIoApiKey,
+		Db:                     db.DbObject,
+		UpdateAfterLastSuccess: c.FixerIoLastFetchSuccessfulPeriod,
+		UpdateAfterLastFail:    c.FixerIoLastFetchFailedPeriod,
 	}
 }
 
@@ -155,9 +164,9 @@ func (c *CurrencyContext) CurrencySyncWorker() (*CurrencySyncResult, error) {
 	var next time.Time
 
 	if lastFail.Batch > lastSuccess.Batch {
-		next = lastFail.Exec.Add(time.Hour * time.Duration(c.UpdateAfterLastFail))
+		next = lastFail.Exec.Add(time.Second * time.Duration(c.UpdateAfterLastFail))
 	} else {
-		next = lastSuccess.Exec.Add(time.Hour * time.Duration(c.UpdateAfterLastSuccess))
+		next = lastSuccess.Exec.Add(time.Second * time.Duration(c.UpdateAfterLastSuccess))
 	}
 
 	invoke := next.Sub(time.Now())

@@ -8,10 +8,12 @@ import (
 )
 
 type Configuration struct {
-	FixerIoApiKey    string `doc:"API Key of fixer.io, you can get one on its website"`
-	ConnectionString string `doc:"Connection string to database."`
-	DatabaseType     string `doc:"Database Type, for example, mysql"`
-	LogLevel         string `doc:"Log Level, 0 for debug and 7 for info"`
+	FixerIoApiKey                    string `doc:"API Key of fixer.io, you can get one on its website"`
+	FixerIoLastFetchSuccessfulPeriod int    `doc:"Fetch interval for last successful fetch"`
+	FixerIoLastFetchFailedPeriod     int    `doc:"Fetch interval for last fail fetch"`
+	ConnectionString                 string `doc:"Connection string to database."`
+	DatabaseType                     string `doc:"Database Type, for example, mysql"`
+	LogLevel                         string `doc:"Log Level, 0 for debug and 7 for info"`
 }
 
 func (c *Configuration) LoadConfiguration() error {
@@ -20,6 +22,10 @@ func (c *Configuration) LoadConfiguration() error {
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("./config")
 	viper.AddConfigPath("/etc/iris/")
+
+	//Defaults
+	viper.SetDefault("FixerIoLastFetchSuccessfulPeriod", 43200)
+	viper.SetDefault("FixerIoLastFetchFailedPeriod", 10800)
 
 	err := viper.ReadInConfig()
 
