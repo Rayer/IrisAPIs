@@ -17,7 +17,13 @@ func main() {
 	r := gin.Default()
 	r.Use(cors.Default())
 
-	db, err := IrisAPIs.NewDatabaseContext("acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Asia%2FTaipei&parseTime=true", true)
+	config := IrisAPIs.Configuration{}
+	err := config.LoadConfiguration()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	db, err := IrisAPIs.NewDatabaseContext(config.ConnectionString, true)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -42,7 +48,7 @@ func main() {
 	})
 
 	//Currency Rate
-	currencyContext := IrisAPIs.NewCurrencyContext("676ac77e5ce5d4b9a57ee6464ff84433", db)
+	currencyContext := IrisAPIs.NewCurrencyContext(config.FixerIoApiKey, db)
 
 	r.GET("/currency", func(c *gin.Context) {
 		result, err := currencyContext.GetMostRecentCurrencyDataRaw()

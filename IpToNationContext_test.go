@@ -21,6 +21,7 @@ func TestIpToNationContextSuite(t *testing.T) {
 func (c *IpToNationContextTestSuite) SetupTest() {
 	c.db, _ = NewDatabaseContext("acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps_test?charset=utf8&loc=Asia%2FTaipei&parseTime=true", true)
 	c.ipNationContext = NewIpNationContext(c.db)
+	logrus.SetLevel(logrus.DebugLevel)
 }
 
 func (c *IpToNationContextTestSuite) Test_isCorrectIPAddress() {
@@ -65,7 +66,6 @@ func (c *IpToNationContextTestSuite) Test_isCorrectIPAddress() {
 }
 
 func (c *IpToNationContextTestSuite) TestGetIPNation() {
-	logrus.SetLevel(logrus.DebugLevel)
 	type args struct {
 		ip string
 	}
