@@ -15,6 +15,7 @@ require (
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/magiconair/properties v1.8.1
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/moogar0880/problems v0.1.1
 	github.com/rayer/chatbot v0.5.0

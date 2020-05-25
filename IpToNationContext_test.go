@@ -3,6 +3,7 @@ package IrisAPIs
 import (
 	"errors"
 	"github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"reflect"
 	"testing"
@@ -59,6 +60,7 @@ func (c *IpToNationContextTestSuite) Test_isCorrectIPAddress() {
 	for _, tt := range tests {
 		c.Run(tt.name, func() {
 			if got := isCorrectIPAddress(tt.args.ip); got != tt.want {
+				assert.Equal(c.T(), got, tt.want)
 				c.Errorf(errors.New("Fail in test"), "isCorrectIPAddress() = %v, want %v", got, tt.want)
 			}
 		})
@@ -95,10 +97,12 @@ func (c *IpToNationContextTestSuite) TestGetIPNation() {
 		c.Run(tt.name, func() {
 			got, err := c.ipNationContext.GetIPNation(tt.args.ip)
 			if (err != nil) != tt.wantErr {
+				assert.Equal(c.T(), tt.wantErr, err)
 				c.Errorf(err, "GetIPNation() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
+				assert.Equal(c.T(), got, tt.want)
 				c.Errorf(errors.New(""), "GetIPNation() got = %v, want %v", got, tt.want)
 			}
 		})

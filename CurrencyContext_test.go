@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"github.com/magiconair/properties/assert"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -33,6 +34,7 @@ func (c *CurrencyContextTestSuite) TestSyncToDb() {
 	for _, tt := range tests {
 		c.Run(tt.name, func() {
 			if err := c.currencyContext.SyncToDb(); (err != nil) != tt.wantErr {
+				assert.Equal(c.T(), err, nil)
 				c.Errorf(err, "SyncToDb() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
