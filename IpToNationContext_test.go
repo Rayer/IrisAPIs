@@ -92,6 +92,44 @@ func (c *IpToNationContextTestSuite) TestGetIPNation() {
 			},
 			wantErr: false,
 		},
+		{
+			name: "Private IP",
+			args: args{
+				ip: "10.0.1.4",
+			},
+			want: &IpNationCountries{
+				Code:      "01",
+				IsoCode_2: "",
+				IsoCode_3: "",
+				Country:   "Private",
+				Lat:       0,
+				Lon:       0,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Invalid IP address",
+			args: args{
+				ip: "11.165.283.217",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "Localhost IP Test",
+			args: args{
+				ip: "127.0.0.1",
+			},
+			want: &IpNationCountries{
+				Code:      "03",
+				IsoCode_2: "",
+				IsoCode_3: "",
+				Country:   "(Reserved)Local Host",
+				Lat:       0,
+				Lon:       0,
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		c.Run(tt.name, func() {
