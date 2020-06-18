@@ -62,6 +62,39 @@ func main() {
 		c.Data(http.StatusOK, "application/json", []byte(result))
 	})
 
+	r.POST("/currency/convert", func(c *gin.Context) {
+		type payload struct {
+			From   string  `json:"from"`
+			To     string  `json:"to"`
+			Amount float64 `json:"amount"`
+			Result float64 `json:"result"`
+		}
+
+		var conv payload
+		err := c.BindJSON(&conv)
+		if err != nil {
+			err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
+			c.JSON(500, err500)
+			return
+		}
+
+		if conv.From == "" || conv.To == "" {
+			err400 := problems.NewDetailedProblem(http.StatusBadRequest, "either from or to is null!")
+			c.JSON(400, err400)
+			return
+		}
+
+		result, err := currencyContext.Convert(conv.From, conv.To, conv.Amount)
+		if err != nil {
+			err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
+			c.JSON(500, err500)
+			return
+		}
+
+		conv.Result = result
+		c.JSON(200, conv)
+	})
+
 	ipNation := IrisAPIs.NewIpNationContext(db)
 
 	r.GET("/ip2nation", func(c *gin.Context) {

@@ -4,6 +4,7 @@ import (
 	"github.com/magiconair/properties/assert"
 	"github.com/stretchr/testify/suite"
 	"testing"
+	"time"
 )
 
 type CurrencyContextTestSuite struct {
@@ -66,6 +67,62 @@ func (c *CurrencyContextTestSuite) Test_saveCurrencyEntries() {
 		c.Run(tt.name, func() {
 			if err := c.currencyContext.saveCurrencyEntries(tt.args.raw); (err != nil) != tt.wantErr {
 				c.Errorf(err, "saveCurrencyEntries() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func (c *CurrencyContextTestSuite) Test_CurrencyContext_Convert() {
+	type args struct {
+		from   string
+		to     string
+		amount float64
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    float64
+		wantErr bool
+	}{
+		{
+			name: "Sanity Test",
+			args: args{
+				from:   "USD",
+				to:     "TWD",
+				amount: 15,
+			},
+			want:    0,
+			wantErr: false,
+		},
+		{
+			name: "Sanity Test2, should have cache now",
+			args: args{
+				from:   "USD",
+				to:     "TWD",
+				amount: 10,
+			},
+			want:    0,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		c.currencyContext.cachedBatch = &CurrencyBatch{
+			Batch:   54,
+			Exec:    time.Time{},
+			Raw:     "",
+			Success: true,
+			Host:    "",
+		}
+		c.Run(tt.name, func() {
+			got, err := c.currencyContext.Convert(tt.args.from, tt.args.to, tt.args.amount)
+			if (err != nil) != tt.wantErr {
+				c.Errorf(err, "Convert() error = %v, wantErr %v", err, tt.wantErr)
+				c.FailNow(err.Error())
+				return
+			}
+			if got != tt.want {
+				//c.Errorf(errors.New("Not correct result!"), "Convert() got = %v, want %v", got, tt.want)
+				//We don't determine this result.
 			}
 		})
 	}

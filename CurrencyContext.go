@@ -2,6 +2,7 @@ package IrisAPIs
 
 import (
 	"encoding/json"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
 	"io/ioutil"
@@ -15,6 +16,8 @@ type CurrencyContext struct {
 	Db                     *xorm.Engine
 	UpdateAfterLastSuccess int
 	UpdateAfterLastFail    int
+	cachedBatch            *CurrencyBatch
+	cachedConvert          map[string]currencyConvertCache
 }
 
 func NewCurrencyContext(apiKey string, db *DatabaseContext) *CurrencyContext {
@@ -23,6 +26,7 @@ func NewCurrencyContext(apiKey string, db *DatabaseContext) *CurrencyContext {
 		Db:                     db.DbObject,
 		UpdateAfterLastSuccess: 43200,
 		UpdateAfterLastFail:    10800,
+		cachedConvert:          make(map[string]currencyConvertCache),
 	}
 }
 
@@ -32,7 +36,13 @@ func NewCurrencyContextWithConfig(c *Configuration, db *DatabaseContext) *Curren
 		Db:                     db.DbObject,
 		UpdateAfterLastSuccess: c.FixerIoLastFetchSuccessfulPeriod,
 		UpdateAfterLastFail:    c.FixerIoLastFetchFailedPeriod,
+		cachedConvert:          make(map[string]currencyConvertCache),
 	}
+}
+
+type currencyConvertCache struct {
+	rate  float64
+	batch int64
 }
 
 type CurrencyBatch struct {
@@ -48,6 +58,44 @@ type CurrencyEntry struct {
 	Base   string `xorm:"varchar(3)"`
 	Batch  int64
 	Rate   float64
+}
+
+func (c *CurrencyContext) Convert(from string, to string, amount float64) (float64, error) {
+	if c.cachedBatch == nil {
+		return 0, errors.New("no data found, please check network or DB")
+	}
+
+	key := from + to
+
+	if val, ok := c.cachedConvert[key]; ok {
+		if val.batch == c.cachedBatch.Batch {
+			return amount * val.rate, nil
+		}
+	}
+
+	//read data and refresh cache
+	fromCurrency := &CurrencyEntry{
+		Symbol: from,
+		Batch:  c.cachedBatch.Batch,
+	}
+	toCurrency := &CurrencyEntry{
+		Symbol: to,
+		Batch:  c.cachedBatch.Batch,
+	}
+	_, err := c.Db.Get(fromCurrency)
+	if err != nil {
+		return 0, err
+	}
+	_, err = c.Db.Get(toCurrency)
+	if err != nil {
+		return 0, err
+	}
+	ratio := 1.0 / fromCurrency.Rate * toCurrency.Rate
+	c.cachedConvert[key] = currencyConvertCache{
+		rate:  ratio,
+		batch: c.cachedBatch.Batch,
+	}
+	return amount * ratio, nil
 }
 
 func (c *CurrencyContext) GetMostRecentCurrencyDataRaw() (string, error) {
@@ -100,6 +148,8 @@ func (c *CurrencyContext) saveCurrencyEntries(raw string) error {
 		Host:    hostName,
 	}
 	_, err = c.Db.Insert(batch)
+
+	c.cachedBatch = batch
 
 	var entries = make([]*CurrencyEntry, 0, 0)
 
@@ -168,6 +218,8 @@ func (c *CurrencyContext) CurrencySyncWorker() (*CurrencySyncResult, error) {
 	} else {
 		next = lastSuccess.Exec.Add(time.Second * time.Duration(c.UpdateAfterLastSuccess))
 	}
+
+	c.cachedBatch = lastSuccess
 
 	invoke := next.Sub(time.Now())
 	timer := time.NewTimer(invoke)
