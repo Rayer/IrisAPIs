@@ -90,3 +90,5 @@ fabric.properties
 # vendor/
 config/**
 .idea/**
+server/docs
+server/config

@@ -10,11 +10,6 @@ type ChatbotContext struct {
 	ctxMgr *ChatBot.ContextManager
 }
 
-type ChatbotConversion struct {
-	User  string `json:"user"`
-	Input string `json:"input"`
-}
-
 func NewChatbotContext() *ChatbotContext {
 	ret := ChatbotContext{}
 	ret.conf = ChatBot.Configuration{

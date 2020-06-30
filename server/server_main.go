@@ -2,17 +2,28 @@ package main
 
 import (
 	"IrisAPIs"
+	"IrisAPIsServer/docs"
+	_ "IrisAPIsServer/docs"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/moogar0880/problems"
 	log "github.com/sirupsen/logrus"
-	"net/http"
+	swaggerFiles "github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 )
 
-func main() {
+// @title Iris Node Mainframe API
+// @version 1.0
+// @description This is support APIs for Iris Node
+// @termsOfService http://swagger.io/terms/
 
-	//Init logger
-	log.SetLevel(log.DebugLevel)
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @host api.rayer.idv.tw
+func main() {
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -24,128 +35,46 @@ func main() {
 	}
 	log.Debugf("Configuration : %+v", config)
 
-	db, err := IrisAPIs.NewDatabaseContext(config.ConnectionString, true)
+	//Init logger
+	log.SetLevel(log.Level(config.LogLevel))
+	//Swagger initialization
+	_, host, err := config.SplitSchemeAndHost()
+	if err != nil {
+		panic(err)
+	}
+	swaggerUrl := ginSwagger.URL(config.Host + "/swagger/doc.json")
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerUrl))
+
+	docs.SwaggerInfo.Host = host
+
+	controller, err := NewController(config)
 	if err != nil {
 		panic(err.Error())
 	}
-	chatbot := IrisAPIs.NewChatbotContext()
 
-	r.NoRoute(func(c *gin.Context) {
-		err404 := problems.NewStatusProblem(http.StatusNotFound)
-		err404.Detail = "No such route!"
-		c.JSON(404, err404)
-	})
+	r.NoRoute(controller.NoRouteHandler)
+	r.NoMethod(controller.NoMethodHandler)
+	r.GET("/ping", controller.PingHandler)
 
-	r.NoMethod(func(c *gin.Context) {
-		err404 := problems.NewStatusProblem(http.StatusNotFound)
-		err404.Detail = "No such method!"
-		c.JSON(404, err404)
-	})
+	currency := r.Group("/currency")
+	{
+		currency.GET("", controller.GetCurrencyRaw)
+		currency.POST("/convert", controller.ConvertCurrency)
+	}
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello world!",
-		})
-	})
+	ipNation := r.Group("/ip2nation")
+	{
+		ipNation.GET("", controller.IpToNation)
+	}
 
-	//Currency Rate
-	currencyContext := IrisAPIs.NewCurrencyContextWithConfig(config, db)
-
-	r.GET("/currency", func(c *gin.Context) {
-		result, err := currencyContext.GetMostRecentCurrencyDataRaw()
-		if err != nil {
-			err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-			c.JSON(500, err500)
-			return
-		}
-
-		c.Data(http.StatusOK, "application/json", []byte(result))
-	})
-
-	r.POST("/currency/convert", func(c *gin.Context) {
-		type payload struct {
-			From   string  `json:"from"`
-			To     string  `json:"to"`
-			Amount float64 `json:"amount"`
-			Result float64 `json:"result"`
-		}
-
-		var conv payload
-		err := c.BindJSON(&conv)
-		if err != nil {
-			err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-			c.JSON(500, err500)
-			return
-		}
-
-		if conv.From == "" || conv.To == "" {
-			err400 := problems.NewDetailedProblem(http.StatusBadRequest, "either from or to is null!")
-			c.JSON(400, err400)
-			return
-		}
-
-		result, err := currencyContext.Convert(conv.From, conv.To, conv.Amount)
-		if err != nil {
-			err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-			c.JSON(500, err500)
-			return
-		}
-
-		conv.Result = result
-		c.JSON(200, conv)
-	})
-
-	ipNation := IrisAPIs.NewIpNationContext(db)
-
-	r.GET("/ip2nation", func(c *gin.Context) {
-		ipAddr := c.Query("ip")
-		if ipAddr == "" {
-			err400 := problems.NewDetailedProblem(http.StatusBadRequest, "No query parameter : ip")
-			c.JSON(400, err400)
-			return
-		}
-		res, err := ipNation.GetIPNation(ipAddr)
-		if err != nil {
-			err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-			c.JSON(500, err500)
-			return
-		}
-		c.JSON(200, res)
-	})
-
-	r.POST("/chatbot", func(c *gin.Context) {
-		var conv IrisAPIs.ChatbotConversion
-		err := c.BindJSON(&conv)
-
-		utx, _ := chatbot.GetUserContext(conv.User)
-
-		prompt, keywordsV, keywordsIv, err := utx.RenderMessageWithDetail()
-		str, err := utx.HandleMessage(conv.Input)
-		next, err := utx.RenderMessage()
-		c.JSON(http.StatusOK, gin.H{
-			"prompt":           prompt,
-			"keywords":         keywordsV,
-			"invalid_keywords": keywordsIv,
-			"message":          str,
-			"error":            err,
-			"next":             next,
-		})
-	})
-
-	r.DELETE("/chatbot/:user", func(c *gin.Context) {
-		user := c.Param("user")
-		chatbot.ExpireUser(user, func() {
-			c.JSON(201, gin.H{
-				"message": "ok",
-			})
-		}, func() {
-			c.JSON(http.StatusBadRequest, problems.NewDetailedProblem(http.StatusBadRequest, "User "+user+" not found!"))
-		})
-
-	})
+	chatbot := r.Group("/chatbot")
+	{
+		chatbot.POST("", controller.ChatBotReact)
+		chatbot.DELETE("/:user", controller.ChatBotResetUser)
+	}
 
 	//Run daemon threads
-	currencyContext.CurrencySyncRoutine()
+	IrisAPIs.NewCurrencyContextWithConfig(config, controller.DatabaseContext).CurrencySyncRoutine()
 
 	err = r.Run()
 	if err != nil {

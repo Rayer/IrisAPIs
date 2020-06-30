@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"net/url"
 	"reflect"
 )
 
 type Configuration struct {
+	Host                             string `doc:"Host name with port"`
 	FixerIoApiKey                    string `doc:"API Key of fixer.io, you can get one on its website"`
 	FixerIoLastFetchSuccessfulPeriod int    `doc:"Fetch interval for last successful fetch"`
 	FixerIoLastFetchFailedPeriod     int    `doc:"Fetch interval for last fail fetch"`
 	ConnectionString                 string `doc:"Connection string to database."`
 	DatabaseType                     string `doc:"Database Type, for example, mysql"`
-	LogLevel                         string `doc:"Log Level, 0 for debug and 7 for info"`
+	LogLevel                         int    `doc:"Log Level, 0 for debug and 7 for info"`
 }
 
 func (c *Configuration) LoadConfiguration() error {
@@ -26,6 +28,7 @@ func (c *Configuration) LoadConfiguration() error {
 	//Defaults
 	viper.SetDefault("FixerIoLastFetchSuccessfulPeriod", 43200)
 	viper.SetDefault("FixerIoLastFetchFailedPeriod", 10800)
+	viper.SetDefault("Host", "localhost:8080")
 
 	err := viper.ReadInConfig()
 
@@ -52,4 +55,12 @@ func (c *Configuration) ExampleUsage() string {
 		ret += fmt.Sprintf("# %s\n%s:\n", tag, name)
 	}
 	return ret
+}
+
+func (c *Configuration) SplitSchemeAndHost() (string, string, error) {
+	u, err := url.ParseRequestURI(c.Host)
+	if err != nil {
+		return "", "", fmt.Errorf("Error parsing host : "+c.Host, err)
+	}
+	return u.Scheme, u.Host, nil
 }
