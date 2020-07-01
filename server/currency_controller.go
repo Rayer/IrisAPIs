@@ -37,6 +37,7 @@ func (c *Controller) GetCurrencyRaw(ctx *gin.Context) {
 // @Summary Convert currency
 // @Description Convert currency from most recent data
 // @Tags Currency
+// @param input body CurrencyConvert true "Currency Convert info"
 // @Accept json
 // @Produce json
 // @Success 200 {object} CurrencyConvert

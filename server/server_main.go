@@ -74,7 +74,8 @@ func main() {
 	}
 
 	//Run daemon threads
-	IrisAPIs.NewCurrencyContextWithConfig(config, controller.DatabaseContext).CurrencySyncRoutine()
+	//IrisAPIs.NewCurrencyContextWithConfig(config, controller.DatabaseContext).CurrencySyncRoutine()
+	controller.CurrencyContext.CurrencySyncRoutine()
 
 	err = r.Run()
 	if err != nil {
