@@ -1,11 +1,26 @@
 package main
 
 import (
+	"IrisAPIs"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
 	"net/http"
 )
 
+//For swagger propose
+type IpNationCountries struct {
+	IrisAPIs.IpNationCountries
+}
+
+// IpToNation godoc
+// @Summary IP to Nation
+// @Description Look up in database, find which nation belongs to an IP
+// @Tags IpNation
+// @Param ip query string true "IP address"
+// @Produce json
+// @Success 200 {object} IpNationCountries
+// @Failure 400 {object} problems.DefaultProblem
+// @Router /ip2nation [get]
 func (c *Controller) IpToNation(ctx *gin.Context) {
 	ipAddr := ctx.Query("ip")
 	if ipAddr == "" {

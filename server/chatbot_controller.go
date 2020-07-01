@@ -28,6 +28,7 @@ type ChatbotConversation struct {
 // ChatBotReact godoc
 // @Summary Reaction with ChatBot
 // @Description Main Chatter interface for ChatBot
+// @Tags ChatBot
 // @Accept json
 // @Produce json
 // @param input body ChatbotConversation true "Input info"
@@ -56,12 +57,13 @@ func (c *Controller) ChatBotReact(ctx *gin.Context) {
 // ChatBotResetUser godoc
 // @Summary Reset user status to initial
 // @Description Reset user status to initial
+// @Tags ChatBot
 // @Accept json
 // @Produce json
 // @Param user path string true "User name to reset"
 // @Success 200 {object} ChatbotResetUserResponse
 // @Failure 400 {object} problems.DefaultProblem
-// @Router /chatbot [delete]
+// @Router /chatbot/{user} [delete]
 func (c *Controller) ChatBotResetUser(ctx *gin.Context) {
 	user := ctx.Param("user")
 	c.ChatBotContext.ExpireUser(user, func() {

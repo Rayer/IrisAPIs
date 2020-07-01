@@ -6,6 +6,22 @@ import (
 	"net/http"
 )
 
+type CurrencyConvert struct {
+	From   string  `json:"from"`
+	To     string  `json:"to"`
+	Amount float64 `json:"amount"`
+	Result float64 `json:"result"`
+}
+
+// GetCurrencyRaw godoc
+// @Summary Get most recent raw data
+// @Description Get most recent raw data fetching from fixer.io
+// @Tags Currency
+// @Accept json
+// @Produce json
+// @Success 200 {string} string "...Data from source"
+// @Failure 400 {object} problems.DefaultProblem
+// @Router /currency [get]
 func (c *Controller) GetCurrencyRaw(ctx *gin.Context) {
 	result, err := c.CurrencyContext.GetMostRecentCurrencyDataRaw()
 	if err != nil {
@@ -17,15 +33,18 @@ func (c *Controller) GetCurrencyRaw(ctx *gin.Context) {
 	ctx.Data(http.StatusOK, "application/json", []byte(result))
 }
 
+// ConvertCurrency godoc
+// @Summary Convert currency
+// @Description Convert currency from most recent data
+// @Tags Currency
+// @Accept json
+// @Produce json
+// @Success 200 {object} CurrencyConvert
+// @Failure 400 {object} problems.DefaultProblem
+// @Router /currency/convert [post]
 func (c *Controller) ConvertCurrency(ctx *gin.Context) {
-	type payload struct {
-		From   string  `json:"from"`
-		To     string  `json:"to"`
-		Amount float64 `json:"amount"`
-		Result float64 `json:"result"`
-	}
 
-	var conv payload
+	var conv CurrencyConvert
 	err := ctx.BindJSON(&conv)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())

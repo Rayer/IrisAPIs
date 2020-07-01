@@ -53,6 +53,7 @@ type PingResponse struct {
 
 // PingHandler godoc
 // @Summary Ping for Iris health check
+// @Tags System
 // @Accept json
 // @Produce json
 // @Success 200 {object} PingResponse
