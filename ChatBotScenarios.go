@@ -47,6 +47,7 @@ func (es *EntryState) InitScenarioState(scenario ChatBot.Scenario) {
 		err := es.ChangeStateByName("randomJoke")
 		return "Let me take a look for a joke....", err
 	}})
+
 }
 
 func (es *EntryState) RawMessage() (string, error) {

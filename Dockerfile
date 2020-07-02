@@ -3,8 +3,8 @@ RUN apk --no-cache add tzdata
 RUN apk add build-base
 WORKDIR /IrisAPIs
 ADD . /IrisAPIs
-RUN cd /IrisAPIs/server && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server.app
 RUN cd /IrisAPIs/server && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go get -u github.com/swaggo/swag/cmd/swag && /go/bin/swag init -g server_main.go
+RUN cd /IrisAPIs/server && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server.app
 RUN cd /IrisAPIs/serverInfo && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o serverInfo.app
 
 FROM scratch
