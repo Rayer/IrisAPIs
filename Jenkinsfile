@@ -4,7 +4,6 @@ pipeline {
     parameters {
         string defaultValue: 'api-server.app', description: 'Chatbot Server app name', name: 'server_app', trim: false
         string defaultValue: 'chatbot-cli.app', description: 'Chatbot CLI app name', name: 'cli_app', trim: false
-        string defaultValue: 'iris-apis.image', description: 'Docker image name', name: 'docker_image', trim: false
     }
 
    stages {
@@ -42,8 +41,6 @@ pipeline {
         steps {
             echo 'Building docker image'
             sh label: 'Build docker images', script: 'sudo docker build . -t rayer/iris-apis'
-            sh label: 'Export docker image', script: "sudo docker save rayer/iris-apis > ${params.docker_image}"
-            archiveArtifacts artifacts: "${params.docker_image}", fingerprint: true, followSymlinks: true, onlyIfSuccessful: true
         }
     }
     stage('Push to docker repository') {
