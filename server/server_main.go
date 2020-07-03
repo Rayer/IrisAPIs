@@ -65,6 +65,7 @@ func main() {
 	ipNation := r.Group("/ip2nation")
 	{
 		ipNation.GET("", controller.IpToNation)
+		ipNation.POST("/bulk", controller.IpToNationBulk)
 	}
 
 	chatbot := r.Group("/chatbot")
