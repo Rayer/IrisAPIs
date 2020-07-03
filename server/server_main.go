@@ -23,6 +23,8 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host api.rayer.idv.tw
+//go:generate go get -u github.com/swaggo/swag/cmd/swag
+//go:generate ${GOPATH}/bin/swag init -g server_main.go
 func main() {
 
 	r := gin.Default()
