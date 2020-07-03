@@ -70,7 +70,7 @@ func (c *Controller) PingHandler(ctx *gin.Context) {
 	hostname, _ := os.Hostname()
 	//_ = os.UserCacheDir()
 	ctx.JSON(200, PingResponse{
-		Message:  "System alive!",
+		Message:  "System alive!!!",
 		Hostname: hostname,
 		Timezone: fmt.Sprint(time.Now().Zone()),
 		Time:     fmt.Sprint(time.Now().Format("2006-01-02T15:04:05.000 MST")),
