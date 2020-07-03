@@ -92,3 +92,4 @@ config/**
 .idea/**
 server/docs
 server/config
+/local-storage.json

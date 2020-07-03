@@ -7,7 +7,6 @@ pipeline {
         string defaultValue: 'iris-apis.image', description: 'Docker image name', name: 'docker_image', trim: false
     }
 
-
    stages {
     stage('Fetch from github') {
         steps {
@@ -18,7 +17,9 @@ pipeline {
     stage('Unit test') {
         steps {
             sh label: 'go version', script: 'go version'
-            sh label: 'go unit test', script: 'go test'
+            sh label: 'install gocover-cobertura', script: 'go get github.com/t-yuki/gocover-cobertura'
+            sh label: 'go unit test', script: 'go test --coverprofile=cover.out'
+            sh label: 'convert coverage xml', script: '~/go/bin/gocover-cobertura < cover.out > coverage.xml'
         }
     }
     stage('build and archive executable') {
@@ -53,7 +54,6 @@ pipeline {
             sh label: 'Redeploy image', script: 'ssh jenkins@node.rayer.idv.tw docker run --rm --name APIService -p 8800:8080 -v ~/iris-apis:/app/config --hostname $(hostname) --rm -d rayer/iris-apis'
         }
     }
-
    }
 
    post {
