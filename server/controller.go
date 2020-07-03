@@ -2,10 +2,13 @@ package main
 
 import (
 	"IrisAPIs"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
 	"github.com/pkg/errors"
 	"net/http"
+	"os"
+	"time"
 )
 
 type SystemDefaultController interface {
@@ -48,7 +51,10 @@ func (c *Controller) NoMethodHandler(ctx *gin.Context) {
 }
 
 type PingResponse struct {
-	Message string
+	Message  string
+	Hostname string
+	Timezone string
+	Time     string
 }
 
 // PingHandler godoc
@@ -61,7 +67,12 @@ type PingResponse struct {
 // @Failure 500 {object} problems.DefaultProblem
 // @Router /ping [get]
 func (c *Controller) PingHandler(ctx *gin.Context) {
+	hostname, _ := os.Hostname()
+	//_ = os.UserCacheDir()
 	ctx.JSON(200, PingResponse{
-		Message: "Hello World!",
+		Message:  "System alive!",
+		Hostname: hostname,
+		Timezone: fmt.Sprint(time.Now().Zone()),
+		Time:     fmt.Sprint(time.Now().Format("2006-01-02T15:04:05.000 MST")),
 	})
 }
