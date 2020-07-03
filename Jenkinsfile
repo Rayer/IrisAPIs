@@ -22,6 +22,12 @@ pipeline {
             sh label: 'convert coverage xml', script: '~/go/bin/gocover-cobertura < cover.out > coverage.xml'
         }
     }
+    stage ("Extract test results") {
+        steps {
+            cobertura coberturaReportFile: 'coverage.xml'
+        }
+    }
+
     stage('build and archive executable') {
         steps {
             sh label: 'show version', script: 'go version'
