@@ -99,6 +99,11 @@ func (c *CurrencyContext) Convert(from string, to string, amount float64) (float
 }
 
 func (c *CurrencyContext) GetMostRecentCurrencyDataRaw() (string, error) {
+	if c.cachedBatch != nil {
+		log.Debugf("Read from cache...")
+		return c.cachedBatch.Raw, nil
+	}
+
 	lastSuccess := &CurrencyBatch{}
 	_, err := c.Db.Where("success=?", 1).Desc("exec").Limit(1).Get(lastSuccess)
 	if err != nil {
