@@ -30,7 +30,6 @@ pipeline {
     stage('build and archive executable') {
         steps {
             sh label: 'show version', script: 'go version'
-            sh label: 'fetch swagger cmd', script: 'go get -u github.com/swaggo/swag/cmd/swag'
             sh label: 'generate documents', script: "cd server && ~/go/bin/swag init -g server_main.go"
             sh label: 'build server', script: "cd server && go build -o ../bin/${params.server_app}"
             sh label: 'build cli', script: "cd cli && go build -o ../bin/${params.cli_app}"
