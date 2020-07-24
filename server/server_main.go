@@ -58,6 +58,11 @@ func main() {
 	r.NoMethod(controller.NoMethodHandler)
 	r.GET("/ping", controller.PingHandler)
 
+	//system := r.Group("/system")
+	//{
+	//
+	//}
+
 	currency := r.Group("/currency")
 	{
 		currency.GET("", controller.GetCurrencyRaw)
