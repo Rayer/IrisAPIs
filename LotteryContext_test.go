@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"testing"
+	"time"
 )
 
 type LotteryContextTestSuite struct {
@@ -23,8 +24,10 @@ func (l *LotteryContextTestSuite) SetupSuite() {
 		fmt.Println(err.Error())
 	}
 	httpmock.RegisterResponder("GET", "https://www.taiwanlottery.com.tw/index_new.aspx", httpmock.NewStringResponder(200, string(content)))
+	httpmock.RegisterResponder("GET", "http://210.71.254.181/index_new.htm", httpmock.NewStringResponder(200, string(content)))
 	result, err := l.context.Fetch()
 	if err != nil {
+		l.Error(err, err.Error())
 		l.FailNow("Error in parsing test html file!")
 	}
 	l.result = result
@@ -35,12 +38,16 @@ func (l *LotteryContextTestSuite) TearDownSuite() {
 }
 
 func (l *LotteryContextTestSuite) TestParseResultSL638() {
+	//Can't put time.Time, mock one
+	t := time.Now()
 	r := l.result.SuperLotto638Result
+	r.Date = t
 	expectedResult := SuperLotto638Result{
 		AZone:       []int{35, 17, 9, 1, 18, 31},
 		AZoneSorted: []int{1, 9, 17, 18, 31, 35},
 		BZone:       2,
 		Serial:      "109000059",
+		Date:        t,
 	}
 	assert.Equal(l.T(), *r, expectedResult)
 }
@@ -166,7 +173,6 @@ func (l *LotteryContextTestSuite) TestSuperLotto638Result_RewardOf() {
 				return
 			}
 			got := result.Title
-			fmt.Printf("%s / %s \n", tt.want, got)
 			if got != tt.want {
 				l.Failf("RewardOf() got = %s, want %s", got, tt.want)
 			}

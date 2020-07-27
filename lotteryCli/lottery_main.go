@@ -12,10 +12,14 @@ import (
 func main() {
 	l := IrisAPIs.LotteryContext{}
 	fmt.Println("Fetching data from server...")
-	r, _ := l.Fetch()
+	r, err := l.Fetch()
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 	fmt.Println("Data fetched! ")
 	sl := r.SuperLotto638Result
-	fmt.Printf("本期樂透第%s期:\nA區:\t\t%v\n排序後A區:\t%v\nB區:%d\n\n", sl.Serial, sl.AZone, sl.AZoneSorted, sl.BZone)
+	fmt.Printf("本期樂透第%s期:\n開獎日期:%s\nA區:\t\t%v\n排序後A區:\t%v\nB區:%d\n\n", sl.Serial, sl.Date.Format("2006/1/2"), sl.AZone, sl.AZoneSorted, sl.BZone)
 
 	for {
 		fmt.Println("請輸入號碼，以空白隔開。前六個數字為Ａ區，最後一個數字為Ｂ區，共七組:")
@@ -56,6 +60,5 @@ func main() {
 			fmt.Println("沒中獎....下一張!")
 		}
 	}
-
 
 }
