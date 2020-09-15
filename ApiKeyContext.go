@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type ApiKeyOperations interface {
+type ApiKeyService interface {
 	IssueApiKey(application string, useInHeader bool, useInQuery bool) (string, error)
 	ValidateApiKey(key string, embeddedIn KEY_EMBEDDED_IN) bool
 }
@@ -39,7 +39,7 @@ type ApiKeyContext struct {
 	DB *xorm.Engine
 }
 
-func NewApiKeyOperations(DB DatabaseContext) ApiKeyOperations {
+func NewApiKeyService(DB *DatabaseContext) ApiKeyService {
 	return &ApiKeyContext{DB: DB.DbObject}
 }
 
@@ -54,6 +54,7 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 		UseInQuery:  &useInQuery,
 		Application: &application,
 		Issuer:      &issuer,
+		Valid:       PBool(true),
 	})
 
 	if err != nil {

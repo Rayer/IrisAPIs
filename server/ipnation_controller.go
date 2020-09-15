@@ -36,7 +36,7 @@ func (c *Controller) IpToNation(ctx *gin.Context) {
 		ctx.JSON(400, err400)
 		return
 	}
-	res, err := c.IpNationContext.GetIPNation(ipAddr)
+	res, err := c.IpNationService.GetIPNation(ipAddr)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(500, err500)
@@ -66,7 +66,7 @@ func (c *Controller) IpToNationBulk(ctx *gin.Context) {
 	ret := make(map[string]string)
 	for _, ip := range bulkInput.IpAddresses {
 		if _, ok := ret[ip]; !ok {
-			res, err := c.IpNationContext.GetIPNation(ip)
+			res, err := c.IpNationService.GetIPNation(ip)
 			if err != nil {
 				ret[ip] = "ERROR : " + err.Error()
 				continue

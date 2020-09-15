@@ -19,10 +19,11 @@ type SystemDefaultController interface {
 
 type Controller struct {
 	SystemDefaultController
-	ChatBotContext  *IrisAPIs.ChatbotContext
-	CurrencyContext *IrisAPIs.CurrencyContext
+	ChatBotService  *IrisAPIs.ChatbotContext
+	CurrencyService *IrisAPIs.CurrencyContext
 	DatabaseContext *IrisAPIs.DatabaseContext
-	IpNationContext *IrisAPIs.IpNationContext
+	IpNationService *IrisAPIs.IpNationContext
+	ApiKeyService   IrisAPIs.ApiKeyService
 }
 
 func NewController(config *IrisAPIs.Configuration) (*Controller, error) {
@@ -31,10 +32,11 @@ func NewController(config *IrisAPIs.Configuration) (*Controller, error) {
 		return nil, errors.Wrap(err, "Error initializing controller!")
 	}
 	return &Controller{
-		ChatBotContext:  IrisAPIs.NewChatbotContext(),
-		CurrencyContext: IrisAPIs.NewCurrencyContextWithConfig(config, db),
+		ChatBotService:  IrisAPIs.NewChatbotContext(),
+		CurrencyService: IrisAPIs.NewCurrencyContextWithConfig(config, db),
 		DatabaseContext: db,
-		IpNationContext: IrisAPIs.NewIpNationContext(db),
+		IpNationService: IrisAPIs.NewIpNationContext(db),
+		ApiKeyService:   IrisAPIs.NewApiKeyService(db),
 	}, nil
 }
 

@@ -23,7 +23,7 @@ type CurrencyConvert struct {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /currency [get]
 func (c *Controller) GetCurrencyRaw(ctx *gin.Context) {
-	result, err := c.CurrencyContext.GetMostRecentCurrencyDataRaw()
+	result, err := c.CurrencyService.GetMostRecentCurrencyDataRaw()
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(500, err500)
@@ -59,7 +59,7 @@ func (c *Controller) ConvertCurrency(ctx *gin.Context) {
 		return
 	}
 
-	result, err := c.CurrencyContext.Convert(conv.From, conv.To, conv.Amount)
+	result, err := c.CurrencyService.Convert(conv.From, conv.To, conv.Amount)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(500, err500)

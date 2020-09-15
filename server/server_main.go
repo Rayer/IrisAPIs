@@ -63,6 +63,11 @@ func main() {
 	//
 	//}
 
+	apiKey := r.Group("/apiKey")
+	{
+		apiKey.POST("", controller.IssueApiKey)
+	}
+
 	currency := r.Group("/currency")
 	{
 		currency.GET("", controller.GetCurrencyRaw)
@@ -83,7 +88,7 @@ func main() {
 
 	//Run daemon threads
 	//IrisAPIs.NewCurrencyContextWithConfig(config, controller.DatabaseContext).CurrencySyncRoutine()
-	controller.CurrencyContext.CurrencySyncRoutine()
+	controller.CurrencyService.CurrencySyncRoutine()
 
 	err = r.Run()
 	if err != nil {

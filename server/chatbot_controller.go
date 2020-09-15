@@ -39,7 +39,7 @@ func (c *Controller) ChatBotReact(ctx *gin.Context) {
 	var conv ChatbotConversation
 	err := ctx.BindJSON(&conv)
 
-	utx, _ := c.ChatBotContext.GetUserContext(conv.User)
+	utx, _ := c.ChatBotService.GetUserContext(conv.User)
 
 	prompt, keywordsV, keywordsIv, err := utx.RenderMessageWithDetail()
 	str, err := utx.HandleMessage(conv.Input)
@@ -66,7 +66,7 @@ func (c *Controller) ChatBotReact(ctx *gin.Context) {
 // @Router /chatbot/{user} [delete]
 func (c *Controller) ChatBotResetUser(ctx *gin.Context) {
 	user := ctx.Param("user")
-	c.ChatBotContext.ExpireUser(user, func() {
+	c.ChatBotService.ExpireUser(user, func() {
 		ctx.JSON(http.StatusOK, ChatbotResetUserResponse{
 			User:    user,
 			Message: "ok",
