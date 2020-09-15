@@ -20,7 +20,7 @@ type ApiKeyDataModel struct {
 	Application *string //Should be a type
 	Issuer      *string
 	IssueDate   time.Time `xorm:"created"`
-	Valid       *bool
+	Privileged  *bool
 }
 
 type ApiKeyLocation int
@@ -70,7 +70,7 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 		UseInQuery:  &useInQuery,
 		Application: &application,
 		Issuer:      &issuer,
-		Valid:       PBool(true),
+		Privileged:  PBool(false),
 	})
 
 	if err != nil {
