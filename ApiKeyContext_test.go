@@ -1,7 +1,7 @@
 package IrisAPIs
 
 import (
-	"fmt"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -22,11 +22,14 @@ func TestApiKeyContextTestSuite(t *testing.T) {
 }
 
 func (c *ApiKeyContextTestSuite) TestApiKeyContext_IssueApiKey() {
-	fmt.Println(c.context.IssueApiKey("TestApplication", true, true))
+	key, err := c.context.IssueApiKey("TestApplication", true, true)
+	if err != nil {
+		c.Fail("error while trying issuing apikey", err)
+	}
+	//This key should able to be validated
+	result := c.context.ValidateApiKey(key, KEY_EMBEDDED_IN(0))
+	assert.True(c.T(), result)
 
-}
-
-func (c *ApiKeyContextTestSuite) TestValidateApiKey() {
-	fmt.Println(c.context.ValidateApiKey("12345anvc", HEADER))
-	fmt.Println(c.context.ValidateApiKey("WxlP7RgaUqE7Q8so", QUERY_STRING))
+	//Generate random one and it should not be validated
+	assert.False(c.T(), c.context.ValidateApiKey("abcd1234", KEY_EMBEDDED_IN(0)))
 }
