@@ -48,11 +48,11 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerUrl))
 
 	docs.SwaggerInfo.Host = host
-
 	controller, err := NewController(config)
 	if err != nil {
 		panic(err.Error())
 	}
+	r.Use(ApiKeyCheckMiddleware(controller.ApiKeyService))
 
 	r.NoRoute(controller.NoRouteHandler)
 	r.NoMethod(controller.NoMethodHandler)

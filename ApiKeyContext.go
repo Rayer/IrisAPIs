@@ -82,6 +82,9 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 }
 
 func (a *ApiKeyContext) ValidateApiKey(key string, embeddedIn KEY_EMBEDDED_IN) bool {
+	if key == "" {
+		return false
+	}
 	db := a.DB
 	got, err := db.Get(&ApiKeyDataModel{
 		Key: &key,
