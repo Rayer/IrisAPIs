@@ -52,7 +52,7 @@ pipeline {
         steps {
             echo 'Deploying docker image'
             sh label: 'Pull new images', script: 'ssh jenkins@node.rayer.idv.tw docker pull rayer/iris-apis'
-            catchError {
+            catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                 sh label: 'Kill container if exist', script: 'ssh jenkins@node.rayer.idv.tw docker kill APIService'
             }
             sh label: 'Redeploy container', script: 'ssh jenkins@node.rayer.idv.tw docker run --name APIService -p 8800:8080 -v ~/iris-apis:/app/config --hostname $(hostname) --rm -d rayer/iris-apis'
