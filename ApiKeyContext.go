@@ -45,8 +45,25 @@ func NewApiKeyService(DB *DatabaseContext) ApiKeyService {
 
 func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQuery bool) (string, error) {
 	db := a.DB
-	key := a.generateRandomString(16)
+
+	var key string
+	for {
+		key = a.generateRandomString(16)
+		//Do collision test
+		count, err := db.Count(&ApiKeyDataModel{
+			Key: &key,
+		})
+
+		if err != nil {
+			return "", err
+		}
+
+		if count == 0 {
+			break
+		}
+	}
 	issuer := "auto"
+
 	_, err := db.Insert(&ApiKeyDataModel{
 		Id:          0,
 		Key:         &key,
