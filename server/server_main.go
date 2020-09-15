@@ -52,7 +52,7 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	r.Use(ApiKeyCheckMiddleware(controller.ApiKeyService))
+	r.Use(ApiKeyCheckMiddleware(controller.ApiKeyService, config.EnforceApiKey))
 
 	r.NoRoute(controller.NoRouteHandler)
 	r.NoMethod(controller.NoMethodHandler)

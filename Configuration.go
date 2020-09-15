@@ -10,6 +10,7 @@ import (
 
 type Configuration struct {
 	Host                             string `doc:"Host name with port"`
+	EnforceApiKey                    bool   `doc:"Enforce API Key check, default is true"`
 	FixerIoApiKey                    string `doc:"API Key of fixer.io, you can get one on its website"`
 	FixerIoLastFetchSuccessfulPeriod int    `doc:"Fetch interval for last successful fetch"`
 	FixerIoLastFetchFailedPeriod     int    `doc:"Fetch interval for last fail fetch"`
@@ -29,6 +30,7 @@ func (c *Configuration) LoadConfiguration() error {
 	viper.SetDefault("FixerIoLastFetchSuccessfulPeriod", 43200)
 	viper.SetDefault("FixerIoLastFetchFailedPeriod", 10800)
 	viper.SetDefault("Host", "localhost:8080")
+	viper.SetDefault("EnforceApiKey", true)
 
 	err := viper.ReadInConfig()
 

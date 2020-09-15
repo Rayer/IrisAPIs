@@ -9,7 +9,7 @@ import (
 
 type ApiKeyService interface {
 	IssueApiKey(application string, useInHeader bool, useInQuery bool) (string, error)
-	ValidateApiKey(key string, embeddedIn KEY_EMBEDDED_IN) bool
+	ValidateApiKey(key string, embeddedIn ApiKeyLocation) bool
 }
 
 type ApiKeyDataModel struct {
@@ -23,12 +23,11 @@ type ApiKeyDataModel struct {
 	Valid       *bool
 }
 
-type KEY_EMBEDDED_IN int
+type ApiKeyLocation int
 
 const (
-	HEADER       = 1
-	QUERY_STRING = 2
-	BOTH         = 3
+	Header      ApiKeyLocation = 1
+	QueryString                = 2
 )
 
 func (d *ApiKeyDataModel) TableName() string {
@@ -81,7 +80,7 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 	return key, nil
 }
 
-func (a *ApiKeyContext) ValidateApiKey(key string, embeddedIn KEY_EMBEDDED_IN) bool {
+func (a *ApiKeyContext) ValidateApiKey(key string, embeddedIn ApiKeyLocation) bool {
 	if key == "" {
 		return false
 	}
