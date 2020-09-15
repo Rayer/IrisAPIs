@@ -52,8 +52,10 @@ pipeline {
         steps {
             echo 'Deploying docker image'
             sh label: 'Pull new images', script: 'ssh jenkins@node.rayer.idv.tw docker pull rayer/iris-apis'
-            sh label: 'Kill image if exist', script: 'ssh jenkins@node.rayer.idv.tw docker kill APIService'
-            sh label: 'Redeploy image', script: 'ssh jenkins@node.rayer.idv.tw docker run --rm --name APIService -p 8800:8080 -v ~/iris-apis:/app/config --hostname $(hostname) --rm -d rayer/iris-apis'
+            cacheError {
+                sh label: 'Kill container if exist', script: 'ssh jenkins@node.rayer.idv.tw docker kill APIService'
+            }
+            sh label: 'Redeploy container', script: 'ssh jenkins@node.rayer.idv.tw docker run --name APIService -p 8800:8080 -v ~/iris-apis:/app/config --hostname $(hostname) --rm -d rayer/iris-apis'
         }
     }
    }

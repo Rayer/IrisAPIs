@@ -48,7 +48,7 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 
 	var key string
 	for {
-		key = a.generateRandomString(16)
+		key = a.generateRandomString(24)
 		//Do collision test
 		count, err := db.Count(&ApiKeyDataModel{
 			Key: &key,
