@@ -33,9 +33,10 @@ const (
 type ApiKeyPrivilegeLevel int
 
 const (
-	ApiKeyNotValid   ApiKeyPrivilegeLevel = 0
-	ApiKeyNormal                          = 1
-	ApiKeyPrivileged                      = 2
+	ApiKeyNotValid     ApiKeyPrivilegeLevel = -1
+	ApiKeyNotPresented                      = 0
+	ApiKeyNormal                            = 1
+	ApiKeyPrivileged                        = 2
 )
 
 func (d *ApiKeyDataModel) TableName() string {
@@ -90,7 +91,7 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 
 func (a *ApiKeyContext) ValidateApiKey(key string, embeddedIn ApiKeyLocation) ApiKeyPrivilegeLevel {
 	if key == "" {
-		return ApiKeyNotValid
+		return ApiKeyNotPresented
 	}
 
 	db := a.DB

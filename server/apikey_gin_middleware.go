@@ -66,8 +66,21 @@ func (a *ApiKeyValidatorContext) FetchPrivilegeLevel(fullPath string, method str
 	if p, ok := a.privilegeRoutes[storeKey]; ok {
 		return p
 	} else {
-		return IrisAPIs.ApiKeyNormal
+		return IrisAPIs.ApiKeyNotPresented
 	}
+}
+
+type AKWrappedEngine struct {
+	*gin.Engine
+	validator ApiKeyValidator
+}
+
+func NewAKWrappedEngine(engine *gin.Engine, validator ApiKeyValidator) *AKWrappedEngine {
+	return &AKWrappedEngine{Engine: engine, validator: validator}
+}
+
+func (e *AKWrappedEngine) Group(relativePath string, handlers ...gin.HandlerFunc) *AKGroup {
+	return NewAKGroup(relativePath, e.Engine, e.validator, handlers...)
 }
 
 type AKGroup struct {
@@ -76,8 +89,8 @@ type AKGroup struct {
 	validator    ApiKeyValidator
 }
 
-func NewAKGroup(relativePath string, engine *gin.Engine, validator ApiKeyValidator) *AKGroup {
-	return &AKGroup{relativePath: relativePath, wrapped: engine.Group(relativePath), validator: validator}
+func NewAKGroup(relativePath string, engine *gin.Engine, validator ApiKeyValidator, handlers ...gin.HandlerFunc) *AKGroup {
+	return &AKGroup{relativePath: relativePath, wrapped: engine.Group(relativePath, handlers...), validator: validator}
 }
 
 func (group *AKGroup) POST(relativePath string, level IrisAPIs.ApiKeyPrivilegeLevel, handlers ...gin.HandlerFunc) gin.IRoutes {

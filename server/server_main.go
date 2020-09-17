@@ -60,24 +60,27 @@ func main() {
 	r.NoMethod(controller.NoMethodHandler)
 	r.GET("/ping", controller.PingHandler)
 
-	apiKey := NewAKGroup("/apiKey", r, apiKeyManager)
+	wrapped := NewAKWrappedEngine(r, apiKeyManager)
+
+	//apiKey := NewAKGroup("/apiKey", r, apiKeyManager)
+	apiKey := wrapped.Group("/apiKey")
 	{
 		apiKey.POST("", IrisAPIs.ApiKeyPrivileged, controller.IssueApiKey)
 	}
 
-	currency := NewAKGroup("/currency", r, apiKeyManager)
+	currency := wrapped.Group("/currency")
 	{
 		currency.GET("", IrisAPIs.ApiKeyNormal, controller.GetCurrencyRaw)
-		currency.POST("", IrisAPIs.ApiKeyNormal, controller.ConvertCurrency)
+		currency.POST("", IrisAPIs.ApiKeyNotPresented, controller.ConvertCurrency)
 	}
 
-	ipNation := NewAKGroup("/ipNation", r, apiKeyManager)
+	ipNation := wrapped.Group("/ipNation")
 	{
 		ipNation.GET("", IrisAPIs.ApiKeyNormal, controller.IpToNation)
 		ipNation.POST("/bulk", IrisAPIs.ApiKeyNormal, controller.IpToNationBulk)
 	}
 
-	chatbot := NewAKGroup("/chatbot", r, apiKeyManager)
+	chatbot := wrapped.Group("/chatbot")
 	{
 		chatbot.POST("", IrisAPIs.ApiKeyNormal, controller.ChatBotReact)
 		chatbot.DELETE("/:user", IrisAPIs.ApiKeyPrivileged, controller.ChatBotResetUser)
