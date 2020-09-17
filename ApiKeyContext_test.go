@@ -28,8 +28,8 @@ func (c *ApiKeyContextTestSuite) TestApiKeyContext_IssueApiKey() {
 	}
 	//This key should able to be validated
 	result := c.context.ValidateApiKey(key, ApiKeyLocation(0))
-	assert.True(c.T(), result)
+	assert.True(c.T(), result != ApiKeyNotValid)
 
 	//Generate random one and it should not be validated
-	assert.False(c.T(), c.context.ValidateApiKey("abcd1234", ApiKeyLocation(0)))
+	assert.True(c.T(), c.context.ValidateApiKey("abcd1234", ApiKeyLocation(0)) == ApiKeyNotValid)
 }

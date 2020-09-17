@@ -48,42 +48,39 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerUrl))
 
 	docs.SwaggerInfo.Host = host
+
 	controller, err := NewController(config)
 	if err != nil {
 		panic(err.Error())
 	}
-	r.Use(ApiKeyCheckMiddleware(controller.ApiKeyService, config.EnforceApiKey))
+	apiKeyManager := NewApiKeyValidator(controller.ApiKeyService, config.EnforceApiKey)
+	r.Use(apiKeyManager.GetMiddleware())
 
 	r.NoRoute(controller.NoRouteHandler)
 	r.NoMethod(controller.NoMethodHandler)
 	r.GET("/ping", controller.PingHandler)
 
-	//system := r.Group("/system")
-	//{
-	//
-	//}
-
-	apiKey := r.Group("/apiKey")
+	apiKey := NewAKGroup("/apiKey", r, apiKeyManager)
 	{
-		apiKey.POST("", controller.IssueApiKey)
+		apiKey.POST("", IrisAPIs.ApiKeyPrivileged, controller.IssueApiKey)
 	}
 
-	currency := r.Group("/currency")
+	currency := NewAKGroup("/currency", r, apiKeyManager)
 	{
-		currency.GET("", controller.GetCurrencyRaw)
-		currency.POST("/convert", controller.ConvertCurrency)
+		currency.GET("", IrisAPIs.ApiKeyNormal, controller.GetCurrencyRaw)
+		currency.POST("", IrisAPIs.ApiKeyNormal, controller.ConvertCurrency)
 	}
 
-	ipNation := r.Group("/ip2nation")
+	ipNation := NewAKGroup("/ipNation", r, apiKeyManager)
 	{
-		ipNation.GET("", controller.IpToNation)
-		ipNation.POST("/bulk", controller.IpToNationBulk)
+		ipNation.GET("", IrisAPIs.ApiKeyNormal, controller.IpToNation)
+		ipNation.POST("/bulk", IrisAPIs.ApiKeyNormal, controller.IpToNationBulk)
 	}
 
-	chatbot := r.Group("/chatbot")
+	chatbot := NewAKGroup("/chatbot", r, apiKeyManager)
 	{
-		chatbot.POST("", controller.ChatBotReact)
-		chatbot.DELETE("/:user", controller.ChatBotResetUser)
+		chatbot.POST("", IrisAPIs.ApiKeyNormal, controller.ChatBotReact)
+		chatbot.DELETE("/:user", IrisAPIs.ApiKeyPrivileged, controller.ChatBotResetUser)
 	}
 
 	//Run daemon threads

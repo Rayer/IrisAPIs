@@ -9,7 +9,7 @@ import (
 
 type ApiKeyService interface {
 	IssueApiKey(application string, useInHeader bool, useInQuery bool) (string, error)
-	ValidateApiKey(key string, embeddedIn ApiKeyLocation) bool
+	ValidateApiKey(key string, embeddedIn ApiKeyLocation) ApiKeyPrivilegeLevel
 }
 
 type ApiKeyDataModel struct {
@@ -28,6 +28,14 @@ type ApiKeyLocation int
 const (
 	Header      ApiKeyLocation = 1
 	QueryString                = 2
+)
+
+type ApiKeyPrivilegeLevel int
+
+const (
+	ApiKeyNotValid   ApiKeyPrivilegeLevel = 0
+	ApiKeyNormal                          = 1
+	ApiKeyPrivileged                      = 2
 )
 
 func (d *ApiKeyDataModel) TableName() string {
@@ -80,21 +88,29 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 	return key, nil
 }
 
-func (a *ApiKeyContext) ValidateApiKey(key string, embeddedIn ApiKeyLocation) bool {
+func (a *ApiKeyContext) ValidateApiKey(key string, embeddedIn ApiKeyLocation) ApiKeyPrivilegeLevel {
 	if key == "" {
-		return false
+		return ApiKeyNotValid
 	}
+
 	db := a.DB
-	got, err := db.Get(&ApiKeyDataModel{
-		Key: &key,
-	})
+	dataModel := &ApiKeyDataModel{Key: &key}
+	got, err := db.Get(dataModel)
 
 	if err != nil {
 		fmt.Println("Error : " + err.Error())
-		return false
+		return ApiKeyNotValid
 	}
 
-	return got
+	if !got {
+		return ApiKeyNotValid
+	}
+
+	if *dataModel.Privileged {
+		return ApiKeyPrivileged
+	} else {
+		return ApiKeyNormal
+	}
 }
 
 func (a *ApiKeyContext) generateRandomString(length int) string {
