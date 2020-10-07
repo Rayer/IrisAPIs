@@ -52,7 +52,12 @@ func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 		}
 		log.Debugf("Get request with ApiKey %s, which is %v", apiKey, validKey)
 
-		a.apiKeyService.RecordActivity(path, method, apiKey, keyLocation, c.ClientIP())
+		ipAddr := c.GetHeader("X-Forwarded-For")
+		if ipAddr == "" {
+			ipAddr = c.ClientIP()
+		}
+
+		a.apiKeyService.RecordActivity(path, method, apiKey, keyLocation, ipAddr)
 
 		c.Next()
 	}
