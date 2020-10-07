@@ -11,7 +11,6 @@ import (
 
 type ApiKeyValidator interface {
 	GetMiddleware() gin.HandlerFunc
-	//RegisterPrivilegeRoute(group string, privilegeLevel IrisAPIs.ApiKeyPrivilegeLevel, entry func(string, ...gin.HandlerFunc) gin.IRoutes, relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes
 	RegisterPrivilegeRoute(fullPath string, method string, level IrisAPIs.ApiKeyPrivilegeLevel)
 	FetchPrivilegeLevel(fullPath string, method string) IrisAPIs.ApiKeyPrivilegeLevel
 }
@@ -52,6 +51,9 @@ func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 			return
 		}
 		log.Debugf("Get request with ApiKey %s, which is %v", apiKey, validKey)
+
+		a.apiKeyService.RecordActivity(path, method, apiKey, keyLocation, c.ClientIP())
+
 		c.Next()
 	}
 }

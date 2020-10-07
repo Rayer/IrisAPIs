@@ -2,6 +2,7 @@ package IrisAPIs
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
 	"math/rand"
 	"time"
@@ -10,10 +11,11 @@ import (
 type ApiKeyService interface {
 	IssueApiKey(application string, useInHeader bool, useInQuery bool) (string, error)
 	ValidateApiKey(key string, embeddedIn ApiKeyLocation) ApiKeyPrivilegeLevel
+	RecordActivity(path string, method string, key string, location ApiKeyLocation, ip string)
 }
 
 type ApiKeyDataModel struct {
-	Id          int `xorm:"autoincr"`
+	Id          int `xorm:"autoincr pk"`
 	Key         *string
 	UseInHeader *bool
 	UseInQuery  *bool
@@ -21,6 +23,16 @@ type ApiKeyDataModel struct {
 	Issuer      *string
 	IssueDate   time.Time `xorm:"created"`
 	Privileged  *bool
+}
+
+type ApiKeyAccess struct {
+	Id        int `xorm:"autoincr pk"`
+	ApiKeyRef *int
+	Fullpath  *string
+	Method    *string
+	Ip        *string
+	Nation    *string
+	Timestamp *time.Time
 }
 
 type ApiKeyLocation int
@@ -43,12 +55,17 @@ func (d *ApiKeyDataModel) TableName() string {
 	return "iris_api_key"
 }
 
+func (a *ApiKeyAccess) TableName() string {
+	return "iris_api_key_access"
+}
+
 type ApiKeyContext struct {
-	DB *xorm.Engine
+	DB               *xorm.Engine
+	Ip2NationService *IpNationContext
 }
 
 func NewApiKeyService(DB *DatabaseContext) ApiKeyService {
-	return &ApiKeyContext{DB: DB.DbObject}
+	return &ApiKeyContext{DB: DB.DbObject, Ip2NationService: NewIpNationContext(DB)}
 }
 
 func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQuery bool) (string, error) {
@@ -122,4 +139,52 @@ func (a *ApiKeyContext) generateRandomString(length int) string {
 		s[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(s)
+}
+
+func (a *ApiKeyContext) RecordActivity(path string, method string, key string, location ApiKeyLocation, ip string) {
+	db := a.DB
+	apiKeyEntity := &ApiKeyDataModel{
+		Key: &key,
+	}
+	found, err := db.Get(apiKeyEntity)
+	if err != nil {
+		log.Warnf("Database issue : %s", err.Error())
+		return
+	}
+
+	if !found {
+		log.Warnf("Api key not found : %s", key)
+		return
+	}
+
+	ipNationResult, err := a.Ip2NationService.GetIPNation(ip)
+	nation := "NaN"
+	if err != nil {
+		log.Warnf("Error while trying translating ip address to nation : %s", err.Error())
+	}
+
+	if ipNationResult != nil {
+		nation = ipNationResult.IsoCode_3
+	}
+
+	now := time.Now()
+	keyAccess := &ApiKeyAccess{
+		Id:        0,
+		ApiKeyRef: &apiKeyEntity.Id,
+		Fullpath:  &path,
+		Method:    &method,
+		Ip:        &ip,
+		Nation:    &nation,
+		Timestamp: &now,
+	}
+
+	_, err = db.Insert(keyAccess)
+
+	if err != nil {
+		log.Warnf("Database issue : %s", err.Error())
+		return
+	}
+
+	log.Debugf("Saved %+v", keyAccess)
+	return
 }
