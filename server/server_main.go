@@ -66,6 +66,9 @@ func main() {
 	apiKey := wrapped.Group("/apiKey")
 	{
 		apiKey.POST("", IrisAPIs.ApiKeyPrivileged, controller.IssueApiKey)
+		apiKey.GET("", IrisAPIs.ApiKeyPrivileged, controller.GetAllKeys)
+		apiKey.GET("/:id/usage", IrisAPIs.ApiKeyPrivileged, controller.GetApiUsage)
+		apiKey.GET("/:id", IrisAPIs.ApiKeyPrivileged, controller.GetKey)
 	}
 
 	currency := wrapped.Group("/currency")

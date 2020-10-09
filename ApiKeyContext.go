@@ -15,18 +15,18 @@ type ApiKeyService interface {
 }
 
 type ApiKeyDataModel struct {
-	Id          int `xorm:"autoincr pk"`
+	Id          *int `xorm:"autoincr pk"`
 	Key         *string
 	UseInHeader *bool
 	UseInQuery  *bool
 	Application *string //Should be a type
 	Issuer      *string
-	IssueDate   time.Time `xorm:"created"`
+	IssueDate   *time.Time `xorm:"created"`
 	Privileged  *bool
 }
 
 type ApiKeyAccess struct {
-	Id        int `xorm:"autoincr pk"`
+	Id        *int `xorm:"autoincr pk"`
 	ApiKeyRef *int
 	Fullpath  *string
 	Method    *string
@@ -90,7 +90,7 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 	issuer := "auto"
 
 	_, err := db.Insert(&ApiKeyDataModel{
-		Id:          0,
+		Id:          nil,
 		Key:         &key,
 		UseInHeader: &useInHeader,
 		UseInQuery:  &useInQuery,
@@ -169,8 +169,8 @@ func (a *ApiKeyContext) RecordActivity(path string, method string, key string, l
 
 	now := time.Now()
 	keyAccess := &ApiKeyAccess{
-		Id:        0,
-		ApiKeyRef: &apiKeyEntity.Id,
+		Id:        nil,
+		ApiKeyRef: apiKeyEntity.Id,
 		Fullpath:  &path,
 		Method:    &method,
 		Ip:        &ip,

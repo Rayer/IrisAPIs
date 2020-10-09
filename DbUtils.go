@@ -9,3 +9,7 @@ func NullBool() *bool {
 func PBool(value bool) *bool {
 	return &value
 }
+
+func PValue(value interface{}) *interface{} {
+	return &value
+}
