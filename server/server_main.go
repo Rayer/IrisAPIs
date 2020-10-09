@@ -77,7 +77,7 @@ func main() {
 		currency.POST("", IrisAPIs.ApiKeyNotPresented, controller.ConvertCurrency)
 	}
 
-	ipNation := wrapped.Group("/ip2Nation")
+	ipNation := wrapped.Group("/ip2nation")
 	{
 		ipNation.GET("", IrisAPIs.ApiKeyNormal, controller.IpToNation)
 		ipNation.POST("/bulk", IrisAPIs.ApiKeyNormal, controller.IpToNationBulk)
