@@ -12,6 +12,9 @@ type ApiKeyService interface {
 	IssueApiKey(application string, useInHeader bool, useInQuery bool) (string, error)
 	ValidateApiKey(key string, embeddedIn ApiKeyLocation) ApiKeyPrivilegeLevel
 	RecordActivity(path string, method string, key string, location ApiKeyLocation, ip string)
+	GetAllKeys() ([]*ApiKeyDataModel, error)
+	GetKey(id int) (*ApiKeyDataModel, error)
+	GetKeyUsage(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
 }
 
 type ApiKeyDataModel struct {
@@ -187,4 +190,45 @@ func (a *ApiKeyContext) RecordActivity(path string, method string, key string, l
 
 	log.Debugf("Saved %+v", keyAccess)
 	return
+}
+
+func (a *ApiKeyContext) GetAllKeys() ([]*ApiKeyDataModel, error) {
+	var ret []*ApiKeyDataModel
+	err := a.DB.Find(&ret)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ret, nil
+}
+
+func (a *ApiKeyContext) GetKey(id int) (*ApiKeyDataModel, error) {
+	ret := &ApiKeyDataModel{Id: &id}
+	find, err := a.DB.Get(ret)
+	if err != nil {
+		return nil, err
+	}
+	if !find {
+		return nil, nil
+	}
+
+	return ret, nil
+}
+
+func (a *ApiKeyContext) GetKeyUsage(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error) {
+	//ret := make([]*ApiKeyAccess, 0)
+	var ret []*ApiKeyAccess
+	chain := a.DB.Where("api_key_ref = ?", id)
+	if from != nil {
+		chain.And("timestamp > ?", from)
+	}
+	if to != nil {
+		chain.And("timestamp < ?", to)
+	}
+	err := chain.Find(&ret)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
 }

@@ -34,3 +34,28 @@ func (c *ApiKeyContextTestSuite) TestApiKeyContext_IssueApiKey() {
 	//Generate random one and it should not be validated
 	assert.True(c.T(), c.context.ValidateApiKey("abcd1234", ApiKeyLocation(0)) == ApiKeyNotValid)
 }
+
+func (c *ApiKeyContextTestSuite) TestApiKeyContext_GetAllKeys() {
+	ret, err := c.context.GetAllKeys()
+	if err != nil {
+		c.Failf("Error getting keys : %s", err.Error())
+		c.Assert()
+	}
+	for _, r := range ret {
+		c.T().Logf("%+v", r)
+	}
+}
+
+func (c *ApiKeyContextTestSuite) TestApiKeyContext_GetKeyUsage() {
+	r1, _ := c.context.GetKeyUsage(3, nil, nil)
+	now := time.Now()
+	r2, _ := c.context.GetKeyUsage(3, nil, &now)
+
+	for _, r := range r1 {
+		c.T().Logf("%+v", r)
+	}
+
+	for _, r := range r2 {
+		c.T().Logf("%+v", r)
+	}
+}
