@@ -9,7 +9,7 @@ import (
 )
 
 type ApiKeyService interface {
-	IssueApiKey(application string, useInHeader bool, useInQuery bool) (string, error)
+	IssueApiKey(application string, useInHeader bool, useInQuery bool, issuer string, privileged bool) (string, error)
 	ValidateApiKey(key string, embeddedIn ApiKeyLocation) ApiKeyPrivilegeLevel
 	RecordActivity(path string, method string, key string, location ApiKeyLocation, ip string)
 	GetAllKeys() ([]*ApiKeyDataModel, error)
@@ -71,7 +71,7 @@ func NewApiKeyService(DB *DatabaseContext) ApiKeyService {
 	return &ApiKeyContext{DB: DB.DbObject, Ip2NationService: NewIpNationContext(DB)}
 }
 
-func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQuery bool) (string, error) {
+func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQuery bool, issuer string, privileged bool) (string, error) {
 	db := a.DB
 
 	var key string
@@ -90,7 +90,6 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 			break
 		}
 	}
-	issuer := "auto"
 
 	_, err := db.Insert(&ApiKeyDataModel{
 		Id:          nil,
@@ -99,7 +98,7 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 		UseInQuery:  &useInQuery,
 		Application: &application,
 		Issuer:      &issuer,
-		Privileged:  PBool(false),
+		Privileged:  PBool(privileged),
 	})
 
 	if err != nil {

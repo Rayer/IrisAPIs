@@ -59,7 +59,7 @@ func (c *Controller) IssueApiKey(ctx *gin.Context) {
 		ctx.JSON(400, err400)
 		return
 	}
-	key, err := c.ApiKeyService.IssueApiKey(input.Application, input.UseInHeader, input.UseInQueryParam)
+	key, err := c.ApiKeyService.IssueApiKey(input.Application, input.UseInHeader, input.UseInQueryParam, "auto", false)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(500, err500)

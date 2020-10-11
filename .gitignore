@@ -93,3 +93,4 @@ config/**
 server/docs
 server/config
 /local-storage.json
+/apikey_cli/apikey_cli
