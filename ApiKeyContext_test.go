@@ -23,7 +23,7 @@ func TestApiKeyContextTestSuite(t *testing.T) {
 }
 
 func (c *ApiKeyContextTestSuite) TestApiKeyContext_IssueApiKey() {
-	key, err := c.context.IssueApiKey("TestApplication", true, true)
+	key, err := c.context.IssueApiKey("TestApplication", true, true, "TestUser", false)
 	if err != nil {
 		c.Fail("error while trying issuing apikey", err)
 	}
