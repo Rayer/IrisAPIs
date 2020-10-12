@@ -59,7 +59,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./config/iris-apis.yaml and ./iris-apis.yaml)")
 	rootCmd.PersistentFlags().StringVar(&connectionString, "connection-string", "", "Connection string to database")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose")
-	viper.BindPFlag("ConnectionString", rootCmd.PersistentFlags().Lookup("connection-string"))
+	_ = viper.BindPFlag("ConnectionString", rootCmd.PersistentFlags().Lookup("connection-string"))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

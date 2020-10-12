@@ -22,15 +22,13 @@ import (
 
 // issueCmd represents the issue command
 var issueCmd = &cobra.Command{
-	Use:   "issue",
+	Use:   "issue [application_name]",
 	Short: "Issue an new API Key",
 	Long:  `Issue an new API Key. API Key is used in some limited API endpoints, and moreover, some sensitive endpoints can be protected by only accessible via Privileged API Keys`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		f := cmd.Flags()
-		application, err := f.GetString("application")
-		if err != nil {
-			panic(err)
-		}
+		application := args[0]
 		privileged, _ := f.GetBool("privileged")
 		issuer, _ := f.GetString("issuer")
 
@@ -46,11 +44,11 @@ func init() {
 	rootCmd.AddCommand(issueCmd)
 
 	flags := issueCmd.Flags()
-	flags.StringP("application", "a", "", "Which application will use this API Key (required)")
+	//flags.StringP("application", "a", "", "Which application will use this API Key (required)")
 	flags.StringP("issuer", "i", "auto", "Issuer")
 	flags.BoolP("privileged", "p", false, "Privileged API Key")
 
-	issueCmd.MarkFlagRequired("application")
+	//issueCmd.MarkFlagRequired("application")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
