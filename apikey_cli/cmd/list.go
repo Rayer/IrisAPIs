@@ -35,7 +35,11 @@ var listCmd = &cobra.Command{
 			if *v.Privileged {
 				p = "Privileged"
 			}
-			fmt.Printf("%3d %-24s %-20s %-10s\n", *v.Id, *v.Key, *v.Application, p)
+			expiredStr := ""
+			if v.Expiration != nil {
+				expiredStr = "(Expired)"
+			}
+			fmt.Printf("%3d %-24s %-20s %-10s %-8s\n", *v.Id, *v.Key, *v.Application, p, expiredStr)
 		}
 	},
 }

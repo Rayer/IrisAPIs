@@ -3,7 +3,6 @@ package main
 import (
 	"IrisAPIs"
 	"IrisAPIsServer/docs"
-	_ "IrisAPIsServer/docs"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"

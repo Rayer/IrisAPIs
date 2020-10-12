@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
@@ -14,6 +15,8 @@ type ApiKeyService interface {
 	RecordActivity(path string, method string, key string, location ApiKeyLocation, ip string)
 	GetAllKeys() ([]*ApiKeyDataModel, error)
 	GetKey(id int) (*ApiKeyDataModel, error)
+	//UpdateApiKey(apiKeyDataModel *ApiKeyDataModel) error
+	SetExpire(keyId int, expire bool) error
 	GetKeyUsage(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
 }
 
@@ -26,6 +29,7 @@ type ApiKeyDataModel struct {
 	Issuer      *string
 	IssueDate   *time.Time `xorm:"created"`
 	Privileged  *bool
+	Expiration  *time.Time
 }
 
 type ApiKeyAccess struct {
@@ -230,4 +234,40 @@ func (a *ApiKeyContext) GetKeyUsage(id int, from *time.Time, to *time.Time) ([]*
 		return nil, err
 	}
 	return ret, nil
+}
+
+//func (a *ApiKeyContext) UpdateApiKey(apiKeyDataModel *ApiKeyDataModel) error {
+//	count, err := a.DB.ID(*apiKeyDataModel.Id).Update(apiKeyDataModel)
+//	if err != nil {
+//		return err
+//	}
+//	if count < 1 {
+//		return errors.New("no api key is updated")
+//	}
+//	return nil
+//}
+
+func (a *ApiKeyContext) SetExpire(id int, setExpire bool) error {
+	entity := &ApiKeyDataModel{Id: &id}
+	exist, err := a.DB.Get(entity)
+	if err != nil {
+		return err
+	}
+	if !exist {
+		return errors.New("bean id not found")
+	}
+
+	if setExpire {
+		if entity.Expiration != nil {
+			return errors.New("already expired")
+		}
+		now := time.Now()
+		entity.Expiration = &now
+	} else {
+		entity.Expiration = nil
+	}
+
+	_, err = a.DB.Cols("expiration").ID(id).Update(entity)
+
+	return err
 }
