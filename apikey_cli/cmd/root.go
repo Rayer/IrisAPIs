@@ -80,8 +80,9 @@ func initConfig() {
 		}
 
 		viper.AddConfigPath(home)
-		viper.AddConfigPath("./config")
 		viper.AddConfigPath(".")
+		viper.AddConfigPath("./config")
+		viper.AddConfigPath("/etc/iris/")
 		viper.SetConfigName("iris-apis")
 	}
 
