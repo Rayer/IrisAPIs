@@ -28,22 +28,28 @@ var expireCmd = &cobra.Command{
 	Short: "Expire an API Key or verse visa.",
 	Long:  "Set an API Key to expire, or cancel expiration",
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
+		if len(args) < 1 {
 			return errors.New("require argument as api key ID")
 		}
-		_, err := strconv.Atoi(args[0])
-		if err != nil {
-			return err
+
+		for _, value := range args {
+			_, err := strconv.Atoi(value)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
+
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		//fmt.Println("expire called")
-		id, _ := strconv.Atoi(args[0])
-		enable, _ := cmd.Flags().GetBool("re-enable")
-		err := service.SetExpire(id, !enable)
-		if err != nil {
-			fmt.Println(err.Error())
+		for _, v := range args {
+			id, _ := strconv.Atoi(v)
+			enable, _ := cmd.Flags().GetBool("re-enable")
+			err := service.SetExpire(id, !enable)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		}
 	},
 }
