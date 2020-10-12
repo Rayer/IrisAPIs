@@ -52,7 +52,8 @@ const (
 type ApiKeyPrivilegeLevel int
 
 const (
-	ApiKeyNotValid     ApiKeyPrivilegeLevel = -1
+	ApiKeyNotValid     ApiKeyPrivilegeLevel = -2
+	ApiKeyExpired                           = -1
 	ApiKeyNotPresented                      = 0
 	ApiKeyNormal                            = 1
 	ApiKeyPrivileged                        = 2
@@ -128,6 +129,10 @@ func (a *ApiKeyContext) ValidateApiKey(key string, embeddedIn ApiKeyLocation) Ap
 
 	if !got {
 		return ApiKeyNotValid
+	}
+
+	if dataModel.Expiration != nil {
+		return ApiKeyExpired
 	}
 
 	if *dataModel.Privileged {
