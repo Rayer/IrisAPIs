@@ -23,9 +23,10 @@ type IpNationCountriesBulkResponse struct {
 // IpToNation godoc
 // @Summary IP to Nation
 // @Description Look up in database, find which nation belongs to an IP
-// @Tags IpNation
+// @Tags Ip2Nation
 // @Param ip query string true "IP address"
 // @Produce json
+// @Param apiKey query string true "API Key"
 // @Success 200 {object} IpNationCountries
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /ip2nation [get]
@@ -48,9 +49,10 @@ func (c *Controller) IpToNation(ctx *gin.Context) {
 // IpToNationBulk godoc
 // @Summary IP to Nation in bulk
 // @Description Look up in database, find which nation belongs to an IP
-// @Tags IpNation
-// @param input body IpNationCountriesBulk true "IP Addresses"
+// @Tags Ip2Nation
 // @Produce json
+// @param input body IpNationCountriesBulk true "IP Addresses"
+// @Param apiKey query string true "API Key"
 // @Success 200 {object} IpNationCountriesBulkResponse
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /ip2nation/bulk [post]

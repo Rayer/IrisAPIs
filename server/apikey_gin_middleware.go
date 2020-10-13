@@ -13,6 +13,7 @@ type ApiKeyValidator interface {
 	GetMiddleware() gin.HandlerFunc
 	RegisterPrivilegeRoute(fullPath string, method string, level IrisAPIs.ApiKeyPrivilegeLevel)
 	FetchPrivilegeLevel(fullPath string, method string) IrisAPIs.ApiKeyPrivilegeLevel
+	GetPrivilegeMap() map[string]IrisAPIs.ApiKeyPrivilegeLevel
 }
 
 type ApiKeyValidatorContext struct {
@@ -64,17 +65,23 @@ func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 }
 
 func (a *ApiKeyValidatorContext) RegisterPrivilegeRoute(fullPath string, method string, level IrisAPIs.ApiKeyPrivilegeLevel) {
-	storeKey := fullPath + "+" + method
+	//storeKey := fullPath + "+" + method
+	storeKey := fmt.Sprintf("%s (%s)", fullPath, method)
 	a.privilegeRoutes[storeKey] = level
 }
 
 func (a *ApiKeyValidatorContext) FetchPrivilegeLevel(fullPath string, method string) IrisAPIs.ApiKeyPrivilegeLevel {
-	storeKey := fullPath + "+" + method
+	//storeKey := fullPath + "+" + method
+	storeKey := fmt.Sprintf("%s (%s)", fullPath, method)
 	if p, ok := a.privilegeRoutes[storeKey]; ok {
 		return p
 	} else {
 		return IrisAPIs.ApiKeyNotPresented
 	}
+}
+
+func (a *ApiKeyValidatorContext) GetPrivilegeMap() map[string]IrisAPIs.ApiKeyPrivilegeLevel {
+	return a.privilegeRoutes
 }
 
 type AKWrappedEngine struct {
@@ -88,6 +95,10 @@ func NewAKWrappedEngine(engine *gin.Engine, validator ApiKeyValidator) *AKWrappe
 
 func (e *AKWrappedEngine) Group(relativePath string, handlers ...gin.HandlerFunc) *AKGroup {
 	return NewAKGroup(relativePath, e.Engine, e.validator, handlers...)
+}
+
+func (e *AKWrappedEngine) GetPrivilegeMap() map[string]IrisAPIs.ApiKeyPrivilegeLevel {
+	return e.validator.GetPrivilegeMap()
 }
 
 type AKGroup struct {

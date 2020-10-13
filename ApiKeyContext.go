@@ -15,7 +15,6 @@ type ApiKeyService interface {
 	RecordActivity(path string, method string, key string, location ApiKeyLocation, ip string)
 	GetAllKeys() ([]*ApiKeyDataModel, error)
 	GetKey(id int) (*ApiKeyDataModel, error)
-	//UpdateApiKey(apiKeyDataModel *ApiKeyDataModel) error
 	SetExpire(keyId int, expire bool) error
 	GetKeyUsage(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
 }
@@ -240,17 +239,6 @@ func (a *ApiKeyContext) GetKeyUsage(id int, from *time.Time, to *time.Time) ([]*
 	}
 	return ret, nil
 }
-
-//func (a *ApiKeyContext) UpdateApiKey(apiKeyDataModel *ApiKeyDataModel) error {
-//	count, err := a.DB.ID(*apiKeyDataModel.Id).Update(apiKeyDataModel)
-//	if err != nil {
-//		return err
-//	}
-//	if count < 1 {
-//		return errors.New("no api key is updated")
-//	}
-//	return nil
-//}
 
 func (a *ApiKeyContext) SetExpire(id int, setExpire bool) error {
 	entity := &ApiKeyDataModel{Id: &id}

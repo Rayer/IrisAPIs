@@ -92,6 +92,12 @@ func main() {
 	//IrisAPIs.NewCurrencyContextWithConfig(config, controller.DatabaseContext).CurrencySyncRoutine()
 	controller.CurrencyService.CurrencySyncRoutine()
 
+	log.Info("Listing privilege endpoints : ")
+	privilegeEndpoints := wrapped.GetPrivilegeMap()
+	for path, level := range privilegeEndpoints {
+		log.Infof("%s(%#v)", path, level)
+	}
+
 	err = r.Run()
 	if err != nil {
 		panic(err.Error())

@@ -19,6 +19,7 @@ type CurrencyConvert struct {
 // @Tags Currency
 // @Accept json
 // @Produce json
+// @Param apiKey query string true "API Key"
 // @Success 200 {string} string "...Data from source"
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /currency [get]
