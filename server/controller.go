@@ -26,6 +26,10 @@ type Controller struct {
 	ApiKeyService   IrisAPIs.ApiKeyService
 }
 
+type GenericResultResponse struct {
+	Result bool `json:"result"`
+}
+
 func NewController(config *IrisAPIs.Configuration) (*Controller, error) {
 	db, err := IrisAPIs.NewDatabaseContext(config.ConnectionString, true)
 	if err != nil {

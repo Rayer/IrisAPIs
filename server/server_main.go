@@ -22,7 +22,7 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host api.rayer.idv.tw
-//go:generate go get -u github.com/swaggo/swag/cmd/swag
+//go:generate go get -u github.com/swaggo/swag/cmd/swag@v1.6.7
 //go:generate ${GOPATH}/bin/swag init -g server_main.go
 func main() {
 
@@ -73,6 +73,7 @@ func main() {
 	currency := wrapped.Group("/currency")
 	{
 		currency.GET("", IrisAPIs.ApiKeyNormal, controller.GetCurrencyRaw)
+		currency.GET("/sync", IrisAPIs.ApiKeyPrivileged, controller.SyncData)
 		currency.POST("", IrisAPIs.ApiKeyNotPresented, controller.ConvertCurrency)
 	}
 
@@ -89,7 +90,6 @@ func main() {
 	}
 
 	//Run daemon threads
-	//IrisAPIs.NewCurrencyContextWithConfig(config, controller.DatabaseContext).CurrencySyncRoutine()
 	controller.CurrencyService.CurrencySyncRoutine()
 
 	log.Info("Listing privilege endpoints : ")

@@ -70,3 +70,25 @@ func (c *Controller) ConvertCurrency(ctx *gin.Context) {
 	conv.Result = result
 	ctx.JSON(200, conv)
 }
+
+// SyncData godoc
+// @Summary Sync server cache with Fixer.io with most recent raw data
+// @Description Sync server cache with Fixer.io with most recent raw data
+// @Tags Currency
+// @Produce json
+// @Param apiKey query string true "API Key(Privileged)"
+// @Success 200 {object} GenericResultResponse
+// @Failure 400 {object} problems.DefaultProblem
+// @Router /currency/sync [get]
+func (c *Controller) SyncData(ctx *gin.Context) {
+	err := c.CurrencyService.SyncToDb()
+	if err != nil {
+		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
+		ctx.JSON(500, err500)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, GenericResultResponse{
+		Result: true,
+	})
+}
