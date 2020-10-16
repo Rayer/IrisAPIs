@@ -20,6 +20,7 @@ type CurrencyConvert struct {
 // @Accept json
 // @Produce json
 // @Param apiKey query string true "API Key"
+// @Security ApiKeyAuth
 // @Success 200 {string} string "...Data from source"
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /currency [get]
@@ -77,6 +78,7 @@ func (c *Controller) ConvertCurrency(ctx *gin.Context) {
 // @Tags Currency
 // @Produce json
 // @Param apiKey query string true "API Key(Privileged)"
+// @Security ApiKeyAuth
 // @Success 200 {object} GenericResultResponse
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /currency/sync [get]
