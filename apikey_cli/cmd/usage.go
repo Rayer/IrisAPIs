@@ -16,7 +16,11 @@ limitations under the License.
 package cmd
 
 import (
+	"IrisAPIs"
+	"errors"
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -26,13 +30,53 @@ var usageCmd = &cobra.Command{
 	Use:   "usage",
 	Short: "Show usage for specified API Key",
 	Long:  "Show usage statistics for specified API Key, will aggregated into IPs, Paths and Occurrence",
+	Args: func(cmd *cobra.Command, args []string) error {
+
+		if len(args) != 1 {
+			return errors.New("require exactly 1 argument")
+		}
+
+		if func() bool {
+			b, _ := cmd.Flags().GetBool("byPath")
+			return b
+		}() {
+			return nil
+		} else if func() bool {
+			_, err := strconv.Atoi(args[0])
+			return err != nil
+		}() {
+			return errors.New("error parsing argument")
+		}
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("usage called")
+		days, _ := cmd.Flags().GetInt("days")
+		now := time.Now()
+		prev := time.Now().AddDate(0, 0, -days)
+		var retValue []*IrisAPIs.ApiKeyAccess
+		if func() bool {
+			b, _ := cmd.Flags().GetBool("byPath")
+			return b
+		}() {
+			retValue, _ = service.GetKeyUsageByPath(args[0], false, &prev, &now)
+		} else {
+			retValue, _ = service.GetKeyUsageById(func() int {
+				i, _ := strconv.Atoi(args[0])
+				return i
+			}(), &prev, &now)
+		}
+
+		for _, v := range retValue {
+			fmt.Printf("Key id : %d, path : %s(%s), ip : %s(%s), time : %s\n", *v.ApiKeyRef, *v.Fullpath, *v.Method, *v.Ip, *v.Nation, v.Timestamp.Format(time.RFC822))
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(usageCmd)
+	usageCmd.Flags().BoolP("byPath", "p", false, "Use this flag to mark filter by path")
+	usageCmd.Flags().IntP("days", "d", 7, "Retrieve n days")
 
 	// Here you will define your flags and configuration settings.
 
