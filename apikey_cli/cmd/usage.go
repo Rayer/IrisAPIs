@@ -16,9 +16,12 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
-
 	"github.com/spf13/cobra"
+	"os"
+	"strconv"
+	"time"
 )
 
 // usageCmd represents the usage command
@@ -26,13 +29,37 @@ var usageCmd = &cobra.Command{
 	Use:   "usage",
 	Short: "Show usage for specified API Key",
 	Long:  "Show usage statistics for specified API Key, will aggregated into IPs, Paths and Occurrence",
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 1 || func() bool {
+			_, err := strconv.Atoi(args[0])
+			return err != nil
+		}() {
+			return errors.New("require exactly 1 id as argument")
+		}
+		return nil
+	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("usage called")
+		fmt.Println("usage called, args is : ", args)
+		v, _ := strconv.Atoi(args[0])
+		days, _ := cmd.Flags().GetInt("days")
+		now := time.Now()
+		before := time.Now().AddDate(0, 0, -days)
+		res, err := service.GetKeyUsage(v, &before, &now)
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+
+		for _, u := range res {
+			fmt.Printf("key id : %d, path : %s, timestamp : %s\n", *u.ApiKeyRef, *u.Fullpath, u.Timestamp.Format(time.Stamp))
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(usageCmd)
+	usageCmd.Flags().IntP("days", "d", 7, "Define usage in n days.")
+	//usageCmd.Flags().BoolP("byPath", "p", false, "Use path as argument instead of Key ID")
 
 	// Here you will define your flags and configuration settings.
 

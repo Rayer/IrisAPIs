@@ -11,7 +11,7 @@ type ChatbotReactResponse struct {
 	Keywords        []string `json:"keywords"`
 	InvalidKeywords []string `json:"invalid_keywords"`
 	Message         string   `json:"message"`
-	Error           error    `json:"error"`
+	Error           string   `json:"error"`
 	Next            string   `json:"next"`
 }
 
@@ -51,7 +51,7 @@ func (c *Controller) ChatBotReact(ctx *gin.Context) {
 		Keywords:        keywordsV,
 		InvalidKeywords: keywordsIv,
 		Message:         str,
-		Error:           err,
+		Error:           err.Error(),
 		Next:            next,
 	})
 }
