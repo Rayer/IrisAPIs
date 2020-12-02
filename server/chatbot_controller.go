@@ -32,7 +32,6 @@ type ChatbotConversation struct {
 // @Accept json
 // @Produce json
 // @param input body ChatbotConversation true "Input info"
-// @Param apiKey query string true "API Key"
 // @Security ApiKeyAuth
 // @Success 200 {object} ChatbotReactResponse
 // @Failure 400 {object} problems.DefaultProblem
@@ -63,7 +62,6 @@ func (c *Controller) ChatBotReact(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user path string true "User name to reset"
-// @Param apiKey query string true "API Key(Privileged)"
 // @Security ApiKeyAuth
 // @Success 200 {object} ChatbotResetUserResponse
 // @Failure 400 {object} problems.DefaultProblem

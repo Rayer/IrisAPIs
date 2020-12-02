@@ -26,7 +26,6 @@ type IpNationCountriesBulkResponse struct {
 // @Tags Ip2Nation
 // @Param ip query string true "IP address"
 // @Produce json
-// @Param apiKey query string true "API Key"
 // @Security ApiKeyAuth
 // @Success 200 {object} main.IpNationCountries
 // @Failure 400 {object} problems.DefaultProblem
@@ -53,7 +52,6 @@ func (c *Controller) IpToNation(ctx *gin.Context) {
 // @Tags Ip2Nation
 // @Produce json
 // @param input body IpNationCountriesBulk true "IP Addresses"
-// @Param apiKey query string true "API Key"
 // @Security ApiKeyAuth
 // @Success 200 {object} IpNationCountriesBulkResponse
 // @Failure 400 {object} problems.DefaultProblem

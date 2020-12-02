@@ -19,7 +19,6 @@ type CurrencyConvert struct {
 // @Tags Currency
 // @Accept json
 // @Produce json
-// @Param apiKey query string true "API Key"
 // @Security ApiKeyAuth
 // @Success 200 {string} string "...Data from source"
 // @Failure 400 {object} problems.DefaultProblem
@@ -77,7 +76,6 @@ func (c *Controller) ConvertCurrency(ctx *gin.Context) {
 // @Description Sync server cache with Fixer.io with most recent raw data
 // @Tags Currency
 // @Produce json
-// @Param apiKey query string true "API Key(Privileged)"
 // @Security ApiKeyAuth
 // @Success 200 {object} GenericResultResponse
 // @Failure 400 {object} problems.DefaultProblem

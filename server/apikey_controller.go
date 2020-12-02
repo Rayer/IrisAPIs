@@ -48,7 +48,6 @@ type ApiKeyUsage struct {
 // @Accept json
 // @Produce json
 // @param input body IssueApiKeyPayload true "Input info"
-// @Param apiKey query string true "API Key(Privileged)"
 // @Security ApiKeyAuth
 // @Success 200 {object} IssueApiKeyResponse
 // @Failure 400 {object} problems.DefaultProblem
@@ -77,7 +76,6 @@ func (c *Controller) IssueApiKey(ctx *gin.Context) {
 // @Tags ApiKey
 // @Accept json
 // @Produce json
-// @Param apiKey query string true "API Key(Privileged)"
 // @Security ApiKeyAuth
 // @Success 200 {array} ApiKeyBrief
 // @Failure 400 {object} problems.DefaultProblem
@@ -109,7 +107,6 @@ func (c *Controller) GetAllKeys(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path integer true "Api Key ID"
-// @Param apiKey query string true "API Key(Privileged)"
 // @Security ApiKeyAuth
 // @Success 200 {array} ApiKeyDetail
 // @Failure 400 {object} problems.DefaultProblem
@@ -156,7 +153,6 @@ func (c *Controller) GetKey(ctx *gin.Context) {
 // @Param id path integer true "Api Key ID"
 // @Param from query integer false "From(timestamp)"
 // @Param to query integer false "To(timestamp)"
-// @Param apiKey query string true "API Key(Privileged)"
 // @Security ApiKeyAuth
 // @Success 200 {object} ApiKeyUsage
 // @Failure 400 {object} problems.DefaultProblem
