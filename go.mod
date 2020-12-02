@@ -24,7 +24,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tealeg/xlsx v1.0.5 // indirect
-	github.com/xormplus/builder v0.0.0-20200331055651-240ff40009be // indirect
+	github.com/xormplus/builder v0.0.0-20200331055651-240ff40009be
 	github.com/xormplus/xorm v0.0.0-20200514184607-0f37421d8714
 	golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect
 	gopkg.in/flosch/pongo2.v3 v3.0.0-20141028000813-5e81b817a0c4 // indirect

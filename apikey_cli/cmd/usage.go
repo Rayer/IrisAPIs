@@ -16,12 +16,13 @@ limitations under the License.
 package cmd
 
 import (
+	"IrisAPIs"
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
-	"os"
 	"strconv"
 	"time"
+
+	"github.com/spf13/cobra"
 )
 
 // usageCmd represents the usage command
@@ -30,36 +31,52 @@ var usageCmd = &cobra.Command{
 	Short: "Show usage for specified API Key",
 	Long:  "Show usage statistics for specified API Key, will aggregated into IPs, Paths and Occurrence",
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 || func() bool {
+
+		if len(args) != 1 {
+			return errors.New("require exactly 1 argument")
+		}
+
+		if func() bool {
+			b, _ := cmd.Flags().GetBool("byPath")
+			return b
+		}() {
+			return nil
+		} else if func() bool {
 			_, err := strconv.Atoi(args[0])
 			return err != nil
 		}() {
-			return errors.New("require exactly 1 id as argument")
+			return errors.New("error parsing argument")
 		}
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("usage called, args is : ", args)
-		v, _ := strconv.Atoi(args[0])
+		fmt.Println("usage called")
 		days, _ := cmd.Flags().GetInt("days")
 		now := time.Now()
-		before := time.Now().AddDate(0, 0, -days)
-		res, err := service.GetKeyUsage(v, &before, &now)
-		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
+		prev := time.Now().AddDate(0, 0, -days)
+		var retValue []*IrisAPIs.ApiKeyAccess
+		if func() bool {
+			b, _ := cmd.Flags().GetBool("byPath")
+			return b
+		}() {
+			retValue, _ = service.GetKeyUsageByPath(args[0], false, &prev, &now)
+		} else {
+			retValue, _ = service.GetKeyUsageById(func() int {
+				i, _ := strconv.Atoi(args[0])
+				return i
+			}(), &prev, &now)
 		}
 
-		for _, u := range res {
-			fmt.Printf("key id : %d, path : %s, timestamp : %s\n", *u.ApiKeyRef, *u.Fullpath, u.Timestamp.Format(time.Stamp))
+		for _, v := range retValue {
+			fmt.Printf("Key id : %d, path : %s(%s), ip : %s(%s), time : %s\n", *v.ApiKeyRef, *v.Fullpath, *v.Method, *v.Ip, *v.Nation, v.Timestamp.Format(time.RFC822))
 		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(usageCmd)
-	usageCmd.Flags().IntP("days", "d", 7, "Define usage in n days.")
-	//usageCmd.Flags().BoolP("byPath", "p", false, "Use path as argument instead of Key ID")
+	usageCmd.Flags().BoolP("byPath", "p", false, "Use this flag to mark filter by path")
+	usageCmd.Flags().IntP("days", "d", 7, "Retrieve n days")
 
 	// Here you will define your flags and configuration settings.
 

@@ -184,7 +184,7 @@ func (c *Controller) GetApiUsage(ctx *gin.Context) {
 		toT = &t
 	}
 
-	records, err := c.ApiKeyService.GetKeyUsage(id, fromT, toT)
+	records, err := c.ApiKeyService.GetKeyUsageById(id, fromT, toT)
 
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"github.com/xormplus/builder"
 	"github.com/xormplus/xorm"
 	"math/rand"
 	"time"
@@ -16,7 +17,8 @@ type ApiKeyService interface {
 	GetAllKeys() ([]*ApiKeyDataModel, error)
 	GetKey(id int) (*ApiKeyDataModel, error)
 	SetExpire(keyId int, expire bool) error
-	GetKeyUsage(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
+	GetKeyUsageById(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
+	GetKeyUsageByPath(path string, exactMatch bool, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
 }
 
 type ApiKeyDataModel struct {
@@ -223,10 +225,33 @@ func (a *ApiKeyContext) GetKey(id int) (*ApiKeyDataModel, error) {
 	return ret, nil
 }
 
-func (a *ApiKeyContext) GetKeyUsage(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error) {
+func (a *ApiKeyContext) GetKeyUsageById(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error) {
 	//ret := make([]*ApiKeyAccess, 0)
 	var ret []*ApiKeyAccess
 	chain := a.DB.Where("api_key_ref = ?", id)
+	if from != nil {
+		chain.And("timestamp > ?", from)
+	}
+	if to != nil {
+		chain.And("timestamp < ?", to)
+	}
+	err := chain.Find(&ret)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (a *ApiKeyContext) GetKeyUsageByPath(path string, exactMatch bool, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error) {
+	//ret := make([]*ApiKeyAccess, 0)
+	var ret []*ApiKeyAccess
+	var chain *xorm.Session
+	if exactMatch {
+		//chain = a.DB.Where("fullpath = ?", path)
+		chain = a.DB.Where(builder.Eq{"fullpath": path})
+	} else {
+		chain = a.DB.Where(builder.Like{"fullpath", path})
+	}
 	if from != nil {
 		chain.And("timestamp > ?", from)
 	}

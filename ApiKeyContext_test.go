@@ -47,9 +47,9 @@ func (c *ApiKeyContextTestSuite) TestApiKeyContext_GetAllKeys() {
 }
 
 func (c *ApiKeyContextTestSuite) TestApiKeyContext_GetKeyUsage() {
-	r1, _ := c.context.GetKeyUsage(3, nil, nil)
+	r1, _ := c.context.GetKeyUsageById(3, nil, nil)
 	now := time.Now()
-	r2, _ := c.context.GetKeyUsage(3, nil, &now)
+	r2, _ := c.context.GetKeyUsageById(3, nil, &now)
 
 	for _, r := range r1 {
 		c.T().Logf("%+v", r)
