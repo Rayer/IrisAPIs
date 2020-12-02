@@ -19,7 +19,11 @@ import (
 // @contact.url http://www.swagger.io/support
 // @contact.email support@swagger.io
 // @basePath /
-// @schemas http https
+// @schemes http https
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in query
+// @name apiKey
 
 // @in query
 // @name apiKey
