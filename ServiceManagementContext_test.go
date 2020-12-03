@@ -2,36 +2,20 @@ package IrisAPIs
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"testing"
 )
 
 func TestServiceManagementContext_CheckAllServerStatus(t *testing.T) {
 	s := NewServiceManagementContext()
-	_ = s.RegisterService(&WebServiceDescriptor{
-		Name:    "Wordpress",
-		PingUrl: "https://www.rayer.idv.tw/blog/wp-admin/install.php",
-	})
-
-	_ = s.RegisterService(&WebServiceDescriptor{
-		Name:    "API",
-		PingUrl: "https://api.rayer.idv.tw/ping",
-	})
-
-	_ = s.RegisterService(&WebServiceDescriptor{
-		Name:    "Jenkins(Web)",
-		PingUrl: "https://jenkins.rayer.idv.tw/login",
-	})
-
-	_ = s.RegisterService(&WebServiceDescriptor{
-		Name:    "SupposedFail",
-		PingUrl: "https://aa.cc.dde",
-	})
-
-	_ = s.RegisterService(&WebServiceDescriptor{
-		Name:    "SupposedFail2",
-		PingUrl: "https://api.rayer.idv.tw/notexist",
-	})
-	fmt.Printf("%+v", s.CheckAllServerStatus())
+	err := s.RegisterPresetServices()
+	if err != nil {
+		log.Warn(err.Error())
+	}
+	result := s.CheckAllServerStatus()
+	for _, v := range result {
+		fmt.Printf("%s - %s - %s - %s\n", v.Name, v.Status, v.ServiceType, v.Message)
+	}
 }
 
 func TestServiceManagementContext_RegisterService(t *testing.T) {

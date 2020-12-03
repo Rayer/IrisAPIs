@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	"reflect"
 )
@@ -25,6 +26,7 @@ type ServiceManagement interface {
 	CheckAllServerStatus() []ServiceStatusRet
 	CheckServerStatus(name ServiceStatus) ServiceStatusRet
 	RegisterServices(services []ServiceDescriptor) error
+	RegisterPresetServices() error
 }
 
 type ServiceManagementContext struct {
@@ -92,4 +94,54 @@ func getTypeName(inVar interface{}) string {
 	} else {
 		return t.Name()
 	}
+}
+
+func (s *ServiceManagementContext) RegisterPresetServices() error {
+	dc, err := client.NewEnvClient()
+	if err != nil {
+		return err
+	}
+	return s.RegisterServices([]ServiceDescriptor{
+		&DockerComponentDescriptor{
+			Name:          "IrisAPI-Docker",
+			ContainerName: "APIService",
+			ImageName:     "rayer/iris-apis",
+			ImageTag:      "latest",
+			client:        dc,
+		},
+		&DockerComponentDescriptor{
+			Name:          "OneIndex",
+			ContainerName: "oneindex-service",
+			ImageName:     "setzero/oneindex",
+			ImageTag:      "latest",
+			client:        dc,
+		},
+		&DockerComponentDescriptor{
+			Name:          "Jenkins-Docker",
+			ContainerName: "jenkins-service",
+			ImageName:     "jenkins/jenkins:alpine",
+			ImageTag:      "latest",
+			client:        dc,
+		},
+		&DockerComponentDescriptor{
+			Name:          "MTProxy",
+			ContainerName: "mtproxy",
+			ImageName:     "telegrammessenger/proxy",
+			ImageTag:      "latest",
+			client:        dc,
+		},
+		&WebServiceDescriptor{
+			Name:    "WordPress",
+			PingUrl: "https://www.rayer.idv.tw/blog/wp-admin/install.php",
+		},
+		&WebServiceDescriptor{
+			Name:    "IrisAPI-APIAccess",
+			PingUrl: "https://api.rayer.idv.tw/ping",
+		},
+		&WebServiceDescriptor{
+			Name:    "Jenkins-Web",
+			PingUrl: "https://jenkins.rayer.idv.tw/login",
+		},
+	})
+
 }
