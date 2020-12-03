@@ -17,13 +17,14 @@ type ServiceStatusRet struct {
 	Status      ServiceStatus
 	Name        string
 	ServiceType string
+	Message     string
 }
 
 type ServiceManagement interface {
 	RegisterService(service ServiceDescriptor) error
 	CheckAllServerStatus() []ServiceStatusRet
 	CheckServerStatus(name ServiceStatus) ServiceStatusRet
-	//RegisterServices(services []ServiceDescriptor) error
+	RegisterServices(services []ServiceDescriptor) error
 }
 
 type ServiceManagementContext struct {
@@ -46,7 +47,13 @@ func (s *ServiceManagementContext) CheckAllServerStatus() []ServiceStatusRet {
 				return StatusDown
 			}(),
 			Name:        k,
-			ServiceType: getType(v),
+			ServiceType: getTypeName(v),
+			Message: func() string {
+				if err != nil {
+					return err.Error()
+				}
+				return ""
+			}(),
 		})
 	}
 	return ret
@@ -64,39 +71,24 @@ func (s *ServiceManagementContext) RegisterService(service ServiceDescriptor) er
 	return nil
 }
 
+func (s *ServiceManagementContext) RegisterServices(services []ServiceDescriptor) error {
+	for _, v := range services {
+		err := s.RegisterService(v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func NewServiceManagementContext() ServiceManagement {
 	ret := &ServiceManagementContext{services: make(map[string]ServiceDescriptor)}
-	_ = ret.RegisterService(&WebServiceDescriptor{
-		Name:    "Wordpress",
-		PingUrl: "https://www.rayer.idv.tw/blog/wp-admin/install.php",
-	})
-
-	_ = ret.RegisterService(&WebServiceDescriptor{
-		Name:    "API",
-		PingUrl: "https://api.rayer.idv.tw/ping",
-	})
-
-	_ = ret.RegisterService(&WebServiceDescriptor{
-		Name:    "Jenkins(Web)",
-		PingUrl: "https://jenkins.rayer.idv.tw/login",
-	})
-
-	_ = ret.RegisterService(&WebServiceDescriptor{
-		Name:    "SupposedFail",
-		PingUrl: "https://aa.cc.dde",
-	})
-
-	_ = ret.RegisterService(&WebServiceDescriptor{
-		Name:    "SupposedFail2",
-		PingUrl: "https://api.rayer.idv.tw/notexist",
-	})
-
 	return ret
 }
 
-func getType(myvar interface{}) string {
-	if t := reflect.TypeOf(myvar); t.Kind() == reflect.Ptr {
-		return "*" + t.Elem().Name()
+func getTypeName(inVar interface{}) string {
+	if t := reflect.TypeOf(inVar); t.Kind() == reflect.Ptr {
+		return t.Elem().Name()
 	} else {
 		return t.Name()
 	}

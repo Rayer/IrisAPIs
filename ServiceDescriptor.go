@@ -1,8 +1,12 @@
 package IrisAPIs
 
 import (
+	"context"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -16,9 +20,11 @@ type ServiceDescriptor interface {
 }
 
 type DockerComponentDescriptor struct {
-	Name            string
-	DockerImageName string
-	dockerClient    *client.Client
+	Name          string
+	ContainerName string
+	ImageName     string
+	ImageTag      string
+	client        *client.Client
 }
 
 func (d *DockerComponentDescriptor) GetServiceName() string {
@@ -26,6 +32,26 @@ func (d *DockerComponentDescriptor) GetServiceName() string {
 }
 
 func (d *DockerComponentDescriptor) IsAlive() (bool, error) {
+	f := filters.NewArgs()
+	f.Add("name", d.ContainerName)
+	ret, err := d.client.ContainerList(context.TODO(), types.ContainerListOptions{
+		All:     false,
+		Filters: f,
+	})
+
+	if err != nil {
+		return false, err
+	}
+
+	if len(ret) < 1 {
+		return false, nil
+	}
+
+	container := ret[0]
+	log.Infof("Get container info : %+v", container)
+
+	//TODO: Compare image name and tag
+
 	return true, nil
 }
 
@@ -82,11 +108,12 @@ func (r *WebServiceDescriptor) Restart() error {
 }
 
 type DatabaseComponentDescriptor struct {
-	Name string
+	Name             string
+	ConnectionString string
 }
 
 func (d *DatabaseComponentDescriptor) GetServiceName() string {
-	panic("implement me")
+	return d.Name
 }
 
 func (d *DatabaseComponentDescriptor) IsAlive() (bool, error) {
