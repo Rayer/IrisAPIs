@@ -43,6 +43,11 @@ func (d *DockerComponentDescriptor) IsAlive() (bool, error) {
 		return false, err
 	}
 
+	if len(ret) > 1 {
+		//Not possible.... but still be there
+		return false, errors.Errorf("Multiple container is found by this name : %s", d.ContainerName)
+	}
+
 	if len(ret) < 1 {
 		return false, nil
 	}
@@ -50,7 +55,9 @@ func (d *DockerComponentDescriptor) IsAlive() (bool, error) {
 	container := ret[0]
 	log.Infof("Get container info : %+v", container)
 
-	//TODO: Compare image name and tag
+	if d.ImageName != container.Image {
+		return false, errors.Errorf("Continer %s found, but image mismatch : %s, expected %s", container.Names, container.Names, d.ImageName)
+	}
 
 	return true, nil
 }
