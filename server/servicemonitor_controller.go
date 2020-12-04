@@ -40,7 +40,7 @@ func (c *Controller) GetServiceStatus(ctx *gin.Context) {
 // @Summary Get service status
 // @Description Get service status with specified ID
 // @Tags System
-// @Path id path string true "Service ID"
+// @Param id path string true "Service ID"
 // @Produce json
 // @Success 200 {object} GetServiceStatusByIdResponse
 // @Failure 400 {object} problems.DefaultProblem
