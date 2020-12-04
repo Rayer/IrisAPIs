@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"github.com/docker/distribution/uuid"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	"reflect"
@@ -19,25 +20,38 @@ type ServiceStatusRet struct {
 	Name        string
 	ServiceType string
 	Message     string
+	ID          uuid.UUID
 }
 
 type ServiceManagement interface {
 	RegisterService(service ServiceDescriptor) error
 	CheckAllServerStatus() []ServiceStatusRet
-	CheckServerStatus(name ServiceStatus) ServiceStatusRet
+	CheckServerStatus(id uuid.UUID) (ServiceStatusRet, error)
 	RegisterServices(services []ServiceDescriptor) error
 	RegisterPresetServices() error
 }
 
 type ServiceManagementContext struct {
-	services map[string]ServiceDescriptor
+	services map[uuid.UUID]ServiceDescriptor
 }
 
 func (s *ServiceManagementContext) CheckAllServerStatus() []ServiceStatusRet {
 	ret := make([]ServiceStatusRet, 0)
-	for k, v := range s.services {
-		alive, err := v.IsAlive()
-		ret = append(ret, ServiceStatusRet{
+	for k := range s.services {
+		s, _ := s.CheckServerStatus(k)
+		ret = append(ret, s)
+	}
+	return ret
+}
+
+func (s *ServiceManagementContext) CheckServerStatus(id uuid.UUID) (ServiceStatusRet, error) {
+
+	if service, exists := s.services[id]; !exists {
+		return ServiceStatusRet{}, errors.Errorf("no such service bound on id : %s", id.String())
+	} else {
+		alive, err := service.IsAlive()
+		return ServiceStatusRet{
+			ID: id,
 			Status: func() ServiceStatus {
 				if err != nil {
 					return StatusInternalError
@@ -48,28 +62,25 @@ func (s *ServiceManagementContext) CheckAllServerStatus() []ServiceStatusRet {
 
 				return StatusDown
 			}(),
-			Name:        k,
-			ServiceType: getTypeName(v),
+			Name:        service.GetServiceName(),
+			ServiceType: getTypeName(service),
 			Message: func() string {
 				if err != nil {
 					return err.Error()
 				}
 				return ""
 			}(),
-		})
+		}, nil
 	}
-	return ret
-}
 
-func (s *ServiceManagementContext) CheckServerStatus(name ServiceStatus) ServiceStatusRet {
-	panic("implement me")
 }
 
 func (s *ServiceManagementContext) RegisterService(service ServiceDescriptor) error {
-	if _, exist := s.services[service.GetServiceName()]; exist {
-		return errors.New("duplicated service name is found!")
-	}
-	s.services[service.GetServiceName()] = service
+	//if _, exist := s.services[service.GetServiceName()]; exist {
+	//	return errors.New("duplicated service name is found!")
+	//}
+
+	s.services[uuid.Generate()] = service
 	return nil
 }
 
@@ -83,8 +94,8 @@ func (s *ServiceManagementContext) RegisterServices(services []ServiceDescriptor
 	return nil
 }
 
-func NewServiceManagementContext() ServiceManagement {
-	ret := &ServiceManagementContext{services: make(map[string]ServiceDescriptor)}
+func NewServiceManagement() ServiceManagement {
+	ret := &ServiceManagementContext{services: make(map[uuid.UUID]ServiceDescriptor)}
 	return ret
 }
 

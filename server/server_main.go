@@ -65,11 +65,17 @@ func main() {
 
 	r.NoRoute(controller.NoRouteHandler)
 	r.NoMethod(controller.NoMethodHandler)
+
 	r.GET("/ping", controller.PingHandler)
 
 	wrapped := NewAKWrappedEngine(r, apiKeyManager)
 
-	//apiKey := NewAKGroup("/apiKey", r, apiKeyManager)
+	system := wrapped.Group("/service")
+	{
+		system.GET("", IrisAPIs.ApiKeyNotPresented, controller.GetServiceStatus)
+		system.GET("/:id", IrisAPIs.ApiKeyNotPresented, controller.GetServiceStatusById)
+	}
+
 	apiKey := wrapped.Group("/apiKey")
 	{
 		apiKey.POST("", IrisAPIs.ApiKeyPrivileged, controller.IssueApiKey)

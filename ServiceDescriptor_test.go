@@ -23,7 +23,7 @@ func TestServiceDescriptorSuite(t *testing.T) {
 	suite.Run(t, new(ServiceDescriptorSuite))
 }
 
-func (s *ServiceDescriptorSuite) SetupTest() {
+func (s *ServiceDescriptorSuite) SetupSuite() {
 	log.SetLevel(log.DebugLevel)
 	var err error
 	s.dockerAvailable = true
@@ -44,9 +44,14 @@ func (s *ServiceDescriptorSuite) SetupTest() {
 	} else {
 		//Download and init docker tester
 		p, err := s.dockerClient.ImagePull(context.TODO(), "docker.io/rayer/chatbot-server", types.ImagePullOptions{})
-		defer p.Close()
+		defer func() {
+			err := p.Close()
+			if err != nil {
+				log.Warnf("Error while closing ImagePull stream : %s", err.Error())
+			}
+		}()
 		buf := new(bytes.Buffer)
-		buf.ReadFrom(p)
+		_, _ = buf.ReadFrom(p)
 
 		if err != nil {
 			//log.Warnf("Fail to pull image : %s", err.Error())
@@ -82,7 +87,10 @@ func (s *ServiceDescriptorSuite) SetupTest() {
 func (s *ServiceDescriptorSuite) TearDownSuite() {
 	if s.dockerClient != nil {
 		//s.dockerClient.ImageRemove(context.TODO(), )
-		s.dockerClient.ContainerRemove(context.TODO(), s.dockerContainerId, types.ContainerRemoveOptions{Force: true})
+		err := s.dockerClient.ContainerRemove(context.TODO(), s.dockerContainerId, types.ContainerRemoveOptions{Force: true})
+		if err != nil {
+			log.Warnf("Error removing container %s! - %s", s.dockerContainerId, err.Error())
+		}
 		_ = s.dockerClient.Close()
 	}
 }
@@ -153,6 +161,63 @@ func (s *ServiceDescriptorSuite) TestDockerComponentDescriptor_IsAlive() {
 				client:        tt.fields.client,
 			}
 			got, err := d.IsAlive()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("IsAlive() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("IsAlive() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func (s *ServiceDescriptorSuite) TestWebServiceDescriptor_IsAlive() {
+	type fields struct {
+		Name    string
+		PingUrl string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		want    bool
+		wantErr bool
+	}{
+		{
+			name: "NormalWebSuccess",
+			fields: fields{
+				Name:    "Hinet Service",
+				PingUrl: "https://www.hinet.net",
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "NormalWebFail",
+			fields: fields{
+				Name:    "RandomFQDN",
+				PingUrl: "https://aa.nbnb.ears.c",
+			},
+			want:    false,
+			wantErr: true,
+		},
+		{
+			name: "Normal404",
+			fields: fields{
+				Name:    "Hinet Service 404",
+				PingUrl: "https://www.hinet.net/acccc",
+			},
+			want:    false,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		s.T().Run(tt.name, func(t *testing.T) {
+			r := &WebServiceDescriptor{
+				Name:    tt.fields.Name,
+				PingUrl: tt.fields.PingUrl,
+			}
+			got, err := r.IsAlive()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("IsAlive() error = %v, wantErr %v", err, tt.wantErr)
 				return

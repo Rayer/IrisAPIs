@@ -2,25 +2,26 @@ package IrisAPIs
 
 import (
 	"fmt"
+	"github.com/docker/distribution/uuid"
 	log "github.com/sirupsen/logrus"
 	"testing"
 )
 
 func TestServiceManagementContext_CheckAllServerStatus(t *testing.T) {
-	s := NewServiceManagementContext()
+	s := NewServiceManagement()
 	err := s.RegisterPresetServices()
 	if err != nil {
 		log.Warn(err.Error())
 	}
 	result := s.CheckAllServerStatus()
 	for _, v := range result {
-		fmt.Printf("%s - %s - %s - %s\n", v.Name, v.Status, v.ServiceType, v.Message)
+		fmt.Printf("%s - %s - %s - %s - %s\n", v.ID, v.Name, v.Status, v.ServiceType, v.Message)
 	}
 }
 
 func TestServiceManagementContext_RegisterService(t *testing.T) {
 	type fields struct {
-		services map[string]ServiceDescriptor
+		services map[uuid.UUID]ServiceDescriptor
 	}
 	type args struct {
 		service ServiceDescriptor
@@ -34,7 +35,7 @@ func TestServiceManagementContext_RegisterService(t *testing.T) {
 		{
 			name: "RegularAddWebService",
 			fields: fields{
-				services: make(map[string]ServiceDescriptor),
+				services: make(map[uuid.UUID]ServiceDescriptor),
 			},
 			args: args{
 				service: &WebServiceDescriptor{
@@ -43,24 +44,6 @@ func TestServiceManagementContext_RegisterService(t *testing.T) {
 				},
 			},
 			wantErr: false,
-		},
-		{
-			name: "DuplicatedName",
-			fields: fields{
-				services: map[string]ServiceDescriptor{
-					"DuplicatedWordPress": &WebServiceDescriptor{
-						Name:    "DuplicatedWordPress",
-						PingUrl: "https://rayer.idv.tw/blog",
-					},
-				},
-			},
-			args: args{
-				service: &WebServiceDescriptor{
-					Name:    "DuplicatedWordPress",
-					PingUrl: "https://rayer.idv.tw/blog",
-				},
-			},
-			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
