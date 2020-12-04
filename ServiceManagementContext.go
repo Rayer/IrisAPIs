@@ -94,7 +94,7 @@ func (s *ServiceManagementContext) RegisterServices(services []ServiceDescriptor
 	return nil
 }
 
-func NewServiceManagementContext() ServiceManagement {
+func NewServiceManagement() ServiceManagement {
 	ret := &ServiceManagementContext{services: make(map[uuid.UUID]ServiceDescriptor)}
 	return ret
 }

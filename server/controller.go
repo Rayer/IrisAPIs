@@ -24,6 +24,7 @@ type Controller struct {
 	DatabaseContext *IrisAPIs.DatabaseContext
 	IpNationService *IrisAPIs.IpNationContext
 	ApiKeyService   IrisAPIs.ApiKeyService
+	ServiceMgmt     IrisAPIs.ServiceManagement
 }
 
 type GenericResultResponse struct {
@@ -41,6 +42,11 @@ func NewController(config *IrisAPIs.Configuration) (*Controller, error) {
 		DatabaseContext: db,
 		IpNationService: IrisAPIs.NewIpNationContext(db),
 		ApiKeyService:   IrisAPIs.NewApiKeyService(db),
+		ServiceMgmt: func() IrisAPIs.ServiceManagement {
+			service := IrisAPIs.NewServiceManagement()
+			_ = service.RegisterPresetServices()
+			return service
+		}(),
 	}, nil
 }
 

@@ -8,7 +8,7 @@ import (
 )
 
 func TestServiceManagementContext_CheckAllServerStatus(t *testing.T) {
-	s := NewServiceManagementContext()
+	s := NewServiceManagement()
 	err := s.RegisterPresetServices()
 	if err != nil {
 		log.Warn(err.Error())
