@@ -16,7 +16,7 @@ COPY --from=build-env /IrisAPIs/server/docs/ /app/docs
 COPY --from=build-env /IrisAPIs/serverInfo/serverInfo.app /app
 COPY --from=build-env /IrisAPIs/apikey_cli/apikey_cli.app /app
 COPY --from=build-env /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs
+COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 ENV TZ=Asia/Taipei
 EXPOSE 8080
 ENTRYPOINT ["/app/server.app"]
