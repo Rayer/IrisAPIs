@@ -23,7 +23,7 @@ func TestServiceDescriptorSuite(t *testing.T) {
 	suite.Run(t, new(ServiceDescriptorSuite))
 }
 
-func (s *ServiceDescriptorSuite) SetupTest() {
+func (s *ServiceDescriptorSuite) SetupSuite() {
 	log.SetLevel(log.DebugLevel)
 	var err error
 	s.dockerAvailable = true
