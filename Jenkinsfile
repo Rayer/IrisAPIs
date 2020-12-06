@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Unit test') {
             steps {
-                slackSend message: 'Project rayer/iris-apis start to build.'
+                slackSend message: "${BUILD_TAG} start to build."
                 sh label: 'go version', script: 'go version'
                 sh label: 'install gocover-cobertura', script: 'go get github.com/t-yuki/gocover-cobertura'
                 sh label: 'go unit test', script: 'go test --coverprofile=cover.out'
@@ -56,6 +56,7 @@ pipeline {
         stage('Verify changes in test server') {
             steps {
                 // The input step will prompt a message box for manual approval.
+                slackSend message : "${BUILD_TAG} have been deployed to staging, please check ${BUILD_URL} for details."
                 input message: "Deploy this version as release?"
                 echo 'Verified: ${pwd()}'
             }
@@ -81,13 +82,13 @@ pipeline {
 
     post {
         aborted {
-            slackSend message: 'Project rayer/iris-apis aborted.'
+            slackSend message: "${BUILD_TAG} build ended."
         }
         success {
-            slackSend message: 'Project rayer/iris-apis is built successfully.'
+            slackSend message: "${BUILD_TAG} is built successfully."
         }
         failure {
-            slackSend message: 'Project rayer/iris-apis is failed to be built.'
+            slackSend message: "${BUILD_TAG} is failed to be built."
         }
     }
 }
