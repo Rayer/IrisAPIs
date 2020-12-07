@@ -3,6 +3,7 @@ package IrisAPIs
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/xormplus/xorm"
 	"testing"
 	"time"
 )
@@ -13,9 +14,20 @@ type ApiKeyContextTestSuite struct {
 	context *ApiKeyContext
 }
 
+func (c *ApiKeyContextTestSuite) SetupSuite() {
+	c.db, _ = NewTestDatabaseContext()
+	c.context = &ApiKeyContext{DB: func() *xorm.Engine {
+		if c.db == nil {
+			return nil
+		}
+		return c.db.DbObject
+	}()}
+}
+
 func (c *ApiKeyContextTestSuite) SetupTest() {
-	c.db, _ = NewDatabaseContext("acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps_test?charset=utf8&loc=Asia%2FTaipei&parseTime=true", true)
-	c.context = &ApiKeyContext{DB: c.db.DbObject}
+	if c.db == nil {
+		c.T().Skip("Skip these tests due to no database available!")
+	}
 }
 
 func TestApiKeyContextTestSuite(t *testing.T) {

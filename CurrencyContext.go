@@ -2,6 +2,7 @@ package IrisAPIs
 
 import (
 	"encoding/json"
+	"flag"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
@@ -24,6 +25,35 @@ func NewCurrencyContext(apiKey string, db *DatabaseContext) *CurrencyContext {
 	return &CurrencyContext{
 		ApiKey:                 apiKey,
 		Db:                     db.DbObject,
+		UpdateAfterLastSuccess: 43200,
+		UpdateAfterLastFail:    10800,
+		cachedConvert:          make(map[string]currencyConvertCache),
+	}
+}
+
+func NewTestCurrencyContext() *CurrencyContext {
+	dc, err := NewTestDatabaseContext()
+	if dc == nil || err != nil {
+		return nil
+	}
+	//Load from env
+	apiKey, exist := os.LookupEnv("FIXERIO_KEY")
+	if !exist || apiKey == "" {
+		apiKey = *flag.String("fixerio_key", "", "fixer io key")
+	}
+
+	//Fetch configuration file. It usually only exists in local test environment
+	if apiKey == "" {
+		apiKey = NewConfiguration().FixerIoApiKey
+	}
+
+	if apiKey == "" {
+		return nil
+	}
+
+	return &CurrencyContext{
+		ApiKey:                 apiKey,
+		Db:                     dc.DbObject,
 		UpdateAfterLastSuccess: 43200,
 		UpdateAfterLastFail:    10800,
 		cachedConvert:          make(map[string]currencyConvertCache),

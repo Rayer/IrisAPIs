@@ -13,9 +13,15 @@ type CurrencyContextTestSuite struct {
 	currencyContext *CurrencyContext
 }
 
+func (c *CurrencyContextTestSuite) SetupSuite() {
+	c.currencyContext = NewTestCurrencyContext()
+}
+
 func (c *CurrencyContextTestSuite) SetupTest() {
-	c.db, _ = NewDatabaseContext("acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps_test?charset=utf8&loc=Asia%2FTaipei&parseTime=true", true)
-	c.currencyContext = NewCurrencyContext("676ac77e5ce5d4b9a57ee6464ff84433", c.db)
+	if c.currencyContext == nil {
+		c.T().Errorf("Fail due to can't initialize CurrencyContext!")
+		c.T().FailNow()
+	}
 }
 
 func TestCurrencyContextTestSuite(t *testing.T) {

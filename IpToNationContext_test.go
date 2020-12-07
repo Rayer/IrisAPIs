@@ -19,10 +19,17 @@ func TestIpToNationContextSuite(t *testing.T) {
 	suite.Run(t, new(IpToNationContextTestSuite))
 }
 
-func (c *IpToNationContextTestSuite) SetupTest() {
-	c.db, _ = NewDatabaseContext("acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps_test?charset=utf8&loc=Asia%2FTaipei&parseTime=true", true)
+func (c *IpToNationContextTestSuite) SetupSuite() {
+	c.db, _ = NewTestDatabaseContext()
 	c.ipNationContext = NewIpNationContext(c.db)
 	logrus.SetLevel(logrus.DebugLevel)
+}
+
+func (c *IpToNationContextTestSuite) SetupTest() {
+	if c.db == nil {
+		c.T().Errorf("Can't initialize database!")
+		c.T().Fail()
+	}
 }
 
 func (c *IpToNationContextTestSuite) Test_isCorrectIPAddress() {

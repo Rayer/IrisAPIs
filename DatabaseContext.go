@@ -1,8 +1,10 @@
 package IrisAPIs
 
 import (
+	"flag"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/xormplus/xorm"
+	"os"
 )
 
 type DatabaseContext struct {
@@ -24,8 +26,30 @@ func NewDatabaseContext(connectionString string, showSql bool) (*DatabaseContext
 	}, nil
 }
 
+// This is for test cases. It will try to fetch DB test connect strings with these order :
+// 1. Environment Parameters
+// 2. gtest pass argument
+// 3. config file
+func NewTestDatabaseContext() (*DatabaseContext, error) {
+	var connStr string
+	connStr, exist := os.LookupEnv("TEST_DB_CONN_STR")
+	if !exist || connStr == "" {
+		connStr = *flag.String("db_conn_str", "", "test db password")
+	}
+
+	//Fetch configuration file. It usually only exists in local test environment
+	if connStr == "" {
+		connStr = NewConfiguration().TestConnectionString
+	}
+
+	if connStr == "" {
+		return nil, nil
+	}
+
+	return NewDatabaseContext(connStr, true)
+}
+
 func initDatabaseContext(connectionString string, showSql bool) (engine *xorm.Engine, err error) {
-	//engine, err = xorm.NewEngine("mysql", "acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Asia%2FTaipei&parseTime=true")
 	engine, err = xorm.NewEngine("mysql", connectionString)
 
 	if err != nil {

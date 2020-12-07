@@ -15,8 +15,15 @@ type Configuration struct {
 	FixerIoLastFetchSuccessfulPeriod int    `doc:"Fetch interval for last successful fetch"`
 	FixerIoLastFetchFailedPeriod     int    `doc:"Fetch interval for last fail fetch"`
 	ConnectionString                 string `doc:"Connection string to database."`
+	TestConnectionString             string `doc:"Connection string to Test Database"`
 	DatabaseType                     string `doc:"Database Type, for example, mysql"`
 	LogLevel                         int    `doc:"Log Level, 0 for debug and 7 for info"`
+}
+
+func NewConfiguration() *Configuration {
+	ret := &Configuration{}
+	_ = ret.LoadConfiguration()
+	return ret
 }
 
 func (c *Configuration) LoadConfiguration() error {

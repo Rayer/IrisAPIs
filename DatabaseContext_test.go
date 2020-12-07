@@ -3,12 +3,40 @@ package IrisAPIs
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stretchr/testify/suite"
 	"testing"
 )
 
-func TestDbConnection(t *testing.T) {
-	db, _ := NewDatabaseContext("acc:12qw34er@tcp(node.rayer.idv.tw:3306)/apps?charset=utf8&loc=Asia%2FTaipei&parseTime=true", true)
-	result, _ := db.DbObject.QueryString("select * from mcds_tw_members")
+type DatabaseContextTest struct {
+	suite.Suite
+	db *DatabaseContext
+}
+
+func (d *DatabaseContextTest) SetupSuite() {
+	db, err := NewTestDatabaseContext()
+	if err != nil {
+		fmt.Println(err.Error())
+		d.db = nil
+	}
+	d.db = db
+}
+
+func (d *DatabaseContextTest) SetupTest() {
+	if d.db == nil {
+		d.T().Skip("Test case skipped due to no database available.")
+	}
+}
+
+func (d *DatabaseContextTest) TearDownSuite() {
+
+}
+
+func TestDatabaseContextTest(t *testing.T) {
+	suite.Run(t, new(DatabaseContextTest))
+}
+
+func (d *DatabaseContextTest) TestDbConnection() {
+	result, _ := d.db.DbObject.QueryString("select * from mcds_tw_members")
 	output, _ := json.MarshalIndent(result, "", "\t")
 	fmt.Println(string(output))
 }
