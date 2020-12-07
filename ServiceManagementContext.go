@@ -114,8 +114,15 @@ func (s *ServiceManagementContext) RegisterPresetServices() error {
 	}
 	return s.RegisterServices([]ServiceDescriptor{
 		&DockerComponentDescriptor{
-			Name:          "IrisAPI-Docker",
+			Name:          "IrisAPI",
 			ContainerName: "APIService",
+			ImageName:     "rayer/iris-apis",
+			ImageTag:      "release",
+			client:        dc,
+		},
+		&DockerComponentDescriptor{
+			Name:          "IrisAPI-Test",
+			ContainerName: "APIService-Test",
 			ImageName:     "rayer/iris-apis",
 			ImageTag:      "latest",
 			client:        dc,
@@ -124,21 +131,21 @@ func (s *ServiceManagementContext) RegisterPresetServices() error {
 			Name:          "OneIndex",
 			ContainerName: "oneindex-service",
 			ImageName:     "setzero/oneindex",
-			ImageTag:      "latest",
+			ImageTag:      "",
 			client:        dc,
 		},
 		&DockerComponentDescriptor{
 			Name:          "Jenkins-Docker",
 			ContainerName: "jenkins-service",
-			ImageName:     "jenkins/jenkins:alpine",
-			ImageTag:      "latest",
+			ImageName:     "jenkins/jenkins",
+			ImageTag:      "alpine",
 			client:        dc,
 		},
 		&DockerComponentDescriptor{
 			Name:          "MTProxy",
 			ContainerName: "mtproxy",
 			ImageName:     "telegrammessenger/proxy",
-			ImageTag:      "latest",
+			ImageTag:      "",
 			client:        dc,
 		},
 		&WebServiceDescriptor{
@@ -146,7 +153,11 @@ func (s *ServiceManagementContext) RegisterPresetServices() error {
 			PingUrl: "https://www.rayer.idv.tw/blog/wp-admin/install.php",
 		},
 		&WebServiceDescriptor{
-			Name:    "IrisAPI-APIAccess",
+			Name:    "IrisAPI",
+			PingUrl: "https://api.rayer.idv.tw/ping",
+		},
+		&WebServiceDescriptor{
+			Name:    "IrisAPI-Test",
 			PingUrl: "https://api.rayer.idv.tw/ping",
 		},
 		&WebServiceDescriptor{

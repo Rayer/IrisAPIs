@@ -43,7 +43,7 @@ func (s *ServiceDescriptorSuite) SetupSuite() {
 		log.Warn("Docker client initialization failed, will skip all docker test cases.")
 	} else {
 		//Download and init docker tester
-		p, err := s.dockerClient.ImagePull(context.TODO(), "docker.io/rayer/chatbot-server", types.ImagePullOptions{})
+		p, err := s.dockerClient.ImagePull(context.TODO(), "docker.io/rayer/chatbot-server:latest", types.ImagePullOptions{})
 		defer func() {
 			err := p.Close()
 			if err != nil {
@@ -61,7 +61,7 @@ func (s *ServiceDescriptorSuite) SetupSuite() {
 		}
 
 		cr, err := s.dockerClient.ContainerCreate(context.TODO(), &container.Config{
-			Image: "rayer/chatbot-server",
+			Image: "rayer/chatbot-server:latest",
 			//Cmd: []string{"echo", "Running UT Docker container..."},
 		}, nil, nil, "UTDocker")
 		if err != nil {

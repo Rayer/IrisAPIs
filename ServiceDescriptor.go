@@ -56,7 +56,14 @@ func (d *DockerComponentDescriptor) IsAlive() (bool, error) {
 	container := ret[0]
 	log.Infof("Get container info : %+v", container)
 
-	if d.ImageName != container.Image {
+	imageName := func() string {
+		if d.ImageTag == "" {
+			return d.ImageName
+		}
+		return fmt.Sprintf("%s:%s", d.ImageName, d.ImageTag)
+	}()
+
+	if imageName != container.Image {
 		return false, errors.Errorf("Continer %s found, but image mismatch : %s, expected %s", container.Names, container.Names, d.ImageName)
 	}
 
