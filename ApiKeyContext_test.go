@@ -1,9 +1,9 @@
 package IrisAPIs
 
 import (
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/xormplus/xorm"
 	"testing"
 	"time"
 )
@@ -11,17 +11,13 @@ import (
 type ApiKeyContextTestSuite struct {
 	suite.Suite
 	db      *DatabaseContext
-	context *ApiKeyContext
+	context ApiKeyService
 }
 
 func (c *ApiKeyContextTestSuite) SetupSuite() {
 	c.db, _ = NewTestDatabaseContext()
-	c.context = &ApiKeyContext{DB: func() *xorm.Engine {
-		if c.db == nil {
-			return nil
-		}
-		return c.db.DbObject
-	}()}
+	c.context = NewApiKeyService(c.db)
+	log.SetLevel(log.DebugLevel)
 }
 
 func (c *ApiKeyContextTestSuite) SetupTest() {
@@ -53,9 +49,10 @@ func (c *ApiKeyContextTestSuite) TestApiKeyContext_GetAllKeys() {
 		c.Failf("Error getting keys : %s", err.Error())
 		c.Assert()
 	}
-	for _, r := range ret {
-		c.T().Logf("%+v", r)
-	}
+	//for _, r := range ret {
+	//	c.T().Logf("%+v", r)
+	//}
+	c.T().Logf("Fetched %d keys", len(ret))
 }
 
 func (c *ApiKeyContextTestSuite) TestApiKeyContext_GetKeyUsage() {

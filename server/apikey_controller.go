@@ -120,7 +120,7 @@ func (c *Controller) GetKey(ctx *gin.Context) {
 		return
 	}
 
-	entity, err := c.ApiKeyService.GetKey(id)
+	entity, err := c.ApiKeyService.GetKeyModelById(id)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(http.StatusInternalServerError, err500)
