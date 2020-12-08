@@ -106,6 +106,14 @@ func main() {
 	//Run daemon threads
 	controller.CurrencyService.CurrencySyncRoutine()
 
+	//Check other services
+	ret := controller.ServiceMgmt.CheckAllServerStatus()
+	format := "%27s %20s %16s %8s %40s\n"
+	log.Info(format, "ID", "Name", "Type", "Status", "Message")
+	for _, status := range ret {
+		log.Infof(format, status.ID, status.Name, status.ServiceType, status.Status, status.Message)
+	}
+
 	log.Info("Listing privilege endpoints : ")
 	privilegeEndpoints := wrapped.GetPrivilegeMap()
 	for path, level := range privilegeEndpoints {
