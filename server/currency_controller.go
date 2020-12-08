@@ -24,14 +24,15 @@ type CurrencyConvert struct {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /currency [get]
 func (c *Controller) GetCurrencyRaw(ctx *gin.Context) {
+	ctxCp := ctx.Copy()
 	result, err := c.CurrencyService.GetMostRecentCurrencyDataRaw()
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-		ctx.JSON(500, err500)
+		ctxCp.JSON(500, err500)
 		return
 	}
 
-	ctx.Data(http.StatusOK, "application/json", []byte(result))
+	ctxCp.Data(http.StatusOK, "application/json", []byte(result))
 }
 
 // ConvertCurrency godoc
@@ -45,30 +46,30 @@ func (c *Controller) GetCurrencyRaw(ctx *gin.Context) {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /currency/convert [post]
 func (c *Controller) ConvertCurrency(ctx *gin.Context) {
-
+	ctxCp := ctx.Copy()
 	var conv CurrencyConvert
-	err := ctx.BindJSON(&conv)
+	err := ctxCp.BindJSON(&conv)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-		ctx.JSON(500, err500)
+		ctxCp.JSON(500, err500)
 		return
 	}
 
 	if conv.From == "" || conv.To == "" {
 		err400 := problems.NewDetailedProblem(http.StatusBadRequest, "either from or to is null!")
-		ctx.JSON(400, err400)
+		ctxCp.JSON(400, err400)
 		return
 	}
 
 	result, err := c.CurrencyService.Convert(conv.From, conv.To, conv.Amount)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-		ctx.JSON(500, err500)
+		ctxCp.JSON(500, err500)
 		return
 	}
 
 	conv.Result = result
-	ctx.JSON(200, conv)
+	ctxCp.JSON(200, conv)
 }
 
 // SyncData godoc
@@ -81,14 +82,15 @@ func (c *Controller) ConvertCurrency(ctx *gin.Context) {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /currency/sync [get]
 func (c *Controller) SyncData(ctx *gin.Context) {
+	ctxCp := ctx.Copy()
 	err := c.CurrencyService.SyncToDb()
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-		ctx.JSON(500, err500)
+		ctxCp.JSON(500, err500)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, GenericResultResponse{
+	ctxCp.JSON(http.StatusOK, GenericResultResponse{
 		Result: true,
 	})
 }

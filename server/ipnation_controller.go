@@ -1,16 +1,10 @@
 package main
 
 import (
-	"IrisAPIs"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
 	"net/http"
 )
-
-//For swagger propose
-type IpNationCountries struct {
-	IrisAPIs.IpNationCountries
-}
 
 type IpNationCountriesBulk struct {
 	IpAddresses []string `json:"ip_addr_list"`
@@ -31,19 +25,20 @@ type IpNationCountriesBulkResponse struct {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /ip2nation [get]
 func (c *Controller) IpToNation(ctx *gin.Context) {
-	ipAddr := ctx.Query("ip")
+	ctxCp := ctx.Copy()
+	ipAddr := ctxCp.Query("ip")
 	if ipAddr == "" {
 		err400 := problems.NewDetailedProblem(http.StatusBadRequest, "No query parameter : ip")
-		ctx.JSON(400, err400)
+		ctxCp.JSON(400, err400)
 		return
 	}
 	res, err := c.IpNationService.GetIPNation(ipAddr)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-		ctx.JSON(500, err500)
+		ctxCp.JSON(500, err500)
 		return
 	}
-	ctx.JSON(200, res)
+	ctxCp.JSON(200, res)
 }
 
 // IpToNationBulk godoc
@@ -57,11 +52,12 @@ func (c *Controller) IpToNation(ctx *gin.Context) {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /ip2nation/bulk [post]
 func (c *Controller) IpToNationBulk(ctx *gin.Context) {
+	ctxCp := ctx.Copy()
 	bulkInput := IpNationCountriesBulk{}
-	err := ctx.BindJSON(&bulkInput)
+	err := ctxCp.BindJSON(&bulkInput)
 	if err != nil {
 		err400 := problems.NewDetailedProblem(http.StatusBadRequest, err.Error())
-		ctx.JSON(400, err400)
+		ctxCp.JSON(400, err400)
 		return
 	}
 
@@ -77,6 +73,6 @@ func (c *Controller) IpToNationBulk(ctx *gin.Context) {
 		}
 	}
 
-	ctx.JSON(http.StatusOK, IpNationCountriesBulkResponse{IpAddressResult: ret})
+	ctxCp.JSON(http.StatusOK, IpNationCountriesBulkResponse{IpAddressResult: ret})
 
 }

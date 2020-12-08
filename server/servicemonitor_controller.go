@@ -23,6 +23,7 @@ type GetServiceStatusByIdResponse struct {
 // @Success 200 {array} GetServiceStatusByIdResponse
 // @Router /service [get]
 func (c *Controller) GetServiceStatus(ctx *gin.Context) {
+	ctxCp := ctx.Copy()
 	ret := make([]GetServiceStatusByIdResponse, 0)
 	for _, stat := range c.ServiceMgmt.CheckAllServerStatus() {
 		ret = append(ret, GetServiceStatusByIdResponse{
@@ -33,7 +34,7 @@ func (c *Controller) GetServiceStatus(ctx *gin.Context) {
 			Message: stat.Message,
 		})
 	}
-	ctx.JSON(http.StatusOK, ret)
+	ctxCp.JSON(http.StatusOK, ret)
 }
 
 // GetServiceStatusById godoc
@@ -46,21 +47,22 @@ func (c *Controller) GetServiceStatus(ctx *gin.Context) {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /service/{id} [get]
 func (c *Controller) GetServiceStatusById(ctx *gin.Context) {
-	id, err := uuid.Parse(ctx.Param("id"))
+	ctxCp := ctx.Copy()
+	id, err := uuid.Parse(ctxCp.Param("id"))
 	if err != nil {
 		err400 := problems.NewDetailedProblem(http.StatusBadRequest, "error parsing service id")
-		ctx.JSON(400, err400)
+		ctxCp.JSON(400, err400)
 		return
 	}
 
 	stat, err := c.ServiceMgmt.CheckServerStatus(id)
 	if err != nil {
 		err404 := problems.NewDetailedProblem(http.StatusNotFound, "no such service bound with this id")
-		ctx.JSON(http.StatusNotFound, err404)
+		ctxCp.JSON(http.StatusNotFound, err404)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, GetServiceStatusByIdResponse{
+	ctxCp.JSON(http.StatusOK, GetServiceStatusByIdResponse{
 		Id:      stat.ID.String(),
 		Name:    stat.Name,
 		Type:    stat.ServiceType,

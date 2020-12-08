@@ -28,16 +28,17 @@ func NewApiKeyValidator(apiKeyService IrisAPIs.ApiKeyService, enforceCheckApiKey
 
 func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx := c.Copy()
 		var keyLocation IrisAPIs.ApiKeyLocation
 		keyLocation = IrisAPIs.QueryString
-		apiKey := c.Query("apiKey")
+		apiKey := ctx.Query("apiKey")
 		if apiKey == "" {
-			apiKey = c.GetHeader("apiKey")
+			apiKey = ctx.GetHeader("apiKey")
 			keyLocation = IrisAPIs.Header
 		}
 
-		path := c.FullPath()
-		method := c.Request.Method
+		path := ctx.FullPath()
+		method := ctx.Request.Method
 
 		pathPrivilege := a.FetchPrivilegeLevel(path, method)
 
@@ -47,20 +48,20 @@ func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 		validKey := a.apiKeyService.ValidateApiKey(apiKey, keyLocation)
 
 		if validKey < pathPrivilege && a.EnforceApiKey {
-			c.JSON(http.StatusUnauthorized, problems.NewDetailedProblem(http.StatusUnauthorized, "Not authorize for this resource"))
-			c.Abort()
+			ctx.JSON(http.StatusUnauthorized, problems.NewDetailedProblem(http.StatusUnauthorized, "Not authorize for this resource"))
+			ctx.Abort()
 			return
 		}
 		log.Debugf("Get request with ApiKey %s, which is %v", apiKey, validKey)
 
-		ipAddr := c.GetHeader("X-Forwarded-For")
+		ipAddr := ctx.GetHeader("X-Forwarded-For")
 		if ipAddr == "" {
-			ipAddr = c.ClientIP()
+			ipAddr = ctx.ClientIP()
 		}
 
 		a.apiKeyService.RecordActivity(path, method, apiKey, keyLocation, ipAddr)
 
-		c.Next()
+		ctx.Next()
 	}
 }
 

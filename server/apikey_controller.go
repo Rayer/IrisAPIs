@@ -53,20 +53,21 @@ type ApiKeyUsage struct {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /apiKey [post]
 func (c *Controller) IssueApiKey(ctx *gin.Context) {
+	ctxCp := ctx.Copy()
 	input := &IssueApiKeyPayload{}
-	err := ctx.BindJSON(input)
+	err := ctxCp.BindJSON(input)
 	if err != nil {
 		err400 := problems.NewDetailedProblem(http.StatusBadRequest, err.Error())
-		ctx.JSON(400, err400)
+		ctxCp.JSON(400, err400)
 		return
 	}
 	key, err := c.ApiKeyService.IssueApiKey(input.Application, input.UseInHeader, input.UseInQueryParam, "auto", false)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-		ctx.JSON(500, err500)
+		ctxCp.JSON(500, err500)
 		return
 	}
-	ctx.JSON(http.StatusOK, IssueApiKeyResponse{
+	ctxCp.JSON(http.StatusOK, IssueApiKeyResponse{
 		Key: key,
 	})
 }
@@ -81,10 +82,11 @@ func (c *Controller) IssueApiKey(ctx *gin.Context) {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /apiKey [get]
 func (c *Controller) GetAllKeys(ctx *gin.Context) {
+	ctxCp := ctx.Copy()
 	entities, err := c.ApiKeyService.GetAllKeys()
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-		ctx.JSON(500, err500)
+		ctxCp.JSON(500, err500)
 		return
 	}
 
@@ -98,7 +100,7 @@ func (c *Controller) GetAllKeys(ctx *gin.Context) {
 		})
 	}
 
-	ctx.JSON(http.StatusOK, ret)
+	ctxCp.JSON(http.StatusOK, ret)
 }
 
 // @Summary Get API Key detail
@@ -112,28 +114,29 @@ func (c *Controller) GetAllKeys(ctx *gin.Context) {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /apiKey/{id} [get]
 func (c *Controller) GetKey(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+	ctxCp := ctx.Copy()
+	id, err := strconv.Atoi(ctxCp.Param("id"))
 
 	if err != nil {
 		err400 := problems.NewDetailedProblem(http.StatusBadRequest, "Bad ID")
-		ctx.JSON(http.StatusBadRequest, err400)
+		ctxCp.JSON(http.StatusBadRequest, err400)
 		return
 	}
 
 	entity, err := c.ApiKeyService.GetKeyModelById(id)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-		ctx.JSON(http.StatusInternalServerError, err500)
+		ctxCp.JSON(http.StatusInternalServerError, err500)
 		return
 	}
 
 	if entity == nil {
 		err404 := problems.NewDetailedProblem(http.StatusNotFound, "ID not found")
-		ctx.JSON(http.StatusNotFound, err404)
+		ctxCp.JSON(http.StatusNotFound, err404)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, ApiKeyDetail{
+	ctxCp.JSON(http.StatusOK, ApiKeyDetail{
 		ApiKeyBrief: ApiKeyBrief{
 			Id:         *entity.Id,
 			Key:        *entity.Key,
@@ -158,16 +161,17 @@ func (c *Controller) GetKey(ctx *gin.Context) {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /apiKey/{id}/usage [get]
 func (c *Controller) GetApiUsage(ctx *gin.Context) {
-	id, err := strconv.Atoi(ctx.Param("id"))
+	ctxCp := ctx.Copy()
+	id, err := strconv.Atoi(ctxCp.Param("id"))
 
 	if err != nil {
 		err400 := problems.NewDetailedProblem(http.StatusBadRequest, "Bad ID")
-		ctx.JSON(http.StatusBadRequest, err400)
+		ctxCp.JSON(http.StatusBadRequest, err400)
 		return
 	}
 
-	from, _ := strconv.ParseInt(ctx.Query("from"), 10, 64)
-	to, _ := strconv.ParseInt(ctx.Query("to"), 10, 64)
+	from, _ := strconv.ParseInt(ctxCp.Query("from"), 10, 64)
+	to, _ := strconv.ParseInt(ctxCp.Query("to"), 10, 64)
 
 	var fromT *time.Time
 	if from > 0 {
@@ -184,7 +188,7 @@ func (c *Controller) GetApiUsage(ctx *gin.Context) {
 
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
-		ctx.JSON(500, err500)
+		ctxCp.JSON(500, err500)
 		return
 	}
 
@@ -197,7 +201,7 @@ func (c *Controller) GetApiUsage(ctx *gin.Context) {
 		})
 	}
 
-	ctx.JSON(http.StatusOK, ApiKeyUsage{
+	ctxCp.JSON(http.StatusOK, ApiKeyUsage{
 		Id:     id,
 		Access: ret,
 	})

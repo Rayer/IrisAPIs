@@ -51,15 +51,17 @@ func NewController(config *IrisAPIs.Configuration) (*Controller, error) {
 }
 
 func (c *Controller) NoRouteHandler(ctx *gin.Context) {
+	ctxCp := ctx.Copy()
 	err404 := problems.NewStatusProblem(http.StatusNotFound)
 	err404.Detail = "No such route!"
-	ctx.JSON(404, err404)
+	ctxCp.JSON(404, err404)
 }
 
 func (c *Controller) NoMethodHandler(ctx *gin.Context) {
+	ctxCp := ctx.Copy()
 	err404 := problems.NewStatusProblem(http.StatusNotFound)
 	err404.Detail = "No such method!"
-	ctx.JSON(404, err404)
+	ctxCp.JSON(404, err404)
 }
 
 type PingResponse struct {
@@ -79,9 +81,10 @@ type PingResponse struct {
 // @Failure 500 {object} problems.DefaultProblem
 // @Router /ping [get]
 func (c *Controller) PingHandler(ctx *gin.Context) {
+	ctxCp := ctx.Copy()
 	hostname, _ := os.Hostname()
 	//_ = os.UserCacheDir()
-	ctx.JSON(200, PingResponse{
+	ctxCp.JSON(200, PingResponse{
 		Message:  "System alive!!!",
 		Hostname: hostname,
 		Timezone: fmt.Sprint(time.Now().Zone()),
