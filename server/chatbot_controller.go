@@ -37,27 +37,21 @@ type ChatbotConversation struct {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /chatbot [post]
 func (c *Controller) ChatBotReact(ctx *gin.Context) {
-	ctxCp := ctx.Copy()
 	var conv ChatbotConversation
-	err := ctxCp.BindJSON(&conv)
+	err := ctx.BindJSON(&conv)
 
 	utx, _ := c.ChatBotService.GetUserContext(conv.User)
 
 	prompt, keywordsV, keywordsIv, err := utx.RenderMessageWithDetail()
 	str, err := utx.HandleMessage(conv.Input)
 	next, err := utx.RenderMessage()
-	ctxCp.JSON(http.StatusOK, ChatbotReactResponse{
+	ctx.JSON(http.StatusOK, ChatbotReactResponse{
 		Prompt:          prompt,
 		Keywords:        keywordsV,
 		InvalidKeywords: keywordsIv,
 		Message:         str,
-		Error: func() string {
-			if err != nil {
-				return err.Error()
-			}
-			return ""
-		}(),
-		Next: next,
+		Error:           err.Error(),
+		Next:            next,
 	})
 }
 
@@ -73,14 +67,13 @@ func (c *Controller) ChatBotReact(ctx *gin.Context) {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /chatbot/{user} [delete]
 func (c *Controller) ChatBotResetUser(ctx *gin.Context) {
-	ctxCp := ctx.Copy()
-	user := ctxCp.Param("user")
+	user := ctx.Param("user")
 	c.ChatBotService.ExpireUser(user, func() {
-		ctxCp.JSON(http.StatusOK, ChatbotResetUserResponse{
+		ctx.JSON(http.StatusOK, ChatbotResetUserResponse{
 			User:    user,
 			Message: "ok",
 		})
 	}, func() {
-		ctxCp.JSON(http.StatusBadRequest, problems.NewDetailedProblem(http.StatusBadRequest, "User "+user+" not found!"))
+		ctx.JSON(http.StatusBadRequest, problems.NewDetailedProblem(http.StatusBadRequest, "User "+user+" not found!"))
 	})
 }
