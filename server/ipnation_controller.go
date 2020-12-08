@@ -1,10 +1,15 @@
 package main
 
 import (
+	"IrisAPIs"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
 	"net/http"
 )
+
+type IpNationCountries struct {
+	IrisAPIs.IpNationCountries
+}
 
 type IpNationCountriesBulk struct {
 	IpAddresses []string `json:"ip_addr_list"`
