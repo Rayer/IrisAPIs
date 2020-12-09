@@ -115,7 +115,7 @@ func (c *Controller) GetKey(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 
 	if err != nil {
-		err400 := problems.NewDetailedProblem(http.StatusBadRequest, "Bad ID")
+		err400 := problems.NewDetailedProblem(http.StatusBadRequest, err.Error())
 		ctx.JSON(http.StatusBadRequest, err400)
 		return
 	}
