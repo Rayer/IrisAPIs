@@ -108,7 +108,7 @@ func (c *Controller) GetAllKeys(ctx *gin.Context) {
 // @Produce json
 // @Param id path integer true "Api Key ID"
 // @Security ApiKeyAuth
-// @Success 200 {array} ApiKeyDetail
+// @Success 200 {object} ApiKeyDetail
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /apiKey/{id} [get]
 func (c *Controller) GetKey(ctx *gin.Context) {

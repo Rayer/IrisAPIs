@@ -10,16 +10,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"net/http"
-	"net/http/httptest"
 	"strconv"
 	"testing"
 )
 
 type ApiKeyControllerTestSuite struct {
 	suite.Suite
-	gin              *gin.Context
-	controller       *Controller
-	responseRecorder *httptest.ResponseRecorder
+	controller *Controller
 }
 
 func TestApiKeyControllerTestSuite(t *testing.T) {
@@ -27,8 +24,6 @@ func TestApiKeyControllerTestSuite(t *testing.T) {
 }
 
 func (a *ApiKeyControllerTestSuite) SetupTest() {
-	a.responseRecorder = httptest.NewRecorder()
-	a.gin, _ = gin.CreateTestContext(a.responseRecorder)
 	a.controller = &Controller{}
 }
 
@@ -49,6 +44,7 @@ func (a *ApiKeyControllerTestSuite) generateRandomApiKeyDataModel() *IrisAPIs.Ap
 
 func (a *ApiKeyControllerTestSuite) TestController_GetApiUsage() {
 
+	g, res := createGinTestItems()
 	ctrl := gomock.NewController(a.T())
 	defer ctrl.Finish()
 	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
@@ -59,10 +55,10 @@ func (a *ApiKeyControllerTestSuite) TestController_GetApiUsage() {
 		a.generateRandomApiKeyDataModel(),
 		a.generateRandomApiKeyDataModel(),
 	}, nil)
-	c.GetAllKeys(a.gin)
-	assert.Equal(a.T(), http.StatusOK, a.responseRecorder.Code)
+	c.GetAllKeys(g)
+	assert.Equal(a.T(), http.StatusOK, res.Code)
 	var result []*ApiKeyBrief
-	err := json.NewDecoder(a.responseRecorder.Body).Decode(&result)
+	err := json.NewDecoder(res.Body).Decode(&result)
 	assert.Equal(a.T(), nil, err)
 	assert.Equal(a.T(), 2, len(result))
 }
@@ -70,31 +66,83 @@ func (a *ApiKeyControllerTestSuite) TestController_GetApiUsage() {
 func (a *ApiKeyControllerTestSuite) TestController_GetKey() {
 	ctrl := gomock.NewController(a.T())
 	defer ctrl.Finish()
-	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
-	c := &Controller{
-		ApiKeyService: mockService,
-	}
-
 	mockedModel := a.generateRandomApiKeyDataModel()
+	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
 	mockService.EXPECT().GetKeyModelById(*mockedModel.Id).Return(mockedModel, nil)
 	mockService.EXPECT().GetKeyModelById(*mockedModel.Id+1).Return(nil, nil)
-	a.gin.Params = []gin.Param{
+
+	type fields struct {
+		ApiKeyService IrisAPIs.ApiKeyService
+	}
+	type args struct {
+		Id int
+	}
+	tests := []struct {
+		name            string
+		fields          fields
+		args            args
+		expectRetCode   int
+		expectRetEntity *ApiKeyDetail
+	}{
 		{
-			Key:   "id",
-			Value: strconv.Itoa(*mockedModel.Id),
+			name: "ShouldFindEntry",
+			fields: fields{
+				ApiKeyService: mockService,
+			},
+			args: args{
+				Id: *mockedModel.Id,
+			},
+			expectRetCode: http.StatusOK,
+			expectRetEntity: &ApiKeyDetail{
+				ApiKeyBrief: ApiKeyBrief{
+					Id:         *mockedModel.Id,
+					Key:        *mockedModel.Key,
+					Privileged: *mockedModel.Privileged,
+				},
+				IssueBy:     "UTTester",
+				Application: "UTTester",
+			},
+		},
+		{
+			name: "ShouldNotFindEntry",
+			fields: fields{
+				ApiKeyService: mockService,
+			},
+			args: args{
+				Id: *mockedModel.Id + 1,
+			},
+			expectRetCode:   http.StatusNotFound,
+			expectRetEntity: nil,
 		},
 	}
-	c.GetKey(a.gin)
-	assert.Equal(a.T(), http.StatusOK, a.responseRecorder.Code)
-	a.responseRecorder.Flush()
 
-	a.gin.Params = []gin.Param{
-		{
-			Key:   "id",
-			Value: strconv.Itoa(*mockedModel.Id + 1),
-		},
+	for _, tt := range tests {
+		a.T().Run(tt.name, func(t *testing.T) {
+			c := &Controller{
+				ApiKeyService: tt.fields.ApiKeyService,
+			}
+			g, r := createGinTestItems()
+			id := strconv.Itoa(tt.args.Id)
+			g.Params = []gin.Param{
+				{
+					Key:   "id",
+					Value: id,
+				},
+			}
+			c.GetKey(g)
+			assert.Equal(a.T(), tt.expectRetCode, r.Code)
+
+			if tt.expectRetEntity != nil {
+				var result ApiKeyDetail
+				err := json.NewDecoder(r.Body).Decode(&result)
+				if err != nil {
+					a.T().Fail()
+				}
+				assert.Equal(a.T(), *mockedModel.Key, result.Key)
+				assert.Equal(a.T(), *mockedModel.Id, result.Id)
+				assert.Equal(a.T(), *mockedModel.Privileged, result.Privileged)
+			}
+		})
+
 	}
-	c.GetKey(a.gin)
-	assert.Equal(a.T(), http.StatusNotFound, a.responseRecorder.Code)
-
 }

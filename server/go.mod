@@ -35,7 +35,7 @@ require (
 	github.com/urfave/cli/v2 v2.3.0 // indirect
 	golang.org/x/net v0.0.0-20201207224615-747e23833adb // indirect
 	golang.org/x/sys v0.0.0-20201009025420-dfb3f7c4e634 // indirect
-	golang.org/x/tools v0.0.0-20201208062317-e652b2f42cc7 // indirect
+	golang.org/x/tools v0.0.0-20201208233053-a543418bbed2 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 )

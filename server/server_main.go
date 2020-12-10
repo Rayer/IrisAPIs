@@ -3,6 +3,7 @@ package main
 import (
 	"IrisAPIs"
 	"IrisAPIsServer/docs"
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -63,12 +64,30 @@ func main() {
 	apiKeyManager := NewApiKeyValidator(controller.ApiKeyService, config.EnforceApiKey)
 	r.Use(apiKeyManager.GetMiddleware())
 
-	r.NoRoute(controller.NoRouteHandler)
-	r.NoMethod(controller.NoMethodHandler)
+	_ = setupRouter(NewAKWrappedEngine(r, apiKeyManager), controller)
 
-	r.GET("/ping", controller.PingHandler)
+	//Run daemon threads
+	controller.CurrencyService.CurrencySyncRoutine()
 
-	wrapped := NewAKWrappedEngine(r, apiKeyManager)
+	//Check other services
+	ret := controller.ServiceMgmt.CheckAllServerStatus()
+	format := "%38s %20s %16s %8s %40s\n"
+	fmt.Printf(format, "ID", "Name", "Type", "Status", "Message")
+	for _, status := range ret {
+		fmt.Printf(format, status.ID, status.Name, status.ServiceType, status.Status, status.Message)
+	}
+
+	err = r.Run()
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+func setupRouter(wrapped *AKWrappedEngine, controller *Controller) error {
+
+	wrapped.NoRoute(controller.NoRouteHandler)
+	wrapped.NoMethod(controller.NoMethodHandler)
+	wrapped.GET("/ping", controller.PingHandler)
 
 	system := wrapped.Group("/service")
 	{
@@ -103,25 +122,10 @@ func main() {
 		chatbot.DELETE("/:user", IrisAPIs.ApiKeyPrivileged, controller.ChatBotResetUser)
 	}
 
-	//Run daemon threads
-	controller.CurrencyService.CurrencySyncRoutine()
-
-	//Check other services
-	ret := controller.ServiceMgmt.CheckAllServerStatus()
-	format := "%27s %20s %16s %8s %40s\n"
-	log.Info(format, "ID", "Name", "Type", "Status", "Message")
-	for _, status := range ret {
-		log.Infof(format, status.ID, status.Name, status.ServiceType, status.Status, status.Message)
-	}
-
 	log.Info("Listing privilege endpoints : ")
 	privilegeEndpoints := wrapped.GetPrivilegeMap()
 	for path, level := range privilegeEndpoints {
 		log.Infof("%s(%#v)", path, level)
 	}
-
-	err = r.Run()
-	if err != nil {
-		panic(err.Error())
-	}
+	return nil
 }
