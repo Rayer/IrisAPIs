@@ -1,6 +1,7 @@
 FROM golang:alpine as build-env
 RUN apk --no-cache add tzdata
 RUN apk add build-base
+RUN apk add git
 RUN apk add -U --no-cache ca-certificates
 WORKDIR /IrisAPIs
 ADD . /IrisAPIs
