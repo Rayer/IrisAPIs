@@ -1,4 +1,4 @@
-//go:generate go get -u github.com/golang/mock
+//go:generate go get github.com/golang/mock/mockgen@v1.4.4
 //go:generate ${GOPATH}/bin/mockgen -source ../ApiKeyContext.go -destination mock/ApiKeyContext.go
 package main
 
