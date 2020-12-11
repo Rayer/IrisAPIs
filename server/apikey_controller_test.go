@@ -1,3 +1,5 @@
+//go:generate go get -u github.com/golang/mock
+//go:generate ${GOPATH}/bin/mockgen -source ../ApiKeyContext.go -destination mock/ApiKeyContext.go
 package main
 
 import (
@@ -10,7 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"net/http"
+	"net/http/httptest"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -144,5 +148,105 @@ func (a *ApiKeyControllerTestSuite) TestController_GetKey() {
 			}
 		})
 
+	}
+}
+
+func (a *ApiKeyControllerTestSuite) TestController_IssueApiKey() {
+	ctrl := gomock.NewController(a.T())
+	defer ctrl.Finish()
+	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
+	mockService.EXPECT().IssueApiKey("UTTestApp", true, true, "auto", false).Return("accc", nil)
+
+	type fields struct {
+		ApiKeyService IrisAPIs.ApiKeyService
+	}
+	type args struct {
+		payload string
+	}
+	tests := []struct {
+		name           string
+		fields         fields
+		args           args
+		expectedStatus int
+	}{
+		{
+			name: "SuccessIssue",
+			fields: fields{
+				ApiKeyService: mockService,
+			},
+			args: args{
+				payload: "{\"application\": \"UTTestApp\", \"use_in_header\": true,  \"use_in_query_param\": true}",
+			},
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name: "FailedBadPayload",
+			fields: fields{
+				ApiKeyService: mockService,
+			},
+			args: args{
+				payload: "Ohmygodhow!",
+			},
+			expectedStatus: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range tests {
+		a.T().Run(tt.name, func(t *testing.T) {
+			c := &Controller{
+				ApiKeyService: tt.fields.ApiKeyService,
+			}
+			g, r := createGinTestItems()
+			payload := strings.NewReader(tt.args.payload)
+			g.Request = httptest.NewRequest("POST", "/apiKey", payload)
+			c.IssueApiKey(g)
+			assert.Equal(t, tt.expectedStatus, r.Code)
+		})
+	}
+}
+
+func (a *ApiKeyControllerTestSuite) TestController_GetAllKeys() {
+	ctrl := gomock.NewController(a.T())
+	defer ctrl.Finish()
+	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
+	mockService.EXPECT().GetAllKeys().Return([]*IrisAPIs.ApiKeyDataModel{
+		a.generateRandomApiKeyDataModel(),
+		a.generateRandomApiKeyDataModel(),
+		a.generateRandomApiKeyDataModel(),
+	}, nil)
+
+	type fields struct {
+		ApiKeyService IrisAPIs.ApiKeyService
+	}
+	tests := []struct {
+		name             string
+		fields           fields
+		expectedStatus   int
+		expectedArrLenth int
+	}{
+		{
+			name: "NormalTest",
+			fields: fields{
+				ApiKeyService: mockService,
+			},
+			expectedStatus:   http.StatusOK,
+			expectedArrLenth: 3,
+		},
+	}
+	for _, tt := range tests {
+		a.T().Run(tt.name, func(t *testing.T) {
+			c := &Controller{
+				ApiKeyService: tt.fields.ApiKeyService,
+			}
+			g, r := createGinTestItems()
+			c.GetAllKeys(g)
+			assert.Equal(t, tt.expectedStatus, r.Code)
+			var decoded []ApiKeyBrief
+			err := json.NewDecoder(r.Body).Decode(&decoded)
+			if err != nil {
+				t.Fail()
+			}
+			assert.Equal(t, tt.expectedArrLenth, len(decoded))
+		})
 	}
 }
