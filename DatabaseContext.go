@@ -1,7 +1,6 @@
 package IrisAPIs
 
 import (
-	"flag"
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
@@ -38,7 +37,6 @@ func NewTestDatabaseContext() (*DatabaseContext, error) {
 	connStr, exist := os.LookupEnv("TEST_DB_CONN_STR")
 	if !exist || connStr == "" {
 		log.Debug("Trying initializing Test DB with parameter \"test_db_conn_str\"...")
-		connStr = *flag.String("test_db_conn_str", "", "test db password")
 	} else {
 		log.Debug("Initialized Test DB from environment")
 	}

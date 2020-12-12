@@ -4,7 +4,7 @@ package main
 
 import (
 	"IrisAPIs"
-	mock_IrisAPIs "IrisAPIsServer/mock"
+	mock_IrisAPIs "IrisAPIs/server/mock"
 	"encoding/json"
 	"github.com/Pallinder/go-randomdata"
 	"github.com/gin-gonic/gin"

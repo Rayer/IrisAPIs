@@ -2,7 +2,7 @@ package main
 
 import (
 	"IrisAPIs"
-	"IrisAPIsServer/docs"
+	"IrisAPIs/server/docs"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
