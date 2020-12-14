@@ -20,7 +20,7 @@ type SystemDefaultController interface {
 type Controller struct {
 	SystemDefaultController
 	ChatBotService  *IrisAPIs.ChatbotContext
-	CurrencyService *IrisAPIs.CurrencyContext
+	CurrencyService IrisAPIs.CurrencyService
 	DatabaseContext *IrisAPIs.DatabaseContext
 	IpNationService *IrisAPIs.IpNationContext
 	ApiKeyService   IrisAPIs.ApiKeyService

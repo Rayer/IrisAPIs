@@ -1,4 +1,3 @@
-//go:generate go get github.com/golang/mock/mockgen@v1.4.4
 //go:generate ${GOPATH}/bin/mockgen -source ../ApiKeyContext.go -destination mock/ApiKeyContext.go
 package main
 
@@ -9,6 +8,7 @@ import (
 	"github.com/Pallinder/go-randomdata"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"net/http"
@@ -46,27 +46,6 @@ func (a *ApiKeyControllerTestSuite) generateRandomApiKeyDataModel() *IrisAPIs.Ap
 
 }
 
-func (a *ApiKeyControllerTestSuite) TestController_GetApiUsage() {
-
-	g, res := createGinTestItems()
-	ctrl := gomock.NewController(a.T())
-	defer ctrl.Finish()
-	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
-	c := &Controller{
-		ApiKeyService: mockService,
-	}
-	mockService.EXPECT().GetAllKeys().Return([]*IrisAPIs.ApiKeyDataModel{
-		a.generateRandomApiKeyDataModel(),
-		a.generateRandomApiKeyDataModel(),
-	}, nil)
-	c.GetAllKeys(g)
-	assert.Equal(a.T(), http.StatusOK, res.Code)
-	var result []*ApiKeyBrief
-	err := json.NewDecoder(res.Body).Decode(&result)
-	assert.Equal(a.T(), nil, err)
-	assert.Equal(a.T(), 2, len(result))
-}
-
 func (a *ApiKeyControllerTestSuite) TestController_GetKey() {
 	ctrl := gomock.NewController(a.T())
 	defer ctrl.Finish()
@@ -74,12 +53,13 @@ func (a *ApiKeyControllerTestSuite) TestController_GetKey() {
 	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
 	mockService.EXPECT().GetKeyModelById(*mockedModel.Id).Return(mockedModel, nil)
 	mockService.EXPECT().GetKeyModelById(*mockedModel.Id+1).Return(nil, nil)
+	mockService.EXPECT().GetKeyModelById(*mockedModel.Id+2).Return(nil, errors.Errorf("test error!"))
 
 	type fields struct {
 		ApiKeyService IrisAPIs.ApiKeyService
 	}
 	type args struct {
-		Id int
+		Id string
 	}
 	tests := []struct {
 		name            string
@@ -94,7 +74,7 @@ func (a *ApiKeyControllerTestSuite) TestController_GetKey() {
 				ApiKeyService: mockService,
 			},
 			args: args{
-				Id: *mockedModel.Id,
+				Id: strconv.Itoa(*mockedModel.Id),
 			},
 			expectRetCode: http.StatusOK,
 			expectRetEntity: &ApiKeyDetail{
@@ -113,9 +93,31 @@ func (a *ApiKeyControllerTestSuite) TestController_GetKey() {
 				ApiKeyService: mockService,
 			},
 			args: args{
-				Id: *mockedModel.Id + 1,
+				Id: strconv.Itoa(*mockedModel.Id + 1),
 			},
 			expectRetCode:   http.StatusNotFound,
+			expectRetEntity: nil,
+		},
+		{
+			name: "ShouldGetInternalError",
+			fields: fields{
+				ApiKeyService: mockService,
+			},
+			args: args{
+				Id: strconv.Itoa(*mockedModel.Id + 2),
+			},
+			expectRetCode:   http.StatusInternalServerError,
+			expectRetEntity: nil,
+		},
+		{
+			name: "InvalidID",
+			fields: fields{
+				ApiKeyService: mockService,
+			},
+			args: args{
+				Id: "abcd",
+			},
+			expectRetCode:   http.StatusBadRequest,
 			expectRetEntity: nil,
 		},
 	}
@@ -126,11 +128,11 @@ func (a *ApiKeyControllerTestSuite) TestController_GetKey() {
 				ApiKeyService: tt.fields.ApiKeyService,
 			}
 			g, r := createGinTestItems()
-			id := strconv.Itoa(tt.args.Id)
+			g.Request = httptest.NewRequest("GET", "/apiKey", nil)
 			g.Params = []gin.Param{
 				{
 					Key:   "id",
-					Value: id,
+					Value: tt.args.Id,
 				},
 			}
 			c.GetKey(g)
@@ -156,7 +158,7 @@ func (a *ApiKeyControllerTestSuite) TestController_IssueApiKey() {
 	defer ctrl.Finish()
 	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
 	mockService.EXPECT().IssueApiKey("UTTestApp", true, true, "auto", false).Return("accc", nil)
-
+	mockService.EXPECT().IssueApiKey("TestMockErr", true, true, "auto", false).Return("", errors.New("unit test error"))
 	type fields struct {
 		ApiKeyService IrisAPIs.ApiKeyService
 	}
@@ -188,6 +190,16 @@ func (a *ApiKeyControllerTestSuite) TestController_IssueApiKey() {
 				payload: "Ohmygodhow!",
 			},
 			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name: "ShouldGetInternalError",
+			fields: fields{
+				ApiKeyService: mockService,
+			},
+			args: args{
+				payload: "{\"application\": \"TestMockErr\", \"use_in_header\": true,  \"use_in_query_param\": true}",
+			},
+			expectedStatus: http.StatusInternalServerError,
 		},
 	}
 
@@ -247,6 +259,29 @@ func (a *ApiKeyControllerTestSuite) TestController_GetAllKeys() {
 				t.Fail()
 			}
 			assert.Equal(t, tt.expectedArrLenth, len(decoded))
+		})
+	}
+}
+
+func (a *ApiKeyControllerTestSuite) TestController_GetApiUsage() {
+	ctrl := gomock.NewController(a.T())
+	defer ctrl.Finish()
+	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
+
+	type args struct {
+		ctx *gin.Context
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{},
+	}
+	for _, tt := range tests {
+		a.T().Run(tt.name, func(t *testing.T) {
+			_ = &Controller{
+				ApiKeyService: mockService,
+			}
 		})
 	}
 }

@@ -157,7 +157,6 @@ func (c *Controller) GetKey(ctx *gin.Context) {
 // @Success 200 {object} ApiKeyUsage
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /apiKey/{id}/usage [get]
-// TODO: No test case
 func (c *Controller) GetApiUsage(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 

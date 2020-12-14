@@ -12,6 +12,14 @@ import (
 	"time"
 )
 
+type CurrencyService interface {
+	Convert(from string, to string, amount float64) (float64, error)
+	GetMostRecentCurrencyDataRaw() (string, error)
+	SyncToDb() error
+	CurrencySyncRoutine()
+	CurrencySyncWorker() (*CurrencySyncResult, error)
+}
+
 type CurrencyContext struct {
 	ApiKey                 string
 	Db                     *xorm.Engine
@@ -21,7 +29,7 @@ type CurrencyContext struct {
 	cachedConvert          map[string]currencyConvertCache
 }
 
-func NewCurrencyContext(apiKey string, db *DatabaseContext) *CurrencyContext {
+func NewCurrencyContext(apiKey string, db *DatabaseContext) CurrencyService {
 	return &CurrencyContext{
 		ApiKey:                 apiKey,
 		Db:                     db.DbObject,
@@ -60,7 +68,7 @@ func NewTestCurrencyContext() *CurrencyContext {
 	}
 }
 
-func NewCurrencyContextWithConfig(c *Configuration, db *DatabaseContext) *CurrencyContext {
+func NewCurrencyContextWithConfig(c *Configuration, db *DatabaseContext) CurrencyService {
 	return &CurrencyContext{
 		ApiKey:                 c.FixerIoApiKey,
 		Db:                     db.DbObject,
