@@ -115,6 +115,7 @@ func setupRouter(wrapped *AKWrappedEngine, controller *Controller) error {
 	{
 		ipNation.GET("", IrisAPIs.ApiKeyNormal, controller.IpToNation)
 		ipNation.POST("/bulk", IrisAPIs.ApiKeyNormal, controller.IpToNationBulk)
+		ipNation.GET("/myip", IrisAPIs.ApiKeyNotPresented, controller.IpToNationMyIP)
 	}
 
 	chatbot := wrapped.Group("/chatbot")
