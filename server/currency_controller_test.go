@@ -1,3 +1,5 @@
+// +build ignore
+
 //go:generate ${GOPATH}/bin/mockgen -source ../CurrencyContext.go -destination mock/CurrencyContext.go
 package main
 
