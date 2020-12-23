@@ -153,7 +153,7 @@ func (s *ServiceManagementContext) RegisterPresetServices() error {
 			ContainerName: "AppleProductMonitor",
 			ImageName:     "rayer/apple-product-monitor",
 			ImageTag:      "",
-			client:        nil,
+			client:        dc,
 		},
 		&WebServiceDescriptor{
 			Name:    "WordPress",
