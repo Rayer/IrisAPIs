@@ -148,6 +148,13 @@ func (s *ServiceManagementContext) RegisterPresetServices() error {
 			ImageTag:      "",
 			client:        dc,
 		},
+		&DockerComponentDescriptor{
+			Name:          "AppleNCCMonitor",
+			ContainerName: "AppleProductMonitor",
+			ImageName:     "rayer/apple-product-monitor",
+			ImageTag:      "",
+			client:        nil,
+		},
 		&WebServiceDescriptor{
 			Name:    "WordPress",
 			PingUrl: "https://www.rayer.idv.tw/blog/wp-admin/install.php",
