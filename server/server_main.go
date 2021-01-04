@@ -2,7 +2,9 @@ package main
 
 import (
 	"IrisAPIs"
+	IrisAPIsGRPC "IrisAPIs/grpc"
 	"IrisAPIs/server/docs"
+	"context"
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -78,6 +80,9 @@ func main() {
 		fmt.Printf(format, status.ID, status.Name, status.ServiceType, status.Status, status.Message)
 	}
 
+	grpc := new(IrisAPIsGRPC.GRPCServerRoutine)
+	grpc.RunDetach(context.TODO(), config)
+
 	err = r.Run()
 	if err != nil {
 		panic(err.Error())
@@ -129,5 +134,6 @@ func setupRouter(wrapped *AKWrappedEngine, controller *Controller) error {
 	for path, level := range privilegeEndpoints {
 		log.Infof("%s(%#v)", path, level)
 	}
+
 	return nil
 }

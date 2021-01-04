@@ -1,0 +1,77 @@
+syntax = "proto3";
+package IrisAPIsGRPC;
+import "google/protobuf/wrappers.proto";
+
+service ApiKeyService {
+  rpc IssueApiKey(IssueApiKeyRequest) returns (IssueApiKeyResponse) {}
+  rpc ValidateApiKey(ValidateApiKeyRequest) returns (ValidateApiKeyResponse) {}
+  rpc GetAllKeys(GetAllKeysRequest) returns (GetAllKeysResponse) {}
+  rpc GetKeyById(GetKeyByIdRequest) returns (GetKeyByIdResponse) {}
+  rpc SetExpired(SetExpiredRequest) returns (SetExpiredResponse) {}
+}
+
+//application string, useInHeader bool, useInQuery bool, issuer string, privileged bool
+message IssueApiKeyRequest {
+  string application = 1;
+  bool useInHandler = 2;
+  bool useInQuery = 3;
+  string issuer = 4;
+  bool privileged = 5;
+}
+
+message IssueApiKeyResponse {
+  string ApiKey = 1;
+}
+
+message ValidateApiKeyRequest {
+  string key = 1;
+  int32 apiKeyLocation = 2;
+}
+
+enum PrivilegeLevel {
+  ApiKeyNotValid = 0;
+  ApiKeyExpired = 1;
+  ApiKeyNotPresented = 2;
+  ApiKeyNormal = 3;
+  ApiKeyPrivileged = 4;
+}
+
+message ValidateApiKeyResponse {
+  PrivilegeLevel privilegeLevel = 1;
+}
+
+message ApiKeyDetail {
+  int32 id = 1;
+  string key = 2;
+  bool useInHeader = 3;
+  bool useInQuery = 4;
+  string Application = 5;
+  string Issuer = 6;
+  int64 issueDate = 7;
+  bool Privileged = 8;
+  google.protobuf.Int64Value expiration = 9; //Explicit Optional
+}
+
+message GetAllKeysRequest {
+}
+
+message GetAllKeysResponse {
+  repeated ApiKeyDetail entries = 1;
+}
+
+message GetKeyByIdRequest {
+  int32 id = 1;
+}
+
+message GetKeyByIdResponse {
+  ApiKeyDetail entry = 1;
+}
+
+message SetExpiredRequest {
+  int32 id = 1;
+  bool isExpired = 2;
+}
+
+message SetExpiredResponse {
+
+}
