@@ -19,4 +19,5 @@ COPY --from=build-env /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 ENV TZ=Asia/Taipei
 EXPOSE 8080
+EXPOSE 8082
 ENTRYPOINT ["/app/server.app"]
