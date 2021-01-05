@@ -25,6 +25,9 @@ func main() {
 	c := IrisAPIsGRPC.NewApiKeyServiceClient(conn)
 	ctx := context.Background()
 	r, err := c.GetAllKeys(ctx, &IrisAPIsGRPC.GetAllKeysRequest{})
+	if err != nil {
+		log.Fatalf("Error generating call : %v", err)
+	}
 	keys := make([]string, 0)
 	for i, v := range r.Entries {
 		keys = append(keys, v.Key)

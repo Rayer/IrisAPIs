@@ -32,6 +32,7 @@ func (g *GRPCServerRoutine) RunDetach(ctx context.Context, conf *IrisAPIs.Config
 }
 
 func (g *GRPCServerRoutine) runImpl(conf *IrisAPIs.Configuration) {
+	log.Infof("Creating gRPC server under %s", conf.GRPCServerHost)
 	lis, err := net.Listen("tcp", conf.GRPCServerHost)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -41,4 +42,5 @@ func (g *GRPCServerRoutine) runImpl(conf *IrisAPIs.Configuration) {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+	log.Infof("Exit for gRPC server")
 }
