@@ -1,5 +1,7 @@
 package IrisAPIs
 
+import "time"
+
 func NullBool() *bool {
 	var ret *bool
 	ret = nil
@@ -15,6 +17,10 @@ func PInt(value int) *int {
 }
 
 func PString(value string) *string {
+	return &value
+}
+
+func PTime(value time.Time) *time.Time {
 	return &value
 }
 
