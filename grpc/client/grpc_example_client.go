@@ -11,7 +11,7 @@ import (
 
 func main() {
 	conf := IrisAPIs.NewConfiguration()
-	conn, err := grpc.Dial(conf.GRPCServerHost, grpc.WithInsecure())
+	conn, err := grpc.Dial(conf.GRPCServerTarget, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Connection fail：%v", err)
 	}

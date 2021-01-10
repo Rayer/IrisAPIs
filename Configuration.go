@@ -17,8 +17,9 @@ type Configuration struct {
 	ConnectionString                 string `doc:"Connection string to database."`
 	TestConnectionString             string `doc:"Connection string to Test Database"`
 	DatabaseType                     string `doc:"Database Type, for example, mysql"`
-	LogLevel                         int    `doc:"Log Level, 0 for debug and 7 for info"`
-	GRPCServerHost                   string `doc:"gRPC Server address, default is :8082"`
+	LogLevel                         int    `doc:"Log Level, 6 for trace and 0 for fatal"`
+	GRPCServerHost                   string `doc:"gRPC Server address for gRPC Server config, default is :8082"`
+	GRPCServerTarget                 string `doc:"gRPC Server address for gRPC Client config, default is :8082"`
 }
 
 func NewConfiguration() *Configuration {
@@ -40,6 +41,7 @@ func (c *Configuration) LoadConfiguration() error {
 	viper.SetDefault("Host", "localhost:8080")
 	viper.SetDefault("EnforceApiKey", true)
 	viper.SetDefault("GRPCServerHost", ":8082")
+	viper.SetDefault("GRPCServerTarget", ":8082")
 
 	err := viper.ReadInConfig()
 

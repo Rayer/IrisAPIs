@@ -1,6 +1,9 @@
 package IrisAPIs
 
-import "time"
+import (
+	"google.golang.org/protobuf/types/known/wrapperspb"
+	"time"
+)
 
 func NullBool() *bool {
 	var ret *bool
@@ -26,4 +29,19 @@ func PTime(value time.Time) *time.Time {
 
 func PValue(value interface{}) *interface{} {
 	return &value
+}
+
+func PTimestamp(value *time.Time) *int64 {
+	if value == nil {
+		return nil
+	}
+	ret := value.Unix()
+	return &ret
+}
+
+func PGTimestamp(value *time.Time) *wrapperspb.Int64Value {
+	if value == nil {
+		return nil
+	}
+	return &wrapperspb.Int64Value{Value: value.Unix()}
 }

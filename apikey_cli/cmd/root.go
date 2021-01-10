@@ -39,6 +39,7 @@ var cfgFile string
 var connectionString string
 var service IrisAPIs.ApiKeyService
 var verbose bool
+var grpcServer string
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -59,6 +60,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./config/iris-apis.yaml and ./iris-apis.yaml)")
 	rootCmd.PersistentFlags().StringVar(&connectionString, "connection-string", "", "Connection string to database")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose")
+	rootCmd.PersistentFlags().StringVarP(&grpcServer, "grpc", "g", "", "Target gRPC host")
 	_ = viper.BindPFlag("ConnectionString", rootCmd.PersistentFlags().Lookup("connection-string"))
 
 	// Cobra also supports local flags, which will only run
@@ -87,24 +89,27 @@ func initConfig() {
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
-	// If a config file is found, read it in.
-	rootCmd.PersistentFlags().HasFlags()
 
+	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
-		//dbContext, err = IrisAPIs.NewDatabaseContext(viper.GetString("ConnectionString"), false)
-		//service = IrisAPIs.NewApiKeyService(dbContext)
 	}
+
 	if verbose {
 		log.SetLevel(log.DebugLevel)
 	} else {
 		log.SetLevel(log.WarnLevel)
 	}
 
-	dbContext, err := IrisAPIs.NewDatabaseContext(viper.GetString("ConnectionString"), verbose)
-	if err != nil {
-		panic(err)
+	if grpcServer != "" {
+		log.Info("Using gRPC server :", grpcServer)
+		service = NewGRPCDataSource(grpcServer)
+	} else {
+		log.Info("Using direct database link")
+		dbContext, err := IrisAPIs.NewDatabaseContext(viper.GetString("ConnectionString"), verbose)
+		if err != nil {
+			panic(err)
+		}
+		service = IrisAPIs.NewApiKeyService(dbContext)
 	}
-	service = IrisAPIs.NewApiKeyService(dbContext)
-
 }
