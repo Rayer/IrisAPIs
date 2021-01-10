@@ -8,6 +8,8 @@ service ApiKeyService {
   rpc GetAllKeys(GetAllKeysRequest) returns (GetAllKeysResponse) {}
   rpc GetKeyById(GetKeyByIdRequest) returns (GetKeyByIdResponse) {}
   rpc SetExpired(SetExpiredRequest) returns (SetExpiredResponse) {}
+  rpc GetKeyUsageById(GetKeyUsageByIdRequest) returns (GetKeyUsageByIdResponse) {}
+  rpc GetKeyUsageByPath(GetKeyUsageByPathRequest) returns (GetKeyUsageByPathResponse) {}
 }
 
 //application string, useInHeader bool, useInQuery bool, issuer string, privileged bool
@@ -25,7 +27,7 @@ message IssueApiKeyResponse {
 
 message ValidateApiKeyRequest {
   string key = 1;
-  int32 apiKeyLocation = 2;
+  int64 apiKeyLocation = 2;
 }
 
 enum PrivilegeLevel {
@@ -41,7 +43,7 @@ message ValidateApiKeyResponse {
 }
 
 message ApiKeyDetail {
-  int32 id = 1;
+  int64 id = 1;
   string key = 2;
   bool useInHeader = 3;
   bool useInQuery = 4;
@@ -52,6 +54,16 @@ message ApiKeyDetail {
   google.protobuf.Int64Value expiration = 9; //Explicit Optional
 }
 
+message ApiKeyAccess {
+  int64 id = 1;
+  int64 apiKeyRef = 2;
+  string fullPath = 3;
+  string method = 4;
+  string ip = 5;
+  string nation = 6;
+  int64 timestamp = 7;
+}
+
 message GetAllKeysRequest {
 }
 
@@ -60,7 +72,7 @@ message GetAllKeysResponse {
 }
 
 message GetKeyByIdRequest {
-  int32 id = 1;
+  int64 id = 1;
 }
 
 message GetKeyByIdResponse {
@@ -68,10 +80,36 @@ message GetKeyByIdResponse {
 }
 
 message SetExpiredRequest {
-  int32 id = 1;
+  int64 id = 1;
   bool isExpired = 2;
 }
 
 message SetExpiredResponse {
 
+}
+/*
+	GetKeyUsageById(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
+	GetKeyUsageByPath(path string, exactMatch bool, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
+ */
+
+message GetKeyUsageByIdRequest {
+  int64 id = 1;
+  google.protobuf.Int64Value from = 2;
+  google.protobuf.Int64Value to = 3;
+}
+
+message GetKeyUsageByIdResponse {
+  repeated ApiKeyAccess entries = 1;
+}
+
+
+message GetKeyUsageByPathRequest {
+  string path = 1;
+  bool exactMatch = 2;
+  google.protobuf.Int64Value from = 3;
+  google.protobuf.Int64Value to = 4;
+}
+
+message GetKeyUsageByPathResponse {
+  repeated ApiKeyAccess entries = 1;
 }

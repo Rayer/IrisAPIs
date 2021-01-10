@@ -46,7 +46,7 @@ func ApiKeyDataModelToGRPC(v *IrisAPIs.ApiKeyDataModel) *ApiKeyDetail {
 	}
 
 	return &ApiKeyDetail{
-		Id:          int32(*v.Id),
+		Id:          int64(*v.Id),
 		Key:         *v.Key,
 		UseInHeader: *v.UseInQuery,
 		UseInQuery:  *v.UseInHeader,

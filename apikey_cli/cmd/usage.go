@@ -50,7 +50,6 @@ var usageCmd = &cobra.Command{
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("usage called")
 		days, _ := cmd.Flags().GetInt("days")
 		now := time.Now()
 		prev := time.Now().AddDate(0, 0, -days)
