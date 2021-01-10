@@ -46,10 +46,11 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
+	log.SetLevel(log.Level(config.LogLevel))
+
 	log.Debugf("Configuration : %+v", config)
 
 	//Init logger
-	log.SetLevel(log.Level(config.LogLevel))
 	//Swagger initialization
 	_, host, err := config.SplitSchemeAndHost()
 	if err != nil {

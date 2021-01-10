@@ -22,7 +22,6 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-openapi/spec v0.20.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/golang/mock v1.4.4
 	github.com/golang/protobuf v1.4.3
 	github.com/magiconair/properties v1.8.1
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
@@ -44,9 +43,10 @@ require (
 	github.com/xormplus/xorm v0.0.0-20200514184607-0f37421d8714
 	golang.org/x/mod v0.4.0 // indirect
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
-	golang.org/x/sys v0.0.0-20201223074533-0d417f636930 // indirect
-	golang.org/x/tools v0.0.0-20201221201019-196535612888 // indirect
-	google.golang.org/genproto v0.0.0-20201214200347-8c77b98c765d // indirect
+	golang.org/x/sys v0.0.0-20210110051926-789bb1bd4061 // indirect
+	golang.org/x/text v0.3.5 // indirect
+	golang.org/x/tools v0.0.0-20210104081019-d8d6ddbec6ee // indirect
+	google.golang.org/genproto v0.0.0-20210108203827-ffc7fda8c3d7 // indirect
 	google.golang.org/grpc v1.34.0
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/flosch/pongo2.v3 v3.0.0-20141028000813-5e81b817a0c4 // indirect
