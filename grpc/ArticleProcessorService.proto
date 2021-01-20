@@ -3,5 +3,14 @@ package IrisAPIsGRPC;
 import "google/protobuf/wrappers.proto";
 
 service ArticleProcessorService {
+  rpc ProcessText(ProcessTextRequest) returns (ProcessTextResponse) {};
+}
 
+message ProcessTextRequest {
+  string text = 1;
+  int64 BytesPerLine = 2;
+}
+
+message ProcessTextResponse {
+  string processedText = 1;
 }
