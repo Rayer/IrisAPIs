@@ -39,6 +39,7 @@ func (g *GRPCServerRoutine) runImpl(conf *IrisAPIs.Configuration) {
 	}
 	s := grpc.NewServer()
 	RegisterApiKeyServiceServer(s, NewApiKeyServiceGRPC(conf.ConnectionString))
+	RegisterArticleProcessorServiceServer(s, NewArticleProcessorServiceServiceGRPC())
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
