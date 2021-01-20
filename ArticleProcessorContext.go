@@ -2,6 +2,7 @@ package IrisAPIs
 
 import (
 	"bytes"
+	"github.com/pkg/errors"
 )
 
 type ArticleProcessorService interface {
@@ -13,17 +14,24 @@ type ProcessParameters struct {
 }
 
 type ArticleProcessorContext struct {
+	Param ProcessParameters
 }
 
-func (a *ArticleProcessorContext) Transform(article string, param ProcessParameters) (string, error) {
+func NewArticleProcessorContext(param ProcessParameters) (*ArticleProcessorContext, error) {
+	if param.BytesPerLine < 5 {
+		return nil, errors.New("BytePerLine must greater then 5")
+	}
+	return &ArticleProcessorContext{Param: param}, nil
+}
+
+func (a *ArticleProcessorContext) Transform(article string) (string, error) {
 	var buffer bytes.Buffer
 	index := 0
 	for _, v := range article {
 
 		//fmt.Printf("%d, %c(%U), - %v, index = %d \n", i, v, v, v, index)
-		buffer.WriteString(string(v))
 
-		if index >= param.BytesPerLine {
+		if index >= a.Param.BytesPerLine {
 			buffer.WriteString("\n")
 			index = 0
 		}
@@ -33,6 +41,8 @@ func (a *ArticleProcessorContext) Transform(article string, param ProcessParamet
 			index = 0
 			continue
 		}
+
+		buffer.WriteString(string(v))
 
 		if v > 256 {
 			index += 2
