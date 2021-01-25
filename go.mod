@@ -20,8 +20,9 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
-	github.com/go-openapi/spec v0.20.0 // indirect
+	github.com/go-openapi/spec v0.20.2 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/golang/mock v1.4.4 // indirect
 	github.com/golang/protobuf v1.4.3
 	github.com/magiconair/properties v1.8.1
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
@@ -30,6 +31,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rayer/chatbot v0.5.0
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.7.0
@@ -39,13 +41,13 @@ require (
 	github.com/swaggo/swag v1.6.7
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	github.com/tealeg/xlsx v1.0.5 // indirect
+	github.com/urfave/cli/v2 v2.3.0 // indirect
 	github.com/xormplus/builder v0.0.0-20200331055651-240ff40009be
 	github.com/xormplus/xorm v0.0.0-20200514184607-0f37421d8714
-	golang.org/x/mod v0.4.0 // indirect
-	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
-	golang.org/x/sys v0.0.0-20210110051926-789bb1bd4061 // indirect
+	golang.org/x/mod v0.4.1 // indirect
+	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
 	golang.org/x/text v0.3.5 // indirect
-	golang.org/x/tools v0.0.0-20210104081019-d8d6ddbec6ee // indirect
+	golang.org/x/tools v0.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20210108203827-ffc7fda8c3d7 // indirect
 	google.golang.org/grpc v1.34.0
 	google.golang.org/protobuf v1.25.0

@@ -2,6 +2,7 @@ package IrisAPIs
 
 import (
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
 	"os"
@@ -50,8 +51,9 @@ func NewTestDatabaseContext() (*DatabaseContext, error) {
 	}
 
 	if connStr == "" {
-		log.Warn("Fail to initialize test database form any of source")
-		return nil, nil
+		dir, _ := os.Getwd()
+		log.Warn("Fail to initialize test database form any of source : ", dir)
+		return nil, errors.New("fail to initialize test database from any of resource")
 	} else {
 		log.Debug("Initialized DB from configuration file")
 	}

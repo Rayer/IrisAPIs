@@ -17,17 +17,12 @@ func NewArticleProcessorServiceServiceGRPC() *ArticleProcessorServiceServiceGRPC
 }
 
 func (a *ArticleProcessorServiceServiceGRPC) ProcessText(ctx context.Context, req *ProcessTextRequest) (*ProcessTextResponse, error) {
-	service, err := IrisAPIs.NewArticleProcessorContext(IrisAPIs.ProcessParameters{BytesPerLine: int(req.BytesPerLine)})
+	service := IrisAPIs.NewArticleProcessorContext()
+	res, err := service.Transform(IrisAPIs.ProcessParameters{BytesPerLine: int(req.BytesPerLine)}, req.Text)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "%s", err.Error())
 	}
-	res, err := service.Transform(req.Text)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "%s", err.Error())
-	}
-
 	return &ProcessTextResponse{
 		ProcessedText: res,
 	}, nil
-
 }

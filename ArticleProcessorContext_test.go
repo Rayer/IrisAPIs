@@ -6,8 +6,8 @@ import (
 )
 
 func TestArticleProcessorContext_Transform(t *testing.T) {
-	a, _ := NewArticleProcessorContext(ProcessParameters{BytesPerLine: 60})
-	s, _ := a.Transform(`不過這篇文章跟量子力學沒啥關係 XD 我以前有想過，如果我當國文老師的話，我一定要出一篇作文，開頭大致上像是這樣：
+	a := NewArticleProcessorContext()
+	s, _ := a.Transform(ProcessParameters{BytesPerLine: 60}, `不過這篇文章跟量子力學沒啥關係 XD 我以前有想過，如果我當國文老師的話，我一定要出一篇作文，開頭大致上像是這樣：
 
 我養了隻叫做薛丁格的貓，每天早上起床都一副半死不活的樣子
 摘自：我家的貓叫做薛丁格

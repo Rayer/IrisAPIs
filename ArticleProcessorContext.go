@@ -6,7 +6,8 @@ import (
 )
 
 type ArticleProcessorService interface {
-	Transform(article string, param ProcessParameters) (string, error)
+	Transform(param ProcessParameters, article string) (string, error)
+	validateProcessParameters(param ProcessParameters) error
 }
 
 type ProcessParameters struct {
@@ -14,24 +15,31 @@ type ProcessParameters struct {
 }
 
 type ArticleProcessorContext struct {
-	Param ProcessParameters
 }
 
-func NewArticleProcessorContext(param ProcessParameters) (*ArticleProcessorContext, error) {
+func (a *ArticleProcessorContext) validateProcessParameters(param ProcessParameters) error {
 	if param.BytesPerLine < 5 {
-		return nil, errors.New("BytePerLine must greater then 5")
+		return errors.New("BytesPerLine requires at least 5")
 	}
-	return &ArticleProcessorContext{Param: param}, nil
+	return nil
 }
 
-func (a *ArticleProcessorContext) Transform(article string) (string, error) {
+func NewArticleProcessorContext() *ArticleProcessorContext {
+	return &ArticleProcessorContext{}
+}
+
+func (a *ArticleProcessorContext) Transform(param ProcessParameters, article string) (string, error) {
+	err := a.validateProcessParameters(param)
+	if err != nil {
+		return "", err
+	}
 	var buffer bytes.Buffer
 	index := 0
 	for _, v := range article {
 
 		//fmt.Printf("%d, %c(%U), - %v, index = %d \n", i, v, v, v, index)
 
-		if index >= a.Param.BytesPerLine {
+		if index >= param.BytesPerLine {
 			buffer.WriteString("\n")
 			index = 0
 		}

@@ -19,12 +19,13 @@ type SystemDefaultController interface {
 
 type Controller struct {
 	SystemDefaultController
-	ChatBotService  *IrisAPIs.ChatbotContext
-	CurrencyService IrisAPIs.CurrencyService
-	DatabaseContext *IrisAPIs.DatabaseContext
-	IpNationService *IrisAPIs.IpNationContext
-	ApiKeyService   IrisAPIs.ApiKeyService
-	ServiceMgmt     IrisAPIs.ServiceManagement
+	ChatBotService          *IrisAPIs.ChatbotContext
+	CurrencyService         IrisAPIs.CurrencyService
+	DatabaseContext         *IrisAPIs.DatabaseContext
+	IpNationService         *IrisAPIs.IpNationContext
+	ApiKeyService           IrisAPIs.ApiKeyService
+	ServiceMgmt             IrisAPIs.ServiceManagement
+	ArticleProcessorService IrisAPIs.ArticleProcessorService
 }
 
 type GenericResultResponse struct {
@@ -47,6 +48,7 @@ func NewController(config *IrisAPIs.Configuration) (*Controller, error) {
 			_ = service.RegisterPresetServices()
 			return service
 		}(),
+		ArticleProcessorService: IrisAPIs.NewArticleProcessorContext(),
 	}, nil
 }
 

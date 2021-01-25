@@ -130,6 +130,11 @@ func setupRouter(wrapped *AKWrappedEngine, controller *Controller) error {
 		chatbot.DELETE("/:user", IrisAPIs.ApiKeyPrivileged, controller.ChatBotResetUser)
 	}
 
+	articleProcess := wrapped.Group("/article_process")
+	{
+		articleProcess.POST("", IrisAPIs.ApiKeyNotPresented, controller.TransformArticle)
+	}
+
 	log.Info("Listing privilege endpoints : ")
 	privilegeEndpoints := wrapped.GetPrivilegeMap()
 	for path, level := range privilegeEndpoints {
