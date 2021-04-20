@@ -52,4 +52,6 @@ require (
 	google.golang.org/grpc v1.34.0
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/flosch/pongo2.v3 v3.0.0-20141028000813-5e81b817a0c4 // indirect
+	xorm.io/cmd/xorm v0.0.0-20191108140657-006dbf24bb9b // indirect
+	xorm.io/reverse v0.1.1 // indirect
 )
