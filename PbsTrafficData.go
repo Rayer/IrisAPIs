@@ -138,9 +138,9 @@ func UpdateDatabase(e *xorm.Engine, data []PbsDataEntry) error {
 				fmt.Printf("Information changed from : \n%s \n -----to : \n%s\n", *target.Information, *v.Information)
 				fmt.Printf("Update timestamp changed from %s to %s", *target.LastUpdateTimestamp, *v.LastUpdateTimestamp)
 				_, err := e.Insert(&PbsHistoryEntry{
-					UID:                 v.UID,
-					LastUpdateTimestamp: v.LastUpdateTimestamp,
-					Information:         v.Information,
+					UID:                 target.UID,
+					LastUpdateTimestamp: target.LastUpdateTimestamp,
+					Information:         target.Information,
 				})
 				if err != nil {
 					fmt.Printf("Error writing history : %s\n", err.Error())
