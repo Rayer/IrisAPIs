@@ -33,6 +33,7 @@ func (c *Configuration) LoadConfiguration() error {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("./config")
+	viper.AddConfigPath("../config")
 	viper.AddConfigPath("/etc/iris/")
 
 	//Defaults

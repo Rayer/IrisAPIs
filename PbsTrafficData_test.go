@@ -1,27 +1,44 @@
 package IrisAPIs
 
 import (
+	"context"
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestGetFromPbs(t *testing.T) {
-	ret, err := FetchPbsFromServer()
+	db, err := NewTestDatabaseContext()
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := NewPbsTrafficDataService(db.DbObject)
+	ret, err := s.FetchPbsFromServer(context.TODO())
 	fmt.Println(ret)
 	fmt.Println(err)
 }
 
 func TestPbsWriteDb(t *testing.T) {
-	data, err := FetchPbsFromServer()
-	if err != nil {
-		t.Fatal(err)
-	}
 	db, err := NewTestDatabaseContext()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = UpdateDatabase(db.DbObject, data)
+	s := NewPbsTrafficDataService(db.DbObject)
+	data, err := s.FetchPbsFromServer(context.TODO())
 	if err != nil {
 		t.Fatal(err)
 	}
+	err = s.UpdateDatabase(context.TODO(), data)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestJoinedPbsData(t *testing.T) {
+	db, err := NewTestDatabaseContext()
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := NewPbsTrafficDataService(db.DbObject)
+	fmt.Println(s.(*PbsTrafficDataServiceImpl).PrintHistory(1 * time.Hour))
 }

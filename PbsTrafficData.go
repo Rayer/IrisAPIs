@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/xormplus/xorm"
@@ -37,7 +38,20 @@ func (p *PbsHistoryEntry) TableName() string {
 	return "pbs_traffic_history"
 }
 
-func FetchPbsFromServer() ([]PbsDataEntry, error) {
+type PbsTrafficDataService interface {
+	FetchPbsFromServer(ctx context.Context) ([]PbsDataEntry, error)
+	UpdateDatabase(ctx context.Context, data []PbsDataEntry) error
+}
+
+type PbsTrafficDataServiceImpl struct {
+	engine *xorm.Engine
+}
+
+func NewPbsTrafficDataService(engine *xorm.Engine) PbsTrafficDataService {
+	return &PbsTrafficDataServiceImpl{engine: engine}
+}
+
+func (p *PbsTrafficDataServiceImpl) FetchPbsFromServer(ctx context.Context) ([]PbsDataEntry, error) {
 	const (
 		DataSource = "https://od.moi.gov.tw/MOI/v1/pbs"
 	)
@@ -116,7 +130,8 @@ func FetchPbsFromServer() ([]PbsDataEntry, error) {
 	return ret, nil
 }
 
-func UpdateDatabase(e *xorm.Engine, data []PbsDataEntry) error {
+func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []PbsDataEntry) error {
+	e := p.engine
 	length := len(data)
 	updated := 0
 	skipped := 0
@@ -163,11 +178,28 @@ func UpdateDatabase(e *xorm.Engine, data []PbsDataEntry) error {
 				return err
 			}
 		}
-		fmt.Printf("Total: %d\tNow : %d\tUpdated : %d\tSkipped: %d\tInserted: %d\n", length, i, updated, skipped, inserted)
+		fmt.Printf("Total: %d\tNow : %d\tUpdated : %d\tSkipped: %d\tInserted: %d\n", length, i+1, updated, skipped, inserted)
 	}
 	return nil
 }
 
-func PrintHistory(e *xorm.Engine) {
+func (p *PbsTrafficDataServiceImpl) PrintHistory(pastDuration time.Duration) error {
+	e := p.engine
+	type entry struct {
+		UID         string `xorm:"'pbs_traffic_events.uid'"`
+		CurInfo     string `xorm:"'pbs_traffic_events.information'"`
+		HistoryInfo string `xorm:"'pbs_traffic_history.information'"`
+	}
+	ret := make([]entry, 0, 0)
+	err := e.Table("pbs_traffic_events").
+		Cols("pbs_traffic_events.uid", "pbs_traffic_events.information", "pbs_traffic_history.information").
+		Join("LEFT", "pbs_traffic_events", "pbs_traffic_events.uid = pbs_traffic_history.uid").
+		Find(&ret)
 
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Rows : %d\n", len(ret))
+	return nil
 }
