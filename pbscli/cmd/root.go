@@ -16,15 +16,17 @@ limitations under the License.
 package cmd
 
 import (
+	"IrisAPIs"
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
 
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+var dbContext *IrisAPIs.DatabaseContext
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -59,6 +61,8 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	dbContext, _ = IrisAPIs.NewTestDatabaseContext()
+	dbContext.DbObject.Logger().ShowSQL(false)
 }
 
 // initConfig reads in config file and ENV variables if set.

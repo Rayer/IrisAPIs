@@ -81,6 +81,7 @@ type PingResponse struct {
 // @Failure 500 {object} problems.DefaultProblem
 // @Router /ping [get]
 func (c *Controller) PingHandler(ctx *gin.Context) {
+	ctx.Copy()
 	hostname, _ := os.Hostname()
 	//_ = os.UserCacheDir()
 	ctx.JSON(200, PingResponse{

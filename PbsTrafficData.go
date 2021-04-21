@@ -38,9 +38,18 @@ func (p *PbsHistoryEntry) TableName() string {
 	return "pbs_traffic_history"
 }
 
+type RecentEvents struct {
+	UID            *string `xorm:"'uid'"`
+	EntryTimestamp *time.Time
+	Timestamp      *time.Time `xorm:"'update_timestamp'"`
+	CurInfo        *string    `xorm:"'information'"`
+	HistoryInfo    *string    `xorm:"'information'"`
+}
+
 type PbsTrafficDataService interface {
 	FetchPbsFromServer(ctx context.Context) ([]PbsDataEntry, error)
 	UpdateDatabase(ctx context.Context, data []PbsDataEntry) error
+	GetHistory(ctx context.Context, pastDuration time.Duration) (map[string][]RecentEvents, error)
 }
 
 type PbsTrafficDataServiceImpl struct {
@@ -183,23 +192,29 @@ func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []P
 	return nil
 }
 
-func (p *PbsTrafficDataServiceImpl) PrintHistory(pastDuration time.Duration) error {
+func (p *PbsTrafficDataServiceImpl) GetHistory(ctx context.Context, pastDuration time.Duration) (map[string][]RecentEvents, error) {
 	e := p.engine
-	type entry struct {
-		UID         string `xorm:"'pbs_traffic_events.uid'"`
-		CurInfo     string `xorm:"'pbs_traffic_events.information'"`
-		HistoryInfo string `xorm:"'pbs_traffic_history.information'"`
-	}
-	ret := make([]entry, 0, 0)
+
+	res := make([]RecentEvents, 0, 0)
 	err := e.Table("pbs_traffic_events").
-		Cols("pbs_traffic_events.uid", "pbs_traffic_events.information", "pbs_traffic_history.information").
-		Join("LEFT", "pbs_traffic_events", "pbs_traffic_events.uid = pbs_traffic_history.uid").
-		Find(&ret)
+		Cols("pbs_traffic_events.uid", "pbs_traffic_events.entry_timestamp", "pbs_traffic_history.update_timestamp", "pbs_traffic_events.information", "pbs_traffic_history.information").
+		Join("LEFT", "pbs_traffic_history", "pbs_traffic_events.uid = pbs_traffic_history.uid").
+		Where(fmt.Sprintf("pbs_traffic_events.last_update_timestamp > NOW() - INTERVAL %v SECOND", pastDuration.Seconds())).
+		Find(&res)
 
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	ret := make(map[string][]RecentEvents)
+	for _, v := range res {
+		if _, exists := ret[*v.UID]; exists {
+			ret[*v.UID] = append(ret[*v.UID], v)
+		} else {
+			ret[*v.UID] = []RecentEvents{v}
+		}
 	}
 
 	fmt.Printf("Rows : %d\n", len(ret))
-	return nil
+	return ret, nil
 }

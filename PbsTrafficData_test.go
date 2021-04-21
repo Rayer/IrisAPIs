@@ -40,5 +40,5 @@ func TestJoinedPbsData(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := NewPbsTrafficDataService(db.DbObject)
-	fmt.Println(s.(*PbsTrafficDataServiceImpl).PrintHistory(1 * time.Hour))
+	fmt.Println(s.(*PbsTrafficDataServiceImpl).GetHistory(context.TODO(), 12*time.Hour))
 }
