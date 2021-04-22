@@ -19,6 +19,7 @@ import (
 	"IrisAPIs"
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/xormplus/xorm/log"
 	"os"
 
 	"github.com/mitchellh/go-homedir"
@@ -60,9 +61,9 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	dbContext, _ = IrisAPIs.NewTestDatabaseContext()
 	dbContext.DbObject.Logger().ShowSQL(false)
+	dbContext.DbObject.Logger().SetLevel(log.LOG_WARNING)
 }
 
 // initConfig reads in config file and ENV variables if set.

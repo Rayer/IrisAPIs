@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/spf13/cobra"
+	"os"
 	"time"
 )
 
@@ -35,20 +36,20 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		s := IrisAPIs.NewPbsTrafficDataService(dbContext.DbObject)
-		res, err := s.GetHistory(context.TODO(), 12*time.Hour)
+		hours, err := cmd.Flags().GetInt("time")
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		res, err := s.GetHistory(context.TODO(), time.Duration(hours)*time.Hour)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		for k, v := range res {
 			fmt.Println("ID : ", k)
-			for i, events := range v {
-				if i == 0 {
-					fmt.Printf("%s\t%s\n", events.EntryTimestamp.Format(time.Stamp), *events.CurInfo)
-				}
-				if events.HistoryInfo != nil {
-					fmt.Printf("%s\t%s\n", events.Timestamp.Format(time.Stamp), *events.HistoryInfo)
-				}
+			for _, events := range v {
+				fmt.Printf("%s\t%s\n", events.LastUpdateTimestamp.Format(time.Stamp), *events.Information)
 			}
 			fmt.Println()
 		}
@@ -57,6 +58,7 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(recentCmd)
+	recentCmd.Flags().IntP("time", "t", 6, "Recent n hours")
 
 	// Here you will define your flags and configuration settings.
 
