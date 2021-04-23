@@ -16,13 +16,11 @@ limitations under the License.
 package cmd
 
 import (
-	"IrisAPIs"
 	"context"
 	"fmt"
-	"os"
-	"time"
-
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 // workerCmd represents the worker command
@@ -36,16 +34,26 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("worker called")
-		db, err := IrisAPIs.NewTestDatabaseContext()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		service := IrisAPIs.NewPbsTrafficDataService(db.DbObject)
 		for {
-			data, _ := service.FetchPbsFromServer(context.TODO())
-			service.UpdateDatabase(context.TODO(), data)
+			data, _ := pbsService.FetchPbsFromServer(context.TODO())
+			//bar := progressbar.Default(int64(len(data)))
+			bar := progressbar.NewOptions(len(data),
+				progressbar.OptionEnableColorCodes(true),
+				progressbar.OptionSetWidth(15),
+				progressbar.OptionSetDescription("[cyan][1/3][reset] Writing moshable file..."),
+				progressbar.OptionSetTheme(progressbar.Theme{
+					Saucer:        "[green]=[reset]",
+					SaucerHead:    "[green]>[reset]",
+					SaucerPadding: " ",
+					BarStart:      "[",
+					BarEnd:        "]",
+				}))
+
+			pbsService.UpdateDatabase(context.TODO(), data, func(total int, now int, updated int, inserted int, skipped int) {
+				bar.Describe(fmt.Sprintf("[cyan](%4d/%4d)[reset] %4d updated, %4d inserted %4d skipped", now, total, updated, inserted, skipped))
+				bar.Add(1)
+			})
+			fmt.Println()
 			time.Sleep(1 * time.Minute)
 		}
 	},

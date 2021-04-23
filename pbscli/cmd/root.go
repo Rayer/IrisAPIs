@@ -28,6 +28,7 @@ import (
 
 var cfgFile string
 var dbContext *IrisAPIs.DatabaseContext
+var pbsService IrisAPIs.PbsTrafficDataService
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -62,8 +63,9 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	dbContext, _ = IrisAPIs.NewTestDatabaseContext()
-	dbContext.DbObject.Logger().ShowSQL(false)
+	dbContext.DbObject.Logger().ShowSQL(false, false, false)
 	dbContext.DbObject.Logger().SetLevel(log.LOG_WARNING)
+	pbsService = IrisAPIs.NewPbsTrafficDataService(dbContext.DbObject)
 }
 
 // initConfig reads in config file and ENV variables if set.

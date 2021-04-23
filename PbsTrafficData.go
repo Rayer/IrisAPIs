@@ -52,7 +52,7 @@ type RecentEvents struct {
 
 type PbsTrafficDataService interface {
 	FetchPbsFromServer(ctx context.Context) ([]PbsParseJsonResult, error)
-	UpdateDatabase(ctx context.Context, data []PbsParseJsonResult) error
+	UpdateDatabase(ctx context.Context, data []PbsParseJsonResult, callback func(total int, now int, updated int, inserted int, skipped int)) error
 	GetHistory(ctx context.Context, pastDuration time.Duration) (map[string][]PbsHistoryEntry, error)
 }
 
@@ -150,7 +150,7 @@ func (p *PbsTrafficDataServiceImpl) FetchPbsFromServer(ctx context.Context) ([]P
 	return ret, nil
 }
 
-func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []PbsParseJsonResult) error {
+func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []PbsParseJsonResult, callback func(total int, now int, updated int, inserted int, skipped int)) error {
 	e := p.engine
 	length := len(data)
 	updated := 0
@@ -197,7 +197,9 @@ func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []P
 				return err
 			}
 		}
-		fmt.Printf("Total: %d\tNow : %d\tUpdated : %d\tSkipped: %d\tInserted: %d\n", length, i+1, updated, skipped, inserted)
+		if callback != nil {
+			callback(length, i+1, updated, inserted, skipped)
+		}
 	}
 	return nil
 }

@@ -27,12 +27,15 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/magiconair/properties v1.8.1
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mattn/go-runewidth v0.0.12 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/moogar0880/problems v0.1.1
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rayer/chatbot v0.5.0
+	github.com/schollz/progressbar v1.0.0 // indirect
+	github.com/schollz/progressbar/v3 v3.8.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.0
@@ -44,9 +47,11 @@ require (
 	github.com/tealeg/xlsx v1.0.5 // indirect
 	github.com/xormplus/builder v0.0.0-20200331055651-240ff40009be
 	github.com/xormplus/xorm v0.0.0-20200514184607-0f37421d8714
+	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20210420210106-798c2154c571 // indirect
-	golang.org/x/sys v0.0.0-20210420205809-ac73e9fd8988 // indirect
+	golang.org/x/sys v0.0.0-20210421221651-33663a62ff08 // indirect
+	golang.org/x/term v0.0.0-20210422114643-f5beecf764ed // indirect
 	golang.org/x/tools v0.1.0 // indirect
 	google.golang.org/genproto v0.0.0-20210108203827-ffc7fda8c3d7 // indirect
 	google.golang.org/grpc v1.34.0
