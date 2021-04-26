@@ -150,7 +150,7 @@ func (p *PbsTrafficDataServiceImpl) FetchPbsFromServer(ctx context.Context) ([]P
 	return ret, nil
 }
 
-func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []PbsParseJsonResult, callback func(total int, now int, updated int, inserted int, skipped int)) error {
+func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []PbsParseJsonResult, progressCb func(total int, now int, updated int, inserted int, skipped int)) error {
 	e := p.engine
 	length := len(data)
 	updated := 0
@@ -176,8 +176,12 @@ func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []P
 				return err
 			}
 			if *lastHistory.Information != *v.PbsHistoryEntry.Information {
+				//fmt.Printf("Comparing uid %s (%s):\n", *lastHistory.UID, *lastHistory.Information)
+				//fmt.Printf("Comparing uid %s (%s):\n", *v.PbsHistoryEntry.UID, *v.PbsHistoryEntry.Information)
+
 				updated += 1
 				_, err := e.Insert(v.PbsHistoryEntry)
+				//fmt.Printf("\nupdated : %s\t%s (%s) \n", *v.PbsHistoryEntry.UID, *v.PbsHistoryEntry.Information, v.PbsHistoryEntry.LastUpdateTimestamp.Format(time.RFC3339))
 				if err != nil {
 					return err
 				}
@@ -197,8 +201,8 @@ func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []P
 				return err
 			}
 		}
-		if callback != nil {
-			callback(length, i+1, updated, inserted, skipped)
+		if progressCb != nil {
+			progressCb(length, i+1, updated, inserted, skipped)
 		}
 	}
 	return nil

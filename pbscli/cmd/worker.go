@@ -49,10 +49,13 @@ to quickly create a Cobra application.`,
 					BarEnd:        "]",
 				}))
 
-			pbsService.UpdateDatabase(context.TODO(), data, func(total int, now int, updated int, inserted int, skipped int) {
+			err := pbsService.UpdateDatabase(context.TODO(), data, func(total int, now int, updated int, inserted int, skipped int) {
 				bar.Describe(fmt.Sprintf("[cyan](%4d/%4d)[reset] %4d updated, %4d inserted %4d skipped", now, total, updated, inserted, skipped))
 				bar.Add(1)
 			})
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 			fmt.Println()
 			time.Sleep(1 * time.Minute)
 		}

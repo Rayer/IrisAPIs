@@ -15,8 +15,15 @@ limitations under the License.
 */
 package main
 
-import "IrisAPIs/pbscli/cmd"
+import (
+	"IrisAPIs/pbscli/cmd"
+	"time"
+)
 
 func main() {
+	_, err := time.LoadLocation("Asia/Taipei")
+	if err != nil {
+		panic(err)
+	}
 	cmd.Execute()
 }
