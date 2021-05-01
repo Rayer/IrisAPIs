@@ -16,6 +16,7 @@ type Configuration struct {
 	FixerIoLastFetchFailedPeriod     int    `doc:"Fetch interval for last fail fetch"`
 	ConnectionString                 string `doc:"Connection string to database."`
 	TestConnectionString             string `doc:"Connection string to Test Database"`
+	TimeZone                         string `doc:"TimeZone, default is Asia/Taipei"`
 	DatabaseType                     string `doc:"Database Type, for example, mysql"`
 	LogLevel                         int    `doc:"Log Level, 6 for trace and 0 for fatal"`
 	GRPCServerHost                   string `doc:"gRPC Server address for gRPC Server config, default is :8082"`
@@ -41,6 +42,7 @@ func (c *Configuration) LoadConfiguration() error {
 	viper.SetDefault("FixerIoLastFetchFailedPeriod", 10800)
 	viper.SetDefault("Host", "localhost:8080")
 	viper.SetDefault("EnforceApiKey", true)
+	viper.SetDefault("TimeZone", "Asia/Taipei")
 	viper.SetDefault("GRPCServerHost", ":8082")
 	viper.SetDefault("GRPCServerTarget", ":8082")
 

@@ -28,7 +28,7 @@ func TestPbsWriteDb(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = s.UpdateDatabase(context.TODO(), data)
+	err = s.UpdateDatabase(context.TODO(), data[:10], nil)
 	if err != nil {
 		t.Fatal(err)
 	}

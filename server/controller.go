@@ -33,7 +33,7 @@ type GenericResultResponse struct {
 }
 
 func NewController(config *IrisAPIs.Configuration) (*Controller, error) {
-	db, err := IrisAPIs.NewDatabaseContext(config.ConnectionString, true)
+	db, err := IrisAPIs.NewDatabaseContext(config.ConnectionString, true, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error initializing controller!")
 	}

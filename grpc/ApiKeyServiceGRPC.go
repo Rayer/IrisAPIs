@@ -16,7 +16,7 @@ type ApiKeyServiceGRPC struct {
 func NewApiKeyServiceGRPC(connectionString string) *ApiKeyServiceGRPC {
 	return &ApiKeyServiceGRPC{
 		service: IrisAPIs.NewApiKeyService(func() *IrisAPIs.DatabaseContext {
-			ret, _ := IrisAPIs.NewDatabaseContext(connectionString, false)
+			ret, _ := IrisAPIs.NewDatabaseContext(connectionString, false, nil)
 			return ret
 		}()),
 	}

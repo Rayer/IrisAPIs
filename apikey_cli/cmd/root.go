@@ -106,7 +106,7 @@ func initConfig() {
 		service = NewGRPCDataSource(grpcServer)
 	} else {
 		log.Info("Using direct database link")
-		dbContext, err := IrisAPIs.NewDatabaseContext(viper.GetString("ConnectionString"), verbose)
+		dbContext, err := IrisAPIs.NewDatabaseContext(viper.GetString("ConnectionString"), verbose, nil)
 		if err != nil {
 			panic(err)
 		}

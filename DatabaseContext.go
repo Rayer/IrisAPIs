@@ -6,6 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
 	"os"
+	"time"
 )
 
 type DatabaseContext struct {
@@ -15,8 +16,15 @@ type DatabaseContext struct {
 	ShowSql          bool
 }
 
-func NewDatabaseContext(connectionString string, showSql bool) (*DatabaseContext, error) {
-	engine, err := initDatabaseContext(connectionString, showSql)
+func NewDatabaseContext(connectionString string, showSql bool, tz *time.Location) (*DatabaseContext, error) {
+	if tz == nil {
+		var err error
+		tz, err = time.LoadLocation("Asia/Taipei")
+		if err != nil {
+			return nil, err
+		}
+	}
+	engine, err := initDatabaseContext(connectionString, tz, showSql)
 	if err != nil {
 		return nil, err
 	}
@@ -58,16 +66,16 @@ func NewTestDatabaseContext() (*DatabaseContext, error) {
 		log.Debug("Initialized DB from configuration file")
 	}
 
-	return NewDatabaseContext(connStr, true)
+	return NewDatabaseContext(connStr, true, nil)
 }
 
-func initDatabaseContext(connectionString string, showSql bool) (engine *xorm.Engine, err error) {
+func initDatabaseContext(connectionString string, timezone *time.Location, showSql bool) (engine *xorm.Engine, err error) {
 	engine, err = xorm.NewEngine("mysql", connectionString)
-
 	if err != nil {
 		return nil, err
 	}
-
+	engine.TZLocation = timezone
+	engine.DatabaseTZ = timezone
 	engine.ShowSQL(showSql)
 	return engine, nil
 }
