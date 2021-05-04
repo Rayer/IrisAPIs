@@ -11,6 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
+	"time"
 )
 
 // @title Iris Node Mainframe API
@@ -72,6 +73,7 @@ func main() {
 
 	//Run daemon threads
 	controller.CurrencyService.CurrencySyncRoutine()
+	controller.PbsTrafficDataService.ScheduledWorker(context.TODO(), 3*time.Minute)
 
 	//Check other services
 	ret := controller.ServiceMgmt.CheckAllServerStatus()

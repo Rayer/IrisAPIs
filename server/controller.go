@@ -26,6 +26,7 @@ type Controller struct {
 	ApiKeyService           IrisAPIs.ApiKeyService
 	ServiceMgmt             IrisAPIs.ServiceManagement
 	ArticleProcessorService IrisAPIs.ArticleProcessorService
+	PbsTrafficDataService   IrisAPIs.PbsTrafficDataService
 }
 
 type GenericResultResponse struct {
@@ -49,6 +50,7 @@ func NewController(config *IrisAPIs.Configuration) (*Controller, error) {
 			return service
 		}(),
 		ArticleProcessorService: IrisAPIs.NewArticleProcessorContext(),
+		PbsTrafficDataService:   IrisAPIs.NewPbsTrafficDataService(db),
 	}, nil
 }
 

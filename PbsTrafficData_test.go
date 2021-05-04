@@ -12,7 +12,7 @@ func TestGetFromPbs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := NewPbsTrafficDataService(db.DbObject)
+	s := NewPbsTrafficDataService(db)
 	ret, err := s.FetchPbsFromServer(context.TODO())
 	fmt.Println(ret)
 	fmt.Println(err)
@@ -23,7 +23,7 @@ func TestPbsWriteDb(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := NewPbsTrafficDataService(db.DbObject)
+	s := NewPbsTrafficDataService(db)
 	data, err := s.FetchPbsFromServer(context.TODO())
 	if err != nil {
 		t.Fatal(err)
@@ -39,6 +39,6 @@ func TestJoinedPbsData(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := NewPbsTrafficDataService(db.DbObject)
+	s := NewPbsTrafficDataService(db)
 	fmt.Println(s.(*PbsTrafficDataServiceImpl).GetHistory(context.TODO(), 2*time.Hour))
 }

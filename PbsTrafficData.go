@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
 	"io/ioutil"
 	"net/http"
@@ -42,26 +43,19 @@ type PbsParseJsonResult struct {
 	PbsHistoryEntry
 }
 
-type RecentEvents struct {
-	UID            *string `xorm:"'uid'"`
-	EntryTimestamp *time.Time
-	Timestamp      *time.Time `xorm:"'update_timestamp'"`
-	CurInfo        *string    `xorm:"'information'"`
-	HistoryInfo    *string    `xorm:"'information'"`
-}
-
 type PbsTrafficDataService interface {
 	FetchPbsFromServer(ctx context.Context) ([]PbsParseJsonResult, error)
 	UpdateDatabase(ctx context.Context, data []PbsParseJsonResult, callback func(total int, now int, updated int, inserted int, skipped int)) error
 	GetHistory(ctx context.Context, pastDuration time.Duration) (map[string][]PbsHistoryEntry, error)
+	ScheduledWorker(ctx context.Context, updateRate time.Duration)
 }
 
 type PbsTrafficDataServiceImpl struct {
 	engine *xorm.Engine
 }
 
-func NewPbsTrafficDataService(engine *xorm.Engine) PbsTrafficDataService {
-	return &PbsTrafficDataServiceImpl{engine: engine}
+func NewPbsTrafficDataService(databaseContext *DatabaseContext) PbsTrafficDataService {
+	return &PbsTrafficDataServiceImpl{engine: databaseContext.DbObject}
 }
 
 func (p *PbsTrafficDataServiceImpl) FetchPbsFromServer(ctx context.Context) ([]PbsParseJsonResult, error) {
@@ -226,4 +220,26 @@ func (p *PbsTrafficDataServiceImpl) GetHistory(ctx context.Context, pastDuration
 	}
 
 	return ret, nil
+}
+
+func (p *PbsTrafficDataServiceImpl) ScheduledWorker(ctx context.Context, updateRate time.Duration) {
+	log.Infof("Starting PBS update service")
+	go func() {
+		timer := time.NewTicker(updateRate)
+		defer timer.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-timer.C:
+				log.Debug("Updating PBS from server")
+				res, _ := p.FetchPbsFromServer(ctx)
+				_ = p.UpdateDatabase(ctx, res, func(total int, now int, updated int, inserted int, skipped int) {
+					if total == now {
+						log.Debugf("Processed %d records, %d updated, %d inserted and %d skipped", now, updated, inserted, skipped)
+					}
+				})
+			}
+		}
+	}()
 }
