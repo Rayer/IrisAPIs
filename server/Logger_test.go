@@ -1,7 +1,7 @@
 package main
 
 import (
-	ai_rec_dna "ai-rec-dna"
+	"IrisAPIs"
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -49,16 +49,14 @@ func TestDnaMetaLogger(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			middleware := DnaMetaLogger(logrus.New(), []string{})
+			middleware := LoggerMiddleware(logrus.New())
 			g, _ := createGinTestItems()
 			g.Request, _ = http.NewRequest("GET", tt.url, nil)
 			g.Request.Header = tt.header
 			middleware(g)
-			meta := ai_rec_dna.GetMeta(g)
+			meta := IrisAPIs.GetMeta(g)
 			assert.Equal(t, tt.wantIpAddr, meta.IpAddress)
 			assert.Equal(t, tt.wantCorrelationId, meta.CorrelationId)
-			assert.Equal(t, tt.wantSid, meta.SiteId)
-			assert.Equal(t, tt.wantBidObjId, meta.BidObjId)
 
 		})
 	}

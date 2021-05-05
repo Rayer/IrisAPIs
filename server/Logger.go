@@ -1,11 +1,11 @@
 package main
 
 import (
-	ai_rec_dna "ai-rec-dna"
+	"IrisAPIs"
 	"bytes"
 	"fmt"
+	"github.com/docker/distribution/uuid"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net"
@@ -21,11 +21,11 @@ var gLogger *logrus.Logger
 
 func init() {
 	gLogger = logrus.New()
-	gLogger.SetFormatter(&ai_rec_dna.DnaLoggerFormat{})
+	gLogger.SetFormatter(&IrisAPIs.LoggerFormat{})
 	gLogger.Debug("Logger initialized")
 }
 
-func DnaMetaLogger(logger logrus.FieldLogger, excludedEndpoint []string) gin.HandlerFunc {
+func LoggerMiddleware(logger logrus.FieldLogger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ipAddr := ctx.ClientIP()
 
@@ -35,7 +35,7 @@ func DnaMetaLogger(logger logrus.FieldLogger, excludedEndpoint []string) gin.Han
 		requestIdHeader := ctx.Request.Header["X-Request-ID"]
 
 		if len(correlationIdHeader) == 0 && len(requestIdHeader) == 0 {
-			correlationId = uuid.NewString()
+			correlationId = uuid.Generate().String()
 		} else {
 			for _, v := range [][]string{correlationIdHeader, requestIdHeader} {
 				if len(v) != 0 {
@@ -44,26 +44,18 @@ func DnaMetaLogger(logger logrus.FieldLogger, excludedEndpoint []string) gin.Han
 			}
 		}
 
-		query := struct {
-			Sid      string `form:"sid"`
-			BidObjId string `form:"bidobjid"`
-		}{}
+		apiKeyRef, exist := ctx.Get(ApiKeyRef)
+		if !exist {
+			apiKeyRef = -1
+		}
 
-		_ = ctx.ShouldBindQuery(&query)
-		meta := ai_rec_dna.DnaContextMeta{
+		meta := IrisAPIs.LoggerMeta{
 			CorrelationId: correlationId,
 			IpAddress:     ipAddr,
-			SiteId:        query.Sid,
-			BidObjId:      query.BidObjId,
+			ApiKeyRef:     apiKeyRef.(int),
 		}
-		dnaLogger := ai_rec_dna.ExistingLoggerWithMeta(logger, meta)
-		ctx.Set(ai_rec_dna.DnaMetaLoggerKey, dnaLogger)
-
-		if !ai_rec_dna.IsStringInSlice(ctx.Request.URL.RequestURI(), excludedEndpoint) {
-			//Finally, log for each entrypoint
-			dnaLogger.Log().Debugf("request : %s(%s), handler : ", ctx.Request.URL.RequestURI(), ctx.Request.Method, ctx.HandlerName())
-		}
-
+		serviceLogger := IrisAPIs.ExistingLoggerWithMeta(logger, meta)
+		ctx.Set(IrisAPIs.LoggerKey, serviceLogger)
 	}
 }
 
@@ -93,7 +85,7 @@ func RecoveryWithLogger(logger logrus.FieldLogger) gin.HandlerFunc {
 				}
 				if logger != nil {
 					stack := stack(3)
-					stackLogger := logger.WithField(ai_rec_dna.ExecInfo, string(stack))
+					stackLogger := logger.WithField(IrisAPIs.ExecInfoString, string(stack))
 					httpRequest, _ := httputil.DumpRequest(c.Request, false)
 					headers := strings.Split(string(httpRequest), "\r\n")
 					for idx, header := range headers {

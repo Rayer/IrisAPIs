@@ -45,16 +45,16 @@ func (G *GRPCDataSource) IssueApiKey(application string, useInHeader bool, useIn
 	return ret.ApiKey, err
 }
 
-func (G *GRPCDataSource) ValidateApiKey(key string, embeddedIn IrisAPIs.ApiKeyLocation) IrisAPIs.ApiKeyPrivilegeLevel {
+func (G *GRPCDataSource) ValidateApiKey(key string, embeddedIn IrisAPIs.ApiKeyLocation) (int, IrisAPIs.ApiKeyPrivilegeLevel) {
 	ret, err := G.client.ValidateApiKey(G.ctx, &IrisAPIsGRPC.ValidateApiKeyRequest{
 		Key:            key,
 		ApiKeyLocation: int64(embeddedIn),
 	})
 	if err != nil {
-		return IrisAPIs.ApiKeyPrivilegeLevel(IrisAPIs.ApiKeyNotPresented)
+		return -1, IrisAPIs.ApiKeyPrivilegeLevel(IrisAPIs.ApiKeyNotPresented)
 	}
 
-	return IrisAPIs.ApiKeyPrivilegeLevel(ret.PrivilegeLevel)
+	return -1, IrisAPIs.ApiKeyPrivilegeLevel(ret.PrivilegeLevel)
 }
 
 func (G *GRPCDataSource) RecordActivity(path string, method string, key string, location IrisAPIs.ApiKeyLocation, ip string) {

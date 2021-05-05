@@ -1,4 +1,4 @@
-package ai_rec_dna
+package IrisAPIs
 
 import (
 	"context"
@@ -11,16 +11,22 @@ import (
 
 var defaultLogger *defLogger
 
+const (
+	LoggerMetaString = "LoggerMetaString"
+	ExecInfoString   = "ExecInfoString"
+	LoggerKey        = "LoggerKey"
+)
+
 func init() {
-	defaultLogger = ExistingLoggerWithMeta(logrus.New(), DnaContextMeta{})
+	defaultLogger = ExistingLoggerWithMeta(logrus.New(), LoggerMeta{})
 }
 
 type defLogger struct {
 	logrus.FieldLogger
-	meta DnaContextMeta
+	meta LoggerMeta
 }
 
-func ExistingLoggerWithMeta(logger logrus.FieldLogger, meta DnaContextMeta) *defLogger {
+func ExistingLoggerWithMeta(logger logrus.FieldLogger, meta LoggerMeta) *defLogger {
 	return &defLogger{
 		FieldLogger: logger,
 		meta:        meta,
@@ -28,7 +34,7 @@ func ExistingLoggerWithMeta(logger logrus.FieldLogger, meta DnaContextMeta) *def
 }
 
 func (d *defLogger) Log() logrus.FieldLogger {
-	return d.WithField(DnaMeta, d.meta)
+	return d.WithField(LoggerMetaString, d.meta)
 }
 
 type LoggerFormat struct {
@@ -37,19 +43,20 @@ type LoggerFormat struct {
 	Filename  string `json:"filename"`
 	Func      string `json:"func"`
 	Message   string `json:"message"`
+	ApiKeyRef int    `json:"apiKeyRef"`
 	RequestId string `json:"request_id"`
 	RemoteIp  string `json:"remote_ip"`
 	ExecInfo  string `json:"exec_info"`
 }
 
 func (l *LoggerFormat) Format(entry *logrus.Entry) ([]byte, error) {
-	var contextMeta DnaContextMeta
-	meta, convertible := entry.Data[DnaMeta].(DnaContextMeta)
+	var contextMeta LoggerMeta
+	meta, convertible := entry.Data[LoggerMetaString].(LoggerMeta)
 	if convertible {
 		contextMeta = meta
 	}
 	execInfo := ""
-	contextExecInfo, convertible := entry.Data[ExecInfo].(string)
+	contextExecInfo, convertible := entry.Data[ExecInfoString].(string)
 	if convertible {
 		execInfo = contextExecInfo
 	}
@@ -70,6 +77,7 @@ func (l *LoggerFormat) Format(entry *logrus.Entry) ([]byte, error) {
 			return caller.Function
 		}(entry.Caller),
 		Message:   entry.Message,
+		ApiKeyRef: meta.ApiKeyRef,
 		RequestId: contextMeta.CorrelationId,
 		RemoteIp:  contextMeta.IpAddress,
 		ExecInfo:  execInfo,
@@ -78,15 +86,14 @@ func (l *LoggerFormat) Format(entry *logrus.Entry) ([]byte, error) {
 	return append(bytes, '\n'), err
 }
 
-type DnaContextMeta struct {
+type LoggerMeta struct {
 	CorrelationId string
 	IpAddress     string
-	SiteId        string
-	BidObjId      string
+	ApiKeyRef     int
 }
 
 func GetLogger(ctx context.Context) logrus.FieldLogger {
-	ret := ctx.Value(DnaMetaLoggerKey)
+	ret := ctx.Value(LoggerKey)
 	if ret == nil {
 		//This behavior should be change?
 		defaultLogger.Error("No logger found in context, use default.")
@@ -95,10 +102,10 @@ func GetLogger(ctx context.Context) logrus.FieldLogger {
 	return ret.(*defLogger).Log()
 }
 
-func GetMeta(ctx context.Context) DnaContextMeta {
-	ret := ctx.Value(DnaMetaLoggerKey)
+func GetMeta(ctx context.Context) LoggerMeta {
+	ret := ctx.Value(LoggerKey)
 	if ret != nil {
 		return ret.(*defLogger).meta
 	}
-	return DnaContextMeta{}
+	return LoggerMeta{}
 }

@@ -29,9 +29,10 @@ func (a *ApiKeyServiceGRPC) IssueApiKey(ctx context.Context, r *IssueApiKeyReque
 	}, status.Errorf(codes.Internal, "%s", err.Error())
 }
 func (a *ApiKeyServiceGRPC) ValidateApiKey(ctx context.Context, r *ValidateApiKeyRequest) (*ValidateApiKeyResponse, error) {
+	_, previlegeLevel := a.service.ValidateApiKey(r.Key, IrisAPIs.ApiKeyLocation(r.ApiKeyLocation))
 	return &ValidateApiKeyResponse{
 		//2 is for offset between PrivilegeLevel(protobuf) and ApiKeyPrivilegeLevel
-		PrivilegeLevel: PrivilegeLevel(a.service.ValidateApiKey(r.Key, IrisAPIs.ApiKeyLocation(r.ApiKeyLocation)) + 2),
+		PrivilegeLevel: PrivilegeLevel(previlegeLevel + 2),
 	}, nil
 }
 

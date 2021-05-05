@@ -9,6 +9,10 @@ import (
 	"net/http"
 )
 
+const (
+	ApiKeyRef = "ApiKeyRef"
+)
+
 type ApiKeyValidator interface {
 	GetMiddleware() gin.HandlerFunc
 	RegisterPrivilegeRoute(fullPath string, method string, level IrisAPIs.ApiKeyPrivilegeLevel)
@@ -44,7 +48,7 @@ func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 		fmt.Printf("Privilege Map : %+v\n", a.privilegeRoutes)
 		fmt.Printf("Path : %s, Path Privilege : %d\n", path, pathPrivilege)
 
-		validKey := a.apiKeyService.ValidateApiKey(apiKey, keyLocation)
+		apiKeyRef, validKey := a.apiKeyService.ValidateApiKey(apiKey, keyLocation)
 
 		if validKey < pathPrivilege && a.EnforceApiKey {
 			c.JSON(http.StatusUnauthorized, problems.NewDetailedProblem(http.StatusUnauthorized, "Not authorize for this resource"))
@@ -60,6 +64,7 @@ func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 
 		a.apiKeyService.RecordActivity(path, method, apiKey, keyLocation, ipAddr)
 
+		c.Set(ApiKeyRef, apiKeyRef)
 		c.Next()
 	}
 }

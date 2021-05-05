@@ -13,7 +13,7 @@ import (
 
 type ApiKeyService interface {
 	IssueApiKey(application string, useInHeader bool, useInQuery bool, issuer string, privileged bool) (string, error)
-	ValidateApiKey(key string, embeddedIn ApiKeyLocation) ApiKeyPrivilegeLevel
+	ValidateApiKey(key string, embeddedIn ApiKeyLocation) (apiKeyRef int, privilegeLevel ApiKeyPrivilegeLevel)
 	RecordActivity(path string, method string, key string, location ApiKeyLocation, ip string)
 	GetAllKeys() ([]*ApiKeyDataModel, error)
 	GetKeyModelById(id int) (*ApiKeyDataModel, error)
@@ -146,30 +146,30 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 	return key, nil
 }
 
-func (a *ApiKeyContext) ValidateApiKey(key string, embeddedIn ApiKeyLocation) ApiKeyPrivilegeLevel {
+func (a *ApiKeyContext) ValidateApiKey(key string, embeddedIn ApiKeyLocation) (int, ApiKeyPrivilegeLevel) {
 	if key == "" {
-		return ApiKeyNotPresented
+		return -1, ApiKeyNotPresented
 	}
 
 	dataModel, err := a.GetKeyModelByKey(key)
 
 	if err != nil {
 		fmt.Println("Error : " + err.Error())
-		return ApiKeyNotValid
+		return -1, ApiKeyNotValid
 	}
 
 	if dataModel == nil {
-		return ApiKeyNotValid
+		return -1, ApiKeyNotValid
 	}
 
 	if dataModel.Expiration != nil {
-		return ApiKeyExpired
+		return -1, ApiKeyExpired
 	}
 
 	if *dataModel.Privileged {
-		return ApiKeyPrivileged
+		return *dataModel.Id, ApiKeyPrivileged
 	} else {
-		return ApiKeyNormal
+		return *dataModel.Id, ApiKeyNormal
 	}
 }
 

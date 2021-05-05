@@ -36,11 +36,13 @@ func (c *ApiKeyContextTestSuite) TestApiKeyContext_IssueApiKey() {
 		c.Fail("error while trying issuing apikey", err)
 	}
 	//This key should able to be validated
-	result := c.context.ValidateApiKey(key, ApiKeyLocation(0))
+	_, result := c.context.ValidateApiKey(key, ApiKeyLocation(0))
 	assert.True(c.T(), result != ApiKeyNotValid)
 
 	//Generate random one and it should not be validated
-	assert.True(c.T(), c.context.ValidateApiKey("abcd1234", ApiKeyLocation(0)) == ApiKeyNotValid)
+	id, level := c.context.ValidateApiKey("abcd1234", ApiKeyLocation(0))
+	assert.Equal(c.T(), ApiKeyNotValid, level)
+	assert.Equal(c.T(), -1, id)
 }
 
 func (c *ApiKeyContextTestSuite) TestApiKeyContext_GetAllKeys() {
