@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 )
@@ -46,7 +46,8 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	log.SetLevel(log.Level(config.LogLevel))
+	log := gLogger
+	log.SetLevel(logrus.Level(config.LogLevel))
 
 	log.Debugf("Configuration : %+v", config)
 
@@ -67,6 +68,7 @@ func main() {
 	}
 	apiKeyManager := NewApiKeyValidator(controller.ApiKeyService, config.EnforceApiKey)
 	r.Use(apiKeyManager.GetMiddleware())
+	r.Use(LoggerMiddleware(gLogger))
 
 	_ = setupRouter(NewAKWrappedEngine(r, apiKeyManager), controller)
 
@@ -135,10 +137,10 @@ func setupRouter(wrapped *AKWrappedEngine, controller *Controller) error {
 		articleProcess.POST("", IrisAPIs.ApiKeyNotPresented, controller.TransformArticle)
 	}
 
-	log.Info("Listing privilege endpoints : ")
+	gLogger.Info("Listing privilege endpoints : ")
 	privilegeEndpoints := wrapped.GetPrivilegeMap()
 	for path, level := range privilegeEndpoints {
-		log.Infof("%s(%#v)", path, level)
+		gLogger.Infof("%s(%#v)", path, level)
 	}
 
 	return nil

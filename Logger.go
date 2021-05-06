@@ -93,19 +93,17 @@ type LoggerMeta struct {
 }
 
 func GetLogger(ctx context.Context) logrus.FieldLogger {
-	ret := ctx.Value(LoggerKey)
-	if ret == nil {
-		//This behavior should be change?
-		defaultLogger.Error("No logger found in context, use default.")
-		return defaultLogger
+	if ctx != nil && ctx.Value(LoggerKey) != nil {
+		return ctx.Value(LoggerKey).(*defLogger).Log()
 	}
-	return ret.(*defLogger).Log()
+
+	defaultLogger.Error("No logger found in context, use default.")
+	return defaultLogger
 }
 
 func GetMeta(ctx context.Context) LoggerMeta {
-	ret := ctx.Value(LoggerKey)
-	if ret != nil {
-		return ret.(*defLogger).meta
+	if ctx != nil && ctx.Value(LoggerKey) != nil {
+		return ctx.Value(LoggerKey).(*defLogger).meta
 	}
 	return LoggerMeta{}
 }
