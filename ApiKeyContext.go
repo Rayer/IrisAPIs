@@ -1,9 +1,9 @@
 package IrisAPIs
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/builder"
 	"github.com/xormplus/xorm"
 	"math/rand"
@@ -12,14 +12,14 @@ import (
 )
 
 type ApiKeyService interface {
-	IssueApiKey(application string, useInHeader bool, useInQuery bool, issuer string, privileged bool) (string, error)
-	ValidateApiKey(key string, embeddedIn ApiKeyLocation) (apiKeyRef int, privilegeLevel ApiKeyPrivilegeLevel)
-	RecordActivity(path string, method string, key string, location ApiKeyLocation, ip string)
-	GetAllKeys() ([]*ApiKeyDataModel, error)
-	GetKeyModelById(id int) (*ApiKeyDataModel, error)
-	SetExpire(keyId int, expire bool) error
-	GetKeyUsageById(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
-	GetKeyUsageByPath(path string, exactMatch bool, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
+	IssueApiKey(ctx context.Context, application string, useInHeader bool, useInQuery bool, issuer string, privileged bool) (string, error)
+	ValidateApiKey(ctx context.Context, key string, embeddedIn ApiKeyLocation) (apiKeyRef int, privilegeLevel ApiKeyPrivilegeLevel)
+	RecordActivity(ctx context.Context, path string, method string, key string, location ApiKeyLocation, ip string)
+	GetAllKeys(ctx context.Context) ([]*ApiKeyDataModel, error)
+	GetKeyModelById(ctx context.Context, id int) (*ApiKeyDataModel, error)
+	SetExpire(ctx context.Context, keyId int, expire bool) error
+	GetKeyUsageById(ctx context.Context, id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
+	GetKeyUsageByPath(ctx context.Context, path string, exactMatch bool, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error)
 }
 
 type ApiKeyDataModel struct {
@@ -109,7 +109,7 @@ func NewApiKeyService(DB *DatabaseContext) ApiKeyService {
 	return &ApiKeyContext{DB: DB.DbObject, Ip2NationService: NewIpNationContext(DB), cache: &cache}
 }
 
-func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQuery bool, issuer string, privileged bool) (string, error) {
+func (a *ApiKeyContext) IssueApiKey(ctx context.Context, application string, useInHeader bool, useInQuery bool, issuer string, privileged bool) (string, error) {
 	db := a.DB
 
 	var key string
@@ -146,12 +146,12 @@ func (a *ApiKeyContext) IssueApiKey(application string, useInHeader bool, useInQ
 	return key, nil
 }
 
-func (a *ApiKeyContext) ValidateApiKey(key string, embeddedIn ApiKeyLocation) (int, ApiKeyPrivilegeLevel) {
+func (a *ApiKeyContext) ValidateApiKey(ctx context.Context, key string, embeddedIn ApiKeyLocation) (int, ApiKeyPrivilegeLevel) {
 	if key == "" {
 		return -1, ApiKeyNotPresented
 	}
 
-	dataModel, err := a.GetKeyModelByKey(key)
+	dataModel, err := a.GetKeyModelByKey(ctx, key)
 
 	if err != nil {
 		fmt.Println("Error : " + err.Error())
@@ -183,10 +183,11 @@ func (a *ApiKeyContext) generateRandomString(length int) string {
 	return string(s)
 }
 
-func (a *ApiKeyContext) RecordActivity(path string, method string, key string, location ApiKeyLocation, ip string) {
+func (a *ApiKeyContext) RecordActivity(ctx context.Context, path string, method string, key string, location ApiKeyLocation, ip string) {
+	log := GetLogger(ctx)
 	db := a.DB
 
-	apiKeyEntity, err := a.GetKeyModelByKey(key)
+	apiKeyEntity, err := a.GetKeyModelByKey(ctx, key)
 	if err != nil {
 		log.Warnf("Database issue : %s", err.Error())
 		return
@@ -229,7 +230,7 @@ func (a *ApiKeyContext) RecordActivity(path string, method string, key string, l
 	return
 }
 
-func (a *ApiKeyContext) GetAllKeys() ([]*ApiKeyDataModel, error) {
+func (a *ApiKeyContext) GetAllKeys(ctx context.Context) ([]*ApiKeyDataModel, error) {
 	var ret []*ApiKeyDataModel
 	err := a.DB.Find(&ret)
 
@@ -240,7 +241,7 @@ func (a *ApiKeyContext) GetAllKeys() ([]*ApiKeyDataModel, error) {
 	return ret, nil
 }
 
-func (a *ApiKeyContext) GetKeyModelById(id int) (*ApiKeyDataModel, error) {
+func (a *ApiKeyContext) GetKeyModelById(ctx context.Context, id int) (*ApiKeyDataModel, error) {
 
 	ret := &ApiKeyDataModel{Id: &id}
 	find, err := a.DB.Get(ret)
@@ -254,7 +255,8 @@ func (a *ApiKeyContext) GetKeyModelById(id int) (*ApiKeyDataModel, error) {
 	return ret, nil
 }
 
-func (a *ApiKeyContext) GetKeyModelByKey(key string) (*ApiKeyDataModel, error) {
+func (a *ApiKeyContext) GetKeyModelByKey(ctx context.Context, key string) (*ApiKeyDataModel, error) {
+	log := GetLogger(ctx)
 	if v := a.cache.GetData(key); v != nil {
 		return v, nil
 	}
@@ -277,7 +279,7 @@ func (a *ApiKeyContext) GetKeyModelByKey(key string) (*ApiKeyDataModel, error) {
 
 }
 
-func (a *ApiKeyContext) GetKeyUsageById(id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error) {
+func (a *ApiKeyContext) GetKeyUsageById(ctx context.Context, id int, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error) {
 	//ret := make([]*ApiKeyAccess, 0)
 	var ret []*ApiKeyAccess
 	chain := a.DB.Where("api_key_ref = ?", id)
@@ -294,7 +296,7 @@ func (a *ApiKeyContext) GetKeyUsageById(id int, from *time.Time, to *time.Time) 
 	return ret, nil
 }
 
-func (a *ApiKeyContext) GetKeyUsageByPath(path string, exactMatch bool, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error) {
+func (a *ApiKeyContext) GetKeyUsageByPath(ctx context.Context, path string, exactMatch bool, from *time.Time, to *time.Time) ([]*ApiKeyAccess, error) {
 	//ret := make([]*ApiKeyAccess, 0)
 	var ret []*ApiKeyAccess
 	var chain *xorm.Session
@@ -317,8 +319,8 @@ func (a *ApiKeyContext) GetKeyUsageByPath(path string, exactMatch bool, from *ti
 	return ret, nil
 }
 
-func (a *ApiKeyContext) SetExpire(id int, setExpire bool) error {
-	entity := &ApiKeyDataModel{Id: &id}
+func (a *ApiKeyContext) SetExpire(ctx context.Context, keyId int, expire bool) error {
+	entity := &ApiKeyDataModel{Id: &keyId}
 	exist, err := a.DB.Get(entity)
 	if err != nil {
 		return err
@@ -327,7 +329,7 @@ func (a *ApiKeyContext) SetExpire(id int, setExpire bool) error {
 		return errors.New("bean id not found")
 	}
 
-	if setExpire {
+	if expire {
 		if entity.Expiration != nil {
 			return errors.New("already expired")
 		}
@@ -337,7 +339,7 @@ func (a *ApiKeyContext) SetExpire(id int, setExpire bool) error {
 		entity.Expiration = nil
 	}
 
-	_, err = a.DB.Cols("expiration").ID(id).Update(entity)
+	_, err = a.DB.Cols("expiration").ID(keyId).Update(entity)
 	a.cache.Invalidate(*entity.Key)
 
 	return err

@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/suite"
@@ -13,7 +14,7 @@ type DatabaseContextTest struct {
 }
 
 func (d *DatabaseContextTest) SetupSuite() {
-	db, err := NewTestDatabaseContext()
+	db, err := NewTestDatabaseContext(context.TODO())
 	if err != nil {
 		fmt.Println(err.Error())
 		d.db = nil

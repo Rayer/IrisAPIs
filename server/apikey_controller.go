@@ -1,6 +1,7 @@
 package main
 
 import (
+	context2 "context"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
 	"net/http"
@@ -60,7 +61,7 @@ func (c *Controller) IssueApiKey(ctx *gin.Context) {
 		ctx.JSON(400, err400)
 		return
 	}
-	key, err := c.ApiKeyService.IssueApiKey(input.Application, input.UseInHeader, input.UseInQueryParam, "auto", false)
+	key, err := c.ApiKeyService.IssueApiKey(context2.TODO(), input.Application, input.UseInHeader, input.UseInQueryParam, "auto", false)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(500, err500)
@@ -81,7 +82,7 @@ func (c *Controller) IssueApiKey(ctx *gin.Context) {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /apiKey [get]
 func (c *Controller) GetAllKeys(ctx *gin.Context) {
-	entities, err := c.ApiKeyService.GetAllKeys()
+	entities, err := c.ApiKeyService.GetAllKeys(context2.TODO())
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(500, err500)
@@ -120,7 +121,7 @@ func (c *Controller) GetKey(ctx *gin.Context) {
 		return
 	}
 
-	entity, err := c.ApiKeyService.GetKeyModelById(id)
+	entity, err := c.ApiKeyService.GetKeyModelById(context2.TODO(), id)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(http.StatusInternalServerError, err500)
@@ -180,7 +181,7 @@ func (c *Controller) GetApiUsage(ctx *gin.Context) {
 		toT = &t
 	}
 
-	records, err := c.ApiKeyService.GetKeyUsageById(id, fromT, toT)
+	records, err := c.ApiKeyService.GetKeyUsageById(context2.TODO(), id, fromT, toT)
 
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())

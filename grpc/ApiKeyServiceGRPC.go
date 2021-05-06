@@ -23,13 +23,13 @@ func NewApiKeyServiceGRPC(connectionString string) *ApiKeyServiceGRPC {
 }
 
 func (a *ApiKeyServiceGRPC) IssueApiKey(ctx context.Context, r *IssueApiKeyRequest) (*IssueApiKeyResponse, error) {
-	ret, err := a.service.IssueApiKey(r.Application, r.UseInHandler, r.UseInQuery, r.Issuer, r.Privileged)
+	ret, err := a.service.IssueApiKey(context.TODO(), r.Application, r.UseInHandler, r.UseInQuery, r.Issuer, r.Privileged)
 	return &IssueApiKeyResponse{
 		ApiKey: ret,
 	}, status.Errorf(codes.Internal, "%s", err.Error())
 }
 func (a *ApiKeyServiceGRPC) ValidateApiKey(ctx context.Context, r *ValidateApiKeyRequest) (*ValidateApiKeyResponse, error) {
-	_, previlegeLevel := a.service.ValidateApiKey(r.Key, IrisAPIs.ApiKeyLocation(r.ApiKeyLocation))
+	_, previlegeLevel := a.service.ValidateApiKey(context.TODO(), r.Key, IrisAPIs.ApiKeyLocation(r.ApiKeyLocation))
 	return &ValidateApiKeyResponse{
 		//2 is for offset between PrivilegeLevel(protobuf) and ApiKeyPrivilegeLevel
 		PrivilegeLevel: PrivilegeLevel(previlegeLevel + 2),
@@ -60,7 +60,7 @@ func ApiKeyDataModelToGRPC(v *IrisAPIs.ApiKeyDataModel) *ApiKeyDetail {
 }
 
 func (a *ApiKeyServiceGRPC) GetAllKeys(ctx context.Context, r *GetAllKeysRequest) (*GetAllKeysResponse, error) {
-	keys, err := a.service.GetAllKeys()
+	keys, err := a.service.GetAllKeys(context.TODO())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "%s", err.Error())
 	}
@@ -78,7 +78,7 @@ func (a *ApiKeyServiceGRPC) GetAllKeys(ctx context.Context, r *GetAllKeysRequest
 
 func (a *ApiKeyServiceGRPC) GetKeyById(ctx context.Context, r *GetKeyByIdRequest) (*GetKeyByIdResponse, error) {
 	id := r.GetId()
-	e, err := a.service.GetKeyModelById(int(id))
+	e, err := a.service.GetKeyModelById(context.TODO(), int(id))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "%s", err.Error())
 	}
@@ -88,7 +88,7 @@ func (a *ApiKeyServiceGRPC) GetKeyById(ctx context.Context, r *GetKeyByIdRequest
 }
 
 func (a *ApiKeyServiceGRPC) SetExpired(ctx context.Context, r *SetExpiredRequest) (*SetExpiredResponse, error) {
-	err := a.service.SetExpire(int(r.Id), r.IsExpired)
+	err := a.service.SetExpire(context.TODO(), int(r.Id), r.IsExpired)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "%s", err.Error())
 	}

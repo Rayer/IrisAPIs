@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"context"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -15,7 +16,7 @@ type ApiKeyContextTestSuite struct {
 }
 
 func (c *ApiKeyContextTestSuite) SetupSuite() {
-	c.db, _ = NewTestDatabaseContext()
+	c.db, _ = NewTestDatabaseContext(context.TODO())
 	c.context = NewApiKeyService(c.db)
 	log.SetLevel(log.DebugLevel)
 }
@@ -31,22 +32,22 @@ func TestApiKeyContextTestSuite(t *testing.T) {
 }
 
 func (c *ApiKeyContextTestSuite) TestApiKeyContext_IssueApiKey() {
-	key, err := c.context.IssueApiKey("TestApplication", true, true, "TestUser", false)
+	key, err := c.context.IssueApiKey(context.TODO(), "TestApplication", true, true, "TestUser", false)
 	if err != nil {
 		c.Fail("error while trying issuing apikey", err)
 	}
 	//This key should able to be validated
-	_, result := c.context.ValidateApiKey(key, ApiKeyLocation(0))
+	_, result := c.context.ValidateApiKey(context.TODO(), key, ApiKeyLocation(0))
 	assert.True(c.T(), result != ApiKeyNotValid)
 
 	//Generate random one and it should not be validated
-	id, level := c.context.ValidateApiKey("abcd1234", ApiKeyLocation(0))
+	id, level := c.context.ValidateApiKey(context.TODO(), "abcd1234", ApiKeyLocation(0))
 	assert.Equal(c.T(), ApiKeyNotValid, level)
 	assert.Equal(c.T(), -1, id)
 }
 
 func (c *ApiKeyContextTestSuite) TestApiKeyContext_GetAllKeys() {
-	ret, err := c.context.GetAllKeys()
+	ret, err := c.context.GetAllKeys(context.TODO())
 	if err != nil {
 		c.Failf("Error getting keys : %s", err.Error())
 		c.Assert()
@@ -58,9 +59,9 @@ func (c *ApiKeyContextTestSuite) TestApiKeyContext_GetAllKeys() {
 }
 
 func (c *ApiKeyContextTestSuite) TestApiKeyContext_GetKeyUsage() {
-	r1, _ := c.context.GetKeyUsageById(3, nil, nil)
+	r1, _ := c.context.GetKeyUsageById(context.TODO(), 3, nil, nil)
 	now := time.Now()
-	r2, _ := c.context.GetKeyUsageById(3, nil, &now)
+	r2, _ := c.context.GetKeyUsageById(context.TODO(), 3, nil, &now)
 
 	for _, r := range r1 {
 		c.T().Logf("%+v", r)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"IrisAPIs"
+	context2 "context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
@@ -48,7 +49,7 @@ func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 		fmt.Printf("Privilege Map : %+v\n", a.privilegeRoutes)
 		fmt.Printf("Path : %s, Path Privilege : %d\n", path, pathPrivilege)
 
-		apiKeyRef, validKey := a.apiKeyService.ValidateApiKey(apiKey, keyLocation)
+		apiKeyRef, validKey := a.apiKeyService.ValidateApiKey(context2.TODO(), apiKey, keyLocation)
 
 		if validKey < pathPrivilege && a.EnforceApiKey {
 			c.JSON(http.StatusUnauthorized, problems.NewDetailedProblem(http.StatusUnauthorized, "Not authorize for this resource"))
@@ -62,7 +63,7 @@ func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 			ipAddr = c.ClientIP()
 		}
 
-		a.apiKeyService.RecordActivity(path, method, apiKey, keyLocation, ipAddr)
+		a.apiKeyService.RecordActivity(context2.TODO(), path, method, apiKey, keyLocation, ipAddr)
 
 		c.Set(ApiKeyRef, apiKeyRef)
 		c.Next()
