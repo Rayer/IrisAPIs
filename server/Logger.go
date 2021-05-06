@@ -21,11 +21,12 @@ var gLogger *logrus.Logger
 
 func init() {
 	gLogger = logrus.New()
+	gLogger.SetLevel(logrus.DebugLevel)
 	gLogger.SetFormatter(&IrisAPIs.LoggerFormat{})
 	gLogger.Debug("Logger initialized")
 }
 
-func LoggerMiddleware(logger logrus.FieldLogger) gin.HandlerFunc {
+func InjectLoggerMiddleware(logger logrus.FieldLogger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ipAddr := ctx.ClientIP()
 
@@ -52,7 +53,8 @@ func LoggerMiddleware(logger logrus.FieldLogger) gin.HandlerFunc {
 		meta := IrisAPIs.LoggerMeta{
 			CorrelationId: correlationId,
 			IpAddress:     ipAddr,
-			ApiKeyRef:     apiKeyRef.(int),
+			//TODO: 這個值會空，因為還沒跑到下面，想想怎麼弄
+			ApiKeyRef: apiKeyRef.(int),
 		}
 		serviceLogger := IrisAPIs.ExistingLoggerWithMeta(logger, meta)
 		ctx.Set(IrisAPIs.LoggerKey, serviceLogger)

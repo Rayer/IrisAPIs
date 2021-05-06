@@ -96,7 +96,6 @@ func GetLogger(ctx context.Context) logrus.FieldLogger {
 	if ctx != nil && ctx.Value(LoggerKey) != nil {
 		return ctx.Value(LoggerKey).(*defLogger).Log()
 	}
-
 	defaultLogger.Error("No logger found in context, use default.")
 	return defaultLogger
 }

@@ -16,7 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	context2 "context"
+	"context"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -47,7 +47,7 @@ var expireCmd = &cobra.Command{
 		for _, v := range args {
 			id, _ := strconv.Atoi(v)
 			enable, _ := cmd.Flags().GetBool("re-enable")
-			err := service.SetExpire(context2.TODO(), id, !enable)
+			err := service.SetExpire(context.TODO(), id, !enable)
 			if err != nil {
 				fmt.Println(err.Error())
 			}

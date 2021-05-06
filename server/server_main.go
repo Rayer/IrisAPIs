@@ -67,8 +67,8 @@ func main() {
 		panic(err.Error())
 	}
 	apiKeyManager := NewApiKeyValidator(controller.ApiKeyService, config.EnforceApiKey)
+	r.Use(InjectLoggerMiddleware(log))
 	r.Use(apiKeyManager.GetMiddleware())
-	r.Use(LoggerMiddleware(gLogger))
 
 	_ = setupRouter(NewAKWrappedEngine(r, apiKeyManager), controller)
 
@@ -84,7 +84,7 @@ func main() {
 	}
 
 	grpc := new(IrisAPIsGRPC.GRPCServerRoutine)
-	grpc.RunDetach(context.TODO(), config)
+	grpc.RunDetach(context.Background(), config)
 
 	err = r.Run()
 	if err != nil {

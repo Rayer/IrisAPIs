@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"IrisAPIs"
-	context2 "context"
+	"context"
 	"errors"
 	"fmt"
 	"strconv"
@@ -59,9 +59,9 @@ var usageCmd = &cobra.Command{
 			b, _ := cmd.Flags().GetBool("byPath")
 			return b
 		}() {
-			retValue, _ = service.GetKeyUsageByPath(context2.TODO(), args[0], false, &prev, &now)
+			retValue, _ = service.GetKeyUsageByPath(context.TODO(), args[0], false, &prev, &now)
 		} else {
-			retValue, _ = service.GetKeyUsageById(context2.TODO(), func() int {
+			retValue, _ = service.GetKeyUsageById(context.TODO(), func() int {
 				i, _ := strconv.Atoi(args[0])
 				return i
 			}(), &prev, &now)

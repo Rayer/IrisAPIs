@@ -49,7 +49,7 @@ func TestDnaMetaLogger(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			middleware := LoggerMiddleware(logrus.New())
+			middleware := InjectLoggerMiddleware(logrus.New())
 			g, _ := createGinTestItems()
 			g.Request, _ = http.NewRequest("GET", tt.url, nil)
 			g.Request.Header = tt.header

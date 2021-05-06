@@ -1,7 +1,6 @@
 package main
 
 import (
-	context2 "context"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
 	"net/http"
@@ -61,7 +60,7 @@ func (c *Controller) IssueApiKey(ctx *gin.Context) {
 		ctx.JSON(400, err400)
 		return
 	}
-	key, err := c.ApiKeyService.IssueApiKey(context2.TODO(), input.Application, input.UseInHeader, input.UseInQueryParam, "auto", false)
+	key, err := c.ApiKeyService.IssueApiKey(ctx, input.Application, input.UseInHeader, input.UseInQueryParam, "auto", false)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(500, err500)
@@ -72,7 +71,7 @@ func (c *Controller) IssueApiKey(ctx *gin.Context) {
 	})
 }
 
-// @Summary Get API Key list
+// GetAllKeys @Summary Get API Key list
 // @Description Get current api keys
 // @Tags ApiKey
 // @Accept json
@@ -82,7 +81,7 @@ func (c *Controller) IssueApiKey(ctx *gin.Context) {
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /apiKey [get]
 func (c *Controller) GetAllKeys(ctx *gin.Context) {
-	entities, err := c.ApiKeyService.GetAllKeys(context2.TODO())
+	entities, err := c.ApiKeyService.GetAllKeys(ctx)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(500, err500)
@@ -102,7 +101,7 @@ func (c *Controller) GetAllKeys(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ret)
 }
 
-// @Summary Get API Key detail
+// GetKey @Summary Get API Key detail
 // @Description Get destinated API Key detail
 // @Tags ApiKey
 // @Accept json
@@ -121,7 +120,7 @@ func (c *Controller) GetKey(ctx *gin.Context) {
 		return
 	}
 
-	entity, err := c.ApiKeyService.GetKeyModelById(context2.TODO(), id)
+	entity, err := c.ApiKeyService.GetKeyModelById(ctx, id)
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
 		ctx.JSON(http.StatusInternalServerError, err500)
@@ -145,7 +144,7 @@ func (c *Controller) GetKey(ctx *gin.Context) {
 	})
 }
 
-// IssueApiKey godoc
+// GetApiUsage godoc
 // @Summary Get API Usages
 // @Description Get API Usages, can pass timestamp into thee
 // @Tags ApiKey
@@ -181,7 +180,7 @@ func (c *Controller) GetApiUsage(ctx *gin.Context) {
 		toT = &t
 	}
 
-	records, err := c.ApiKeyService.GetKeyUsageById(context2.TODO(), id, fromT, toT)
+	records, err := c.ApiKeyService.GetKeyUsageById(ctx, id, fromT, toT)
 
 	if err != nil {
 		err500 := problems.NewDetailedProblem(http.StatusInternalServerError, err.Error())
