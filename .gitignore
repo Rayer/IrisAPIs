@@ -96,6 +96,5 @@ server/config
 /apikey_cli/apikey_cli
 /serverUtils/iris-apis.yaml
 /serverUtils/ServerUtils
-/server/mock/
 /iris-apis.yaml
 /apikey_cli/iris-apis.yaml

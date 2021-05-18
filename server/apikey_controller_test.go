@@ -1,4 +1,3 @@
-//go:generate ${GOPATH}/bin/mockgen -source ../ApiKeyContext.go -destination mock/ApiKeyContext.go
 package main
 
 import (
