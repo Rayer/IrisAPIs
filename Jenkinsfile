@@ -23,13 +23,13 @@ pipeline {
         stage('Build docker image') {
             steps {
                 echo 'Building docker image'
-                sh label: 'Build docker images', script: "sudo docker build . -t rayer/iris-apis:${BUILD_TAG}"
+                sh label: 'Build docker images', script: "sudo docker build . -t rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}"
             }
         }
         stage('Push to docker repository') {
             steps {
                 echo 'Pushing docker image'
-                sh label: 'Push docker image', script: "sudo docker push rayer/iris-apis:${BUILD_TAG}"
+                sh label: 'Push docker image', script: "sudo docker push rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}"
             }
         }
         stage('Deploy image to api-test') {
@@ -39,7 +39,7 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                     sh label: 'Kill container if exist', script: 'ssh jenkins@node.rayer.idv.tw docker kill APIService-Test'
                 }
-                sh label: 'Redeploy container', script: 'ssh jenkins@node.rayer.idv.tw docker run --name APIService-Test -p 8801:8080 -p 9002:8082 -v ~/iris-apis/test:/app/config -v /var/run/docker.sock:/var/run/docker.sock --hostname $(hostname) --rm -d rayer/iris-apis:$(BUILD_TAG)'
+                sh label: 'Redeploy container', script: 'ssh jenkins@node.rayer.idv.tw docker run --name APIService-Test -p 8801:8080 -p 9002:8082 -v ~/iris-apis/test:/app/config -v /var/run/docker.sock:/var/run/docker.sock --hostname $(hostname) --rm -d rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}'
             }
         }
         stage('Verify changes in test server') {
