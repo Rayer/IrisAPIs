@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    parameters {
-        string defaultValue: 'api-server.app', description: 'Chatbot Server app name', name: 'server_app', trim: false
-        string defaultValue: 'chatbot-cli.app', description: 'Chatbot CLI app name', name: 'cli_app', trim: false
-    }
-
     stages {
         stage('Unit test') {
             steps {
@@ -25,15 +20,6 @@ pipeline {
             }
         }
 
-        stage('Build and archive executable') {
-            steps {
-                sh label: 'show version', script: 'go version'
-                sh label: 'generate documents', script: 'cd server && ~/go/bin/swag init -g server_main.go'
-                sh label: 'build server', script: "cd server && go build -o ../bin/${params.server_app}"
-                sh label: 'build cli', script: "cd cli && go build -o ../bin/${params.cli_app}"
-                archiveArtifacts artifacts: 'bin/*', fingerprint: true, followSymlinks: false, onlyIfSuccessful: true
-            }
-        }
         stage('Build docker image') {
             steps {
                 echo 'Building docker image'
@@ -43,7 +29,7 @@ pipeline {
         stage('Push to docker repository') {
             steps {
                 echo 'Pushing docker image'
-                sh label: 'Push docker image', script: 'sudo docker push rayer/iris-apis'
+                sh label: 'Push docker image', script: 'sudo docker push rayer/iris-apis:$(BUILD_TAG)'
             }
         }
         stage('Deploy image to api-test') {
@@ -53,7 +39,7 @@ pipeline {
                 catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                     sh label: 'Kill container if exist', script: 'ssh jenkins@node.rayer.idv.tw docker kill APIService-Test'
                 }
-                sh label: 'Redeploy container', script: 'ssh jenkins@node.rayer.idv.tw docker run --name APIService-Test -p 8801:8080 -p 9002:8082 -v ~/iris-apis/test:/app/config -v /var/run/docker.sock:/var/run/docker.sock --hostname $(hostname) --rm -d rayer/iris-apis:latest'
+                sh label: 'Redeploy container', script: 'ssh jenkins@node.rayer.idv.tw docker run --name APIService-Test -p 8801:8080 -p 9002:8082 -v ~/iris-apis/test:/app/config -v /var/run/docker.sock:/var/run/docker.sock --hostname $(hostname) --rm -d rayer/iris-apis:$(BUILD_TAG)'
             }
         }
         stage('Verify changes in test server') {
