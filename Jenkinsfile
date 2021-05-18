@@ -23,13 +23,13 @@ pipeline {
         stage('Build docker image') {
             steps {
                 echo 'Building docker image'
-                sh label: 'Build docker images', script: 'sudo docker build . -t rayer/iris-apis'
+                sh label: 'Build docker images', script: "sudo docker build . -t rayer/iris-apis:${BUILD_TAG}"
             }
         }
         stage('Push to docker repository') {
             steps {
                 echo 'Pushing docker image'
-                sh label: 'Push docker image', script: 'sudo docker push rayer/iris-apis:$(BUILD_TAG)'
+                sh label: 'Push docker image', script: "sudo docker push rayer/iris-apis:${BUILD_TAG}"
             }
         }
         stage('Deploy image to api-test') {
