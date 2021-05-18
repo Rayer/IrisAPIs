@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 )
@@ -46,22 +45,8 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	log := gLogger
-	loggerLevel, err := logrus.ParseLevel(config.LogLevel)
-	if err != nil {
-		log.SetLevel(logrus.TraceLevel)
-		log.Warningf("Wrong logger level %s in config, set to trace", config.LogLevel)
-	} else {
-		log.SetLevel(loggerLevel)
-	}
-	if config.LogType == "json" {
-		log.SetFormatter(&IrisAPIs.JsonLoggerFormat{})
-	} else if config.LogType == "linear" {
-		log.SetFormatter(&IrisAPIs.LinearLoggerFormat{})
-	} else {
-		log.SetFormatter(&IrisAPIs.JsonLoggerFormat{})
-		log.Warningf("Wrong logger type %s in config, set to json", config.LogType)
-	}
+
+	log := SetupLogger(config)
 
 	log.Debugf("Configuration : %+v", config)
 

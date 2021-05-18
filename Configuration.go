@@ -19,6 +19,7 @@ type Configuration struct {
 	DatabaseType                     string `doc:"Database Type, for example, mysql"`
 	LogLevel                         string `doc:"Log Level, should be one of : [panic error warn info debug trace]"`
 	LogType                          string `doc:"Log type, should be one of : [linear json]"`
+	LogRuntimeInfo                   bool   `doc:"Inspect runtime info in log(if applicable)"`
 	GRPCServerHost                   string `doc:"gRPC Server address for gRPC Server config, default is :8082"`
 	GRPCServerTarget                 string `doc:"gRPC Server address for gRPC Client config, default is :8082"`
 }
@@ -43,6 +44,7 @@ func (c *Configuration) LoadConfiguration() error {
 	viper.SetDefault("EnforceApiKey", true)
 	viper.SetDefault("LogLevel", "debug")
 	viper.SetDefault("LogType", "linear")
+	viper.SetDefault("LogRuntimeInfo", false)
 	viper.SetDefault("GRPCServerHost", ":8082")
 	viper.SetDefault("GRPCServerTarget", ":8082")
 

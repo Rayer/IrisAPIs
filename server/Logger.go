@@ -26,6 +26,30 @@ func init() {
 	gLogger.Debug("Logger initialized")
 }
 
+func SetupLogger(config *IrisAPIs.Configuration) *logrus.Logger {
+	log := gLogger
+	loggerLevel, err := logrus.ParseLevel(config.LogLevel)
+	if err != nil {
+		log.SetLevel(logrus.TraceLevel)
+		log.Warningf("Wrong logger level %s in config, set to trace", config.LogLevel)
+	} else {
+		log.SetLevel(loggerLevel)
+	}
+
+	if config.LogType == "json" {
+		log.SetFormatter(&IrisAPIs.JsonLoggerFormat{})
+	} else if config.LogType == "linear" {
+		log.SetFormatter(&IrisAPIs.LinearLoggerFormat{})
+	} else {
+		log.SetFormatter(&IrisAPIs.JsonLoggerFormat{})
+		log.Warningf("Wrong logger type %s in config, set to json", config.LogType)
+	}
+
+	log.ReportCaller = config.LogRuntimeInfo
+
+	return log
+}
+
 func InjectLoggerMiddleware(logger logrus.FieldLogger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ipAddr := ctx.ClientIP()
