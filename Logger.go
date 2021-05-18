@@ -49,7 +49,7 @@ type LoggerFormat struct {
 	ExecInfo  string `json:"exec_info"`
 }
 
-func (l *LoggerFormat) Format(entry *logrus.Entry) ([]byte, error) {
+func (l *LoggerFormat) gatherLogs(entry *logrus.Entry) LoggerFormat {
 	var contextMeta LoggerMeta
 	meta, convertible := entry.Data[LoggerMetaString].(LoggerMeta)
 	if convertible {
@@ -82,8 +82,27 @@ func (l *LoggerFormat) Format(entry *logrus.Entry) ([]byte, error) {
 		RemoteIp:  contextMeta.IpAddress,
 		ExecInfo:  execInfo,
 	}
+	return loggerFormat
+}
+
+type JsonLoggerFormat struct {
+	LoggerFormat
+}
+
+func (j *JsonLoggerFormat) Format(entry *logrus.Entry) ([]byte, error) {
+	loggerFormat := j.gatherLogs(entry)
 	bytes, err := json.Marshal(loggerFormat)
 	return append(bytes, '\n'), err
+}
+
+type LinearLoggerFormat struct {
+	LoggerFormat
+	filteredFields []string
+}
+
+func (li *LinearLoggerFormat) Format(entry *logrus.Entry) ([]byte, error) {
+	e := li.gatherLogs(entry)
+	return []byte(fmt.Sprintf("[%5s] %s %s\n", e.Level, e.EventTime, e.Message)), nil
 }
 
 type LoggerMeta struct {

@@ -22,7 +22,7 @@ var gLogger *logrus.Logger
 func init() {
 	gLogger = logrus.New()
 	gLogger.SetLevel(logrus.DebugLevel)
-	gLogger.SetFormatter(&IrisAPIs.LoggerFormat{})
+	gLogger.SetFormatter(&IrisAPIs.LinearLoggerFormat{})
 	gLogger.Debug("Logger initialized")
 }
 

@@ -17,7 +17,8 @@ type Configuration struct {
 	ConnectionString                 string `doc:"Connection string to database."`
 	TestConnectionString             string `doc:"Connection string to Test Database"`
 	DatabaseType                     string `doc:"Database Type, for example, mysql"`
-	LogLevel                         int    `doc:"Log Level, 6 for trace and 0 for fatal"`
+	LogLevel                         string `doc:"Log Level, should be one of : [panic error warn info debug trace]"`
+	LogType                          string `doc:"Log type, should be one of : [linear json]"`
 	GRPCServerHost                   string `doc:"gRPC Server address for gRPC Server config, default is :8082"`
 	GRPCServerTarget                 string `doc:"gRPC Server address for gRPC Client config, default is :8082"`
 }
@@ -40,6 +41,8 @@ func (c *Configuration) LoadConfiguration() error {
 	viper.SetDefault("FixerIoLastFetchFailedPeriod", 10800)
 	viper.SetDefault("Host", "localhost:8080")
 	viper.SetDefault("EnforceApiKey", true)
+	viper.SetDefault("LogLevel", "debug")
+	viper.SetDefault("LogType", "linear")
 	viper.SetDefault("GRPCServerHost", ":8082")
 	viper.SetDefault("GRPCServerTarget", ":8082")
 
