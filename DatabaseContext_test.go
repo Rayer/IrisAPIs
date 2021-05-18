@@ -3,7 +3,6 @@ package IrisAPIs
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -16,7 +15,7 @@ type DatabaseContextTest struct {
 func (d *DatabaseContextTest) SetupSuite() {
 	db, err := NewTestDatabaseContext(context.TODO())
 	if err != nil {
-		fmt.Println(err.Error())
+		d.T().Error(err)
 		d.db = nil
 	}
 	d.db = db
@@ -39,5 +38,5 @@ func TestDatabaseContextTest(t *testing.T) {
 func (d *DatabaseContextTest) TestDbConnection() {
 	result, _ := d.db.DbObject.QueryString("select * from mcds_tw_members")
 	output, _ := json.MarshalIndent(result, "", "\t")
-	fmt.Println(string(output))
+	d.T().Log(output)
 }

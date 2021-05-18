@@ -3,7 +3,6 @@ package IrisAPIs
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/xormplus/builder"
 	"github.com/xormplus/xorm"
 	"math/rand"
@@ -151,10 +150,11 @@ func (a *ApiKeyContext) ValidateApiKey(ctx context.Context, key string, embedded
 		return -1, ApiKeyNotPresented
 	}
 
+	logger := GetLogger(ctx)
 	dataModel, err := a.GetKeyModelByKey(ctx, key)
 
 	if err != nil {
-		fmt.Println("Error : " + err.Error())
+		logger.Error("Error : " + err.Error())
 		return -1, ApiKeyNotValid
 	}
 
