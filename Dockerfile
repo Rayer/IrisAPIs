@@ -11,7 +11,7 @@ ADD . /IrisAPIs
 RUN cd /IrisAPIs/server && go generate
 RUN cd /IrisAPIs/server && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server.app
 RUN cd /IrisAPIs/serverInfo && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o serverInfo.app
-RUN cd /IrisAPIs/serverInfo && ./serviceInfo.app
+RUN cd /IrisAPIs/serverInfo && ./serverInfo.app
 RUN cd /IrisAPIs/apikey_cli && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o apikey_cli.app
 
 
