@@ -15,7 +15,7 @@ RUN cd /IrisAPIs/serverInfo && ./serverInfo.app
 RUN cd /IrisAPIs/apikey_cli && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o apikey_cli.app
 
 
-FROM scratch
+FROM golang:alpine
 WORKDIR /app
 COPY --from=build-env /IrisAPIs/server/server.app /app
 COPY --from=build-env /IrisAPIs/server/docs/ /app/docs

@@ -44,7 +44,7 @@ pipeline {
 
             steps {
                 echo 'Deploying docker image'
-                sh label: 'Pull new images', script: 'ssh jenkins@node.rayer.idv.tw docker pull rayer/iris-apis:latest'
+                sh label: 'Pull new images', script: 'ssh jenkins@node.rayer.idv.tw docker pull rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}'
                 catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                     sh label: 'Kill container if exist', script: 'ssh jenkins@node.rayer.idv.tw docker kill APIService-Test'
                 }
@@ -58,7 +58,7 @@ pipeline {
             }
             steps {
                 echo 'Deploying docker image'
-                sh label: 'Pull new images', script: 'ssh jenkins@node.rayer.idv.tw docker pull rayer/iris-apis:release'
+                sh label: 'Pull new images', script: 'ssh jenkins@node.rayer.idv.tw docker pull rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}'
                 catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
                     sh label: 'Kill container if exist', script: 'ssh jenkins@node.rayer.idv.tw docker kill APIService'
                 }
