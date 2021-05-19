@@ -26,7 +26,7 @@ pipeline {
         stage('Build docker image') {
             steps {
                 echo 'Building docker image'
-                sh label: 'Build docker images', script: "sudo docker build . -t rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}"
+                sh label: 'Build docker images', script: "sudo docker build . --build-arg IMAGE_TAG=${BRANCH_NAME}-${BUILD_NUMBER} --build-arg JENKINS_LINK=${BUILD_URL} -t rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}"
             }
         }
         stage('Push to docker repository') {
