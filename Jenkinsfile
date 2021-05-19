@@ -33,6 +33,12 @@ pipeline {
             }
         }
         stage('Deploy image to api-test') {
+            when {
+                not {
+                    branch: "master"
+                }
+            }
+
             steps {
                 echo 'Deploying docker image'
                 sh label: 'Pull new images', script: 'ssh jenkins@node.rayer.idv.tw docker pull rayer/iris-apis:latest'
@@ -42,22 +48,11 @@ pipeline {
                 sh label: 'Redeploy container', script: 'ssh jenkins@node.rayer.idv.tw docker run --name APIService-Test -p 8801:8080 -p 9002:8082 -v ~/iris-apis/test:/app/config -v /var/run/docker.sock:/var/run/docker.sock --hostname $(hostname) --rm -d rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}'
             }
         }
-        stage('Verify changes in test server') {
-            steps {
-                // The input step will prompt a message box for manual approval.
-                slackSend message : "${BUILD_TAG} have been deployed to staging, please check ${BUILD_URL} for details."
-                input message: "Deploy this version as release?"
-                echo 'Verified: ${pwd()}'
-            }
-        }
-        stage('Tag docker image as release') {
-            steps {
-                echo 'Pushing docker image'
-                sh label: 'tag as release', script: 'sudo docker tag rayer/iris-apis:latest rayer/iris-apis:release'
-                sh label: 'Push docker image', script: 'sudo docker push rayer/iris-apis:release'
-            }
-        }
+
         stage('Deploy image to api') {
+            when {
+                branch: "master"
+            }
             steps {
                 echo 'Deploying docker image'
                 sh label: 'Pull new images', script: 'ssh jenkins@node.rayer.idv.tw docker pull rayer/iris-apis:release'
