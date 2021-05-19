@@ -14,9 +14,6 @@ pipeline {
                         sh label: 'go unit test', script: "FIXERIO_KEY=\"${FIXERIO_KEY}\" TEST_DB_CONN_STR=\"${TEST_DB_CONN_STR}\"; go test ./... --coverprofile=cover.out"
                     }
                 }
-                withCredentials([string(credentialsId: 'fixerioApiKey', variable: 'FIXERIO_KEY'), string(credentialsId: 'testConnectionString', variable: 'TEST_DB_CONN_STR')]) {
-                    sh label: 'go unit test', script: "FIXERIO_KEY=\"${FIXERIO_KEY}\" TEST_DB_CONN_STR=\"${TEST_DB_CONN_STR}\"; go test ./... --coverprofile=cover.out"
-                }
                 sh label: 'convert coverage xml', script: '~/go/bin/gocover-cobertura < cover.out > coverage.xml'
             }
         }
