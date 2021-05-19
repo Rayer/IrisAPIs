@@ -35,7 +35,7 @@ pipeline {
         stage('Deploy image to api-test') {
             when {
                 not {
-                    branch: "master"
+                    branch "master"
                 }
             }
 
@@ -51,7 +51,7 @@ pipeline {
 
         stage('Deploy image to api') {
             when {
-                branch: "master"
+                branch "master"
             }
             steps {
                 echo 'Deploying docker image'
