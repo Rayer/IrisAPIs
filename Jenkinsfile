@@ -4,10 +4,16 @@ pipeline {
     stages {
         stage('Unit test') {
             steps {
+
                 slackSend message: "${BUILD_TAG} start to build."
                 sh label: 'go version', script: 'go version'
                 sh label: 'install gocover-cobertura', script: 'go get github.com/t-yuki/gocover-cobertura'
                 sh label: 'generate mocks', script: 'go generate ./...'
+                lock(quantity: 1, resource: 'IrisAPI_UT') {
+                    withCredentials([string(credentialsId: 'fixerioApiKey', variable: 'FIXERIO_KEY'), string(credentialsId: 'testConnectionString', variable: 'TEST_DB_CONN_STR')]) {
+                        sh label: 'go unit test', script: "FIXERIO_KEY=\"${FIXERIO_KEY}\" TEST_DB_CONN_STR=\"${TEST_DB_CONN_STR}\"; go test ./... --coverprofile=cover.out"
+                    }
+                }
                 withCredentials([string(credentialsId: 'fixerioApiKey', variable: 'FIXERIO_KEY'), string(credentialsId: 'testConnectionString', variable: 'TEST_DB_CONN_STR')]) {
                     sh label: 'go unit test', script: "FIXERIO_KEY=\"${FIXERIO_KEY}\" TEST_DB_CONN_STR=\"${TEST_DB_CONN_STR}\"; go test ./... --coverprofile=cover.out"
                 }
