@@ -24,7 +24,6 @@ func TestControllerTestSuite(t *testing.T) {
 func (c *ControllerTestSuite) SetupTest() {
 	c.responseRecorder = httptest.NewRecorder()
 	c.gin, _ = gin.CreateTestContext(c.responseRecorder)
-	//We doesn't need services in controller, just test controller itself
 	c.controller = &Controller{
 		BuildInfoService: IrisAPIs.NewBuildInfoService(),
 	}
