@@ -18,7 +18,7 @@ func main() {
 	fmt.Println(os.Hostname())
 
 	filename := "release-info.yaml"
-	buildInfo := IrisAPIs.BuildInfoFile{
+	buildInfo := IrisAPIs.BuildInfo{
 		ImageTag:        os.Getenv("IMAGE_TAG"),
 		CreateTimestamp: time.Now().Unix(),
 		JenkinsLink:     os.Getenv("JENKINS_LINK"),
