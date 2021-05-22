@@ -43,12 +43,14 @@ pipeline {
             }
 
             steps {
-                echo 'Deploying docker image'
-                sh label: 'Pull new images', script: 'ssh jenkins@node.rayer.idv.tw docker pull rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}'
-                catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
-                    sh label: 'Kill container if exist', script: 'ssh jenkins@node.rayer.idv.tw docker kill APIService-Test'
+                lock(quantity: 1, resource: 'IrisAPITest_Deploying') {
+                    echo 'Deploying docker image'
+                    sh label: 'Pull new images', script: 'ssh jenkins@node.rayer.idv.tw docker pull rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}'
+                    catchError(buildResult: 'SUCCESS', stageResult: 'SUCCESS') {
+                        sh label: 'Kill container if exist', script: 'ssh jenkins@node.rayer.idv.tw docker kill APIService-Test'
+                    }
+                    sh label: 'Redeploy container', script: 'ssh jenkins@node.rayer.idv.tw docker run --name APIService-Test -p 8801:8080 -p 9002:8082 -v ~/iris-apis/test:/app/config -v /var/run/docker.sock:/var/run/docker.sock --hostname $(hostname) --rm -d rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}'
                 }
-                sh label: 'Redeploy container', script: 'ssh jenkins@node.rayer.idv.tw docker run --name APIService-Test -p 8801:8080 -p 9002:8082 -v ~/iris-apis/test:/app/config -v /var/run/docker.sock:/var/run/docker.sock --hostname $(hostname) --rm -d rayer/iris-apis:${BRANCH_NAME}-${BUILD_NUMBER}'
             }
         }
 
