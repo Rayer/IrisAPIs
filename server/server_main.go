@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
+	"strings"
 	"time"
 )
 
@@ -61,6 +62,12 @@ func main() {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerUrl))
 
 	docs.SwaggerInfo.Host = host
+	//Only localhost supports http, for others, force to https
+	if strings.HasPrefix(host, "localhost") || strings.HasPrefix(host, "127") {
+		docs.SwaggerInfo.Schemes = []string{"http"}
+	} else {
+		docs.SwaggerInfo.Schemes = []string{"https"}
+	}
 
 	controller, err := NewController(config)
 	if err != nil {

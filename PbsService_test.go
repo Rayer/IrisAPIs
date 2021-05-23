@@ -2,7 +2,6 @@ package IrisAPIs
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 )
@@ -14,8 +13,10 @@ func TestGetFromPbs(t *testing.T) {
 	}
 	s := NewPbsTrafficDataService(db)
 	ret, err := s.FetchPbsFromServer(context.TODO())
-	fmt.Println(ret)
-	fmt.Println(err)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(ret)
 }
 
 func TestPbsWriteDb(t *testing.T) {
@@ -40,5 +41,5 @@ func TestJoinedPbsData(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := NewPbsTrafficDataService(db)
-	fmt.Println(s.(*PbsTrafficDataServiceImpl).GetHistory(context.TODO(), 2*time.Hour))
+	t.Log(s.GetHistory(context.TODO(), 2*time.Hour))
 }
