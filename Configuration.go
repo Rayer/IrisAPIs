@@ -18,7 +18,11 @@ type Configuration struct {
 	TestConnectionString             string `doc:"Connection string to Test Database"`
 	TimeZone                         string `doc:"TimeZone, default is Asia/Taipei"`
 	DatabaseType                     string `doc:"Database Type, for example, mysql"`
-	LogLevel                         int    `doc:"Log Level, 6 for trace and 0 for fatal"`
+	LogLevel                         string `doc:"Log Level, should be one of : [panic error warn info debug trace]"`
+	LogType                          string `doc:"Log type, should be one of : [linear json]"`
+	LogRuntimeInfo                   bool   `doc:"Inspect runtime info in log(if applicable)"`
+	CurrencyUpdateRoutine            int    `doc:"Currency Update Routine time(seconds), <= 0 for no update"`
+	PBSUpdateRoutine                 int    `doc:"PBS Update Routine time(seconds), <= 0 for no update"`
 	GRPCServerHost                   string `doc:"gRPC Server address for gRPC Server config, default is :8082"`
 	GRPCServerTarget                 string `doc:"gRPC Server address for gRPC Client config, default is :8082"`
 }
@@ -43,8 +47,13 @@ func (c *Configuration) LoadConfiguration() error {
 	viper.SetDefault("Host", "localhost:8080")
 	viper.SetDefault("EnforceApiKey", true)
 	viper.SetDefault("TimeZone", "Asia/Taipei")
+	viper.SetDefault("LogLevel", "debug")
+	viper.SetDefault("LogType", "linear")
+	viper.SetDefault("LogRuntimeInfo", false)
 	viper.SetDefault("GRPCServerHost", ":8082")
 	viper.SetDefault("GRPCServerTarget", ":8082")
+	viper.SetDefault("CurrencyUpdateRoutine", 600)
+	viper.SetDefault("PBSUpdateRoutine", 600)
 
 	err := viper.ReadInConfig()
 

@@ -1,9 +1,9 @@
 package IrisAPIs
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -17,14 +17,15 @@ type RandomJoke struct {
 	Punchline string
 }
 
-func fetchRandomJoke() (*RandomJoke, error) {
+func fetchRandomJoke(ctx context.Context) (*RandomJoke, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
+	logger := GetLogger(ctx)
 	client := &http.Client{Transport: tr}
 	resp, err := client.Get("https://official-joke-api.appspot.com/random_joke")
 	if err != nil {
-		fmt.Println("error:", err)
+		logger.Error("error:", err)
 		return nil, err
 	}
 	defer resp.Body.Close()

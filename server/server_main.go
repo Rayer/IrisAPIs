@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	"time"
@@ -47,7 +46,8 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	log.SetLevel(log.Level(config.LogLevel))
+
+	log := SetupLogger(config)
 
 	log.Debugf("Configuration : %+v", config)
 
@@ -67,13 +67,25 @@ func main() {
 		panic(err.Error())
 	}
 	apiKeyManager := NewApiKeyValidator(controller.ApiKeyService, config.EnforceApiKey)
+	r.Use(InjectLoggerMiddleware(log))
 	r.Use(apiKeyManager.GetMiddleware())
 
 	_ = setupRouter(NewAKWrappedEngine(r, apiKeyManager), controller)
 
 	//Run daemon threads
-	controller.CurrencyService.CurrencySyncRoutine()
-	controller.PbsTrafficDataService.ScheduledWorker(context.TODO(), 3*time.Minute)
+	if config.CurrencyUpdateRoutine > 0 {
+		//TODO: Implement update timer
+		controller.CurrencyService.CurrencySyncRoutine()
+		log.Infof("Starting Currency Sync Routine, update for every %d seconds", config.CurrencyUpdateRoutine)
+	} else {
+		log.Infof("Currency Update Routine is disabled.")
+	}
+	if config.PBSUpdateRoutine > 0 {
+		controller.PbsTrafficDataService.ScheduledWorker(context.TODO(), time.Duration(config.PBSUpdateRoutine)*time.Second)
+		log.Infof("Starting PBS Sync Routine, update for every %d seconds", config.PBSUpdateRoutine)
+	} else {
+		log.Infof("PBS Update Routine is disabled.")
+	}
 
 	//Check other services
 	ret := controller.ServiceMgmt.CheckAllServerStatus()
@@ -84,7 +96,7 @@ func main() {
 	}
 
 	grpc := new(IrisAPIsGRPC.GRPCServerRoutine)
-	grpc.RunDetach(context.TODO(), config)
+	grpc.RunDetach(context.Background(), config)
 
 	err = r.Run()
 	if err != nil {
@@ -137,10 +149,15 @@ func setupRouter(wrapped *AKWrappedEngine, controller *Controller) error {
 		articleProcess.POST("", IrisAPIs.ApiKeyNotPresented, controller.TransformArticle)
 	}
 
-	log.Info("Listing privilege endpoints : ")
+	pbs := wrapped.Group("/pbs")
+	{
+		pbs.GET("/recent", IrisAPIs.ApiKeyNotPresented, controller.GetRecentPBSData)
+	}
+
+	gLogger.Info("Listing privilege endpoints : ")
 	privilegeEndpoints := wrapped.GetPrivilegeMap()
 	for path, level := range privilegeEndpoints {
-		log.Infof("%s(%#v)", path, level)
+		gLogger.Infof("%s(%#v)", path, level)
 	}
 
 	return nil

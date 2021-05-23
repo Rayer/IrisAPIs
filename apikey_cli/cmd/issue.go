@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +33,7 @@ var issueCmd = &cobra.Command{
 		privileged, _ := f.GetBool("privileged")
 		issuer, _ := f.GetString("issuer")
 
-		key, err := service.IssueApiKey(application, true, true, issuer, privileged)
+		key, err := service.IssueApiKey(context.TODO(), application, true, true, issuer, privileged)
 		if err != nil {
 			panic(err)
 		}

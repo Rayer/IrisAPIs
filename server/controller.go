@@ -27,6 +27,7 @@ type Controller struct {
 	ServiceMgmt             IrisAPIs.ServiceManagement
 	ArticleProcessorService IrisAPIs.ArticleProcessorService
 	PbsTrafficDataService   IrisAPIs.PbsTrafficDataService
+	BuildInfoService        IrisAPIs.BuildInfoService
 }
 
 type GenericResultResponse struct {
@@ -50,6 +51,7 @@ func NewController(config *IrisAPIs.Configuration) (*Controller, error) {
 			return service
 		}(),
 		ArticleProcessorService: IrisAPIs.NewArticleProcessorContext(),
+		BuildInfoService:        IrisAPIs.NewBuildInfoService(),
 		PbsTrafficDataService:   IrisAPIs.NewPbsTrafficDataService(db),
 	}, nil
 }
@@ -67,10 +69,13 @@ func (c *Controller) NoMethodHandler(ctx *gin.Context) {
 }
 
 type PingResponse struct {
-	Message  string
-	Hostname string
-	Timezone string
-	Time     string
+	Message        string
+	Hostname       string
+	Timezone       string
+	Time           string
+	ImageTag       string
+	JenkinsUrl     string
+	BuildTimestamp int64
 }
 
 // PingHandler godoc
@@ -85,11 +90,15 @@ type PingResponse struct {
 func (c *Controller) PingHandler(ctx *gin.Context) {
 	ctx.Copy()
 	hostname, _ := os.Hostname()
+	buildInfo := c.BuildInfoService.GetBuildInfo(ctx)
 	//_ = os.UserCacheDir()
 	ctx.JSON(200, PingResponse{
-		Message:  "System alive!!!",
-		Hostname: hostname,
-		Timezone: fmt.Sprint(time.Now().Zone()),
-		Time:     fmt.Sprint(time.Now().Format("2006-01-02T15:04:05.000 MST")),
+		Message:        "System alive!!!",
+		Hostname:       hostname,
+		Timezone:       fmt.Sprint(time.Now().Zone()),
+		Time:           fmt.Sprint(time.Now().Format("2006-01-02T15:04:05.000 MST")),
+		ImageTag:       buildInfo.ImageTag,
+		JenkinsUrl:     buildInfo.JenkinsLink,
+		BuildTimestamp: buildInfo.CreateTimestamp,
 	})
 }

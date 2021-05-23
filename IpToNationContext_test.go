@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"context"
 	"errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,7 @@ func TestIpToNationContextSuite(t *testing.T) {
 }
 
 func (c *IpToNationContextTestSuite) SetupSuite() {
-	c.db, _ = NewTestDatabaseContext()
+	c.db, _ = NewTestDatabaseContext(context.TODO())
 	c.ipNationContext = NewIpNationContext(c.db)
 	logrus.SetLevel(logrus.DebugLevel)
 }

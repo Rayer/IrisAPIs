@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"github.com/pkg/errors"
@@ -40,7 +41,7 @@ func NewCurrencyContext(apiKey string, db *DatabaseContext) CurrencyService {
 }
 
 func NewTestCurrencyContext() *CurrencyContext {
-	dc, err := NewTestDatabaseContext()
+	dc, err := NewTestDatabaseContext(context.TODO())
 	if dc == nil || err != nil {
 		return nil
 	}

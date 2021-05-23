@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +27,7 @@ var listCmd = &cobra.Command{
 	Short: "List issued API Keys",
 	Run: func(cmd *cobra.Command, args []string) {
 		//fmt.Println("list called")
-		ret, err := service.GetAllKeys()
+		ret, err := service.GetAllKeys(context.TODO())
 		if err != nil {
 			panic(err)
 		}

@@ -8,7 +8,7 @@ func TestConfiguration_LoadConfiguration(t *testing.T) {
 		FixioApiKey      string
 		ConnectionString string
 		DatabaseType     string
-		LogLevel         int
+		LogLevel         string
 	}
 	tests := []struct {
 		name    string

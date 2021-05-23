@@ -1,9 +1,9 @@
 package IrisAPIs
 
 import (
+	"context"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"github.com/xormplus/xorm"
 	"os"
 	"time"
@@ -39,8 +39,8 @@ func NewDatabaseContext(connectionString string, showSql bool, tz *time.Location
 // 1. Environment Parameters
 // 2. gtest pass argument
 // 3. config file
-func NewTestDatabaseContext() (*DatabaseContext, error) {
-	log.SetLevel(log.DebugLevel)
+func NewTestDatabaseContext(ctx context.Context) (*DatabaseContext, error) {
+	log := GetLogger(ctx)
 	var connStr string
 	log.Debug("Trying initializing Test DB with environment \"TEST_DB_CONN_STR\"...")
 	connStr, exist := os.LookupEnv("TEST_DB_CONN_STR")

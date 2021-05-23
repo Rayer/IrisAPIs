@@ -1,6 +1,3 @@
-//+build ignore
-
-//go:generate ${GOPATH}/bin/mockgen -source ../ApiKeyContext.go -destination mock/ApiKeyContext.go
 package main
 
 import (
@@ -53,9 +50,9 @@ func (a *ApiKeyControllerTestSuite) TestController_GetKey() {
 	defer ctrl.Finish()
 	mockedModel := a.generateRandomApiKeyDataModel()
 	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
-	mockService.EXPECT().GetKeyModelById(*mockedModel.Id).Return(mockedModel, nil)
-	mockService.EXPECT().GetKeyModelById(*mockedModel.Id+1).Return(nil, nil)
-	mockService.EXPECT().GetKeyModelById(*mockedModel.Id+2).Return(nil, errors.Errorf("test error!"))
+	mockService.EXPECT().GetKeyModelById(gomock.Any(), *mockedModel.Id).Return(mockedModel, nil)
+	mockService.EXPECT().GetKeyModelById(gomock.Any(), *mockedModel.Id+1).Return(nil, nil)
+	mockService.EXPECT().GetKeyModelById(gomock.Any(), *mockedModel.Id+2).Return(nil, errors.Errorf("test error!"))
 
 	type fields struct {
 		ApiKeyService IrisAPIs.ApiKeyService
@@ -159,8 +156,8 @@ func (a *ApiKeyControllerTestSuite) TestController_IssueApiKey() {
 	ctrl := gomock.NewController(a.T())
 	defer ctrl.Finish()
 	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
-	mockService.EXPECT().IssueApiKey("UTTestApp", true, true, "auto", false).Return("accc", nil)
-	mockService.EXPECT().IssueApiKey("TestMockErr", true, true, "auto", false).Return("", errors.New("unit test error"))
+	mockService.EXPECT().IssueApiKey(gomock.Any(), "UTTestApp", true, true, "auto", false).Return("accc", nil)
+	mockService.EXPECT().IssueApiKey(gomock.Any(), "TestMockErr", true, true, "auto", false).Return("", errors.New("unit test error"))
 	type fields struct {
 		ApiKeyService IrisAPIs.ApiKeyService
 	}
@@ -223,7 +220,7 @@ func (a *ApiKeyControllerTestSuite) TestController_GetAllKeys() {
 	ctrl := gomock.NewController(a.T())
 	defer ctrl.Finish()
 	mockService := mock_IrisAPIs.NewMockApiKeyService(ctrl)
-	mockService.EXPECT().GetAllKeys().Return([]*IrisAPIs.ApiKeyDataModel{
+	mockService.EXPECT().GetAllKeys(gomock.Any()).Return([]*IrisAPIs.ApiKeyDataModel{
 		a.generateRandomApiKeyDataModel(),
 		a.generateRandomApiKeyDataModel(),
 		a.generateRandomApiKeyDataModel(),

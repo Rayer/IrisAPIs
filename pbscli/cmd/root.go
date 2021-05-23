@@ -3,6 +3,7 @@ package cmd
 
 import (
 	"IrisAPIs"
+	"context"
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/xormplus/xorm/log"
@@ -15,6 +16,7 @@ import (
 var cfgFile string
 var dbContext *IrisAPIs.DatabaseContext
 var pbsService IrisAPIs.PbsTrafficDataService
+var ctx context.Context
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -38,6 +40,7 @@ func Execute() {
 }
 
 func init() {
+	ctx = context.Background()
 	cobra.OnInitialize(initConfig)
 
 	// Here you will define your flags and configuration settings.
@@ -48,7 +51,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	dbContext, err := IrisAPIs.NewTestDatabaseContext()
+	dbContext, err := IrisAPIs.NewTestDatabaseContext(ctx)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(0)

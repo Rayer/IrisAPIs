@@ -1,6 +1,7 @@
 package main
 
 import (
+	"IrisAPIs"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -23,8 +24,9 @@ func TestControllerTestSuite(t *testing.T) {
 func (c *ControllerTestSuite) SetupTest() {
 	c.responseRecorder = httptest.NewRecorder()
 	c.gin, _ = gin.CreateTestContext(c.responseRecorder)
-	//We doesn't need services in controller, just test controller itself
-	c.controller = &Controller{}
+	c.controller = &Controller{
+		BuildInfoService: IrisAPIs.NewBuildInfoService(),
+	}
 }
 
 func (c *ControllerTestSuite) TestController_NoMethodHandler() {

@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetFromPbs(t *testing.T) {
-	db, err := NewTestDatabaseContext()
+	db, err := NewTestDatabaseContext(context.TODO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -19,7 +19,7 @@ func TestGetFromPbs(t *testing.T) {
 }
 
 func TestPbsWriteDb(t *testing.T) {
-	db, err := NewTestDatabaseContext()
+	db, err := NewTestDatabaseContext(context.TODO())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func TestPbsWriteDb(t *testing.T) {
 }
 
 func TestJoinedPbsData(t *testing.T) {
-	db, err := NewTestDatabaseContext()
+	db, err := NewTestDatabaseContext(context.TODO())
 	if err != nil {
 		t.Fatal(err)
 	}

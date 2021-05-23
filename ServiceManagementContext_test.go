@@ -1,7 +1,6 @@
 package IrisAPIs
 
 import (
-	"fmt"
 	"github.com/docker/distribution/uuid"
 	log "github.com/sirupsen/logrus"
 	"testing"
@@ -15,7 +14,7 @@ func TestServiceManagementContext_CheckAllServerStatus(t *testing.T) {
 	}
 	result := s.CheckAllServerStatus()
 	for _, v := range result {
-		fmt.Printf("%s - %s - %s - %s - %s\n", v.ID, v.Name, v.Status, v.ServiceType, v.Message)
+		t.Logf("%s - %s - %s - %s - %s\n", v.ID, v.Name, v.Status, v.ServiceType, v.Message)
 	}
 }
 

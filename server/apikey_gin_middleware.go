@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
-	log "github.com/sirupsen/logrus"
 	"net/http"
+)
+
+const (
+	ApiKeyRef = "ApiKeyRef"
 )
 
 type ApiKeyValidator interface {
@@ -41,10 +44,12 @@ func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 
 		pathPrivilege := a.FetchPrivilegeLevel(path, method)
 
-		fmt.Printf("Privilege Map : %+v\n", a.privilegeRoutes)
-		fmt.Printf("Path : %s, Path Privilege : %d\n", path, pathPrivilege)
+		log := IrisAPIs.GetLogger(c)
 
-		validKey := a.apiKeyService.ValidateApiKey(apiKey, keyLocation)
+		log.Debugf("Privilege Map : %+v\n", a.privilegeRoutes)
+		log.Debugf("Path : %s, Path Privilege : %d\n", path, pathPrivilege)
+
+		apiKeyRef, validKey := a.apiKeyService.ValidateApiKey(c, apiKey, keyLocation)
 
 		if validKey < pathPrivilege && a.EnforceApiKey {
 			c.JSON(http.StatusUnauthorized, problems.NewDetailedProblem(http.StatusUnauthorized, "Not authorize for this resource"))
@@ -58,8 +63,9 @@ func (a *ApiKeyValidatorContext) GetMiddleware() gin.HandlerFunc {
 			ipAddr = c.ClientIP()
 		}
 
-		a.apiKeyService.RecordActivity(path, method, apiKey, keyLocation, ipAddr)
+		a.apiKeyService.RecordActivity(c, path, method, apiKey, keyLocation, ipAddr)
 
+		c.Set(ApiKeyRef, apiKeyRef)
 		c.Next()
 	}
 }

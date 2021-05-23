@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"context"
 	"fmt"
 	ChatBot "github.com/rayer/chatbot"
 	log "github.com/sirupsen/logrus"
@@ -77,7 +78,7 @@ func (ss *RandomJokeState) InitScenarioState(scenario ChatBot.Scenario) {
 
 func (ss *RandomJokeState) RawMessage() (string, error) {
 
-	rj, err := fetchRandomJoke()
+	rj, err := fetchRandomJoke(context.TODO())
 	var raw string
 	if err != nil {
 		raw = "Some bad happened : " + err.Error()
