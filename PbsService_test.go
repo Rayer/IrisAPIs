@@ -16,7 +16,7 @@ func TestGetFromPbs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(ret)
+	t.Log(len(ret))
 }
 
 func TestPbsWriteDb(t *testing.T) {
@@ -41,5 +41,9 @@ func TestJoinedPbsData(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := NewPbsTrafficDataService(db)
-	t.Log(s.GetHistory(context.TODO(), 2*time.Hour))
+	history, err := s.GetHistory(context.TODO(), 2*time.Hour)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(len(history))
 }

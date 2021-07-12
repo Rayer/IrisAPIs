@@ -17,8 +17,8 @@ type CurrencyService interface {
 	Convert(from string, to string, amount float64) (float64, error)
 	GetMostRecentCurrencyDataRaw() (string, error)
 	SyncToDb() error
-	CurrencySyncRoutine()
-	CurrencySyncWorker() (*CurrencySyncResult, error)
+	CurrencySyncRoutine(ctx context.Context)
+	CurrencySyncWorker(ctx context.Context) (*CurrencySyncResult, error)
 }
 
 type CurrencyContext struct {
@@ -28,16 +28,6 @@ type CurrencyContext struct {
 	UpdateAfterLastFail    int
 	cachedBatch            *CurrencyBatch
 	cachedConvert          map[string]currencyConvertCache
-}
-
-func NewCurrencyContext(apiKey string, db *DatabaseContext) CurrencyService {
-	return &CurrencyContext{
-		ApiKey:                 apiKey,
-		Db:                     db.DbObject,
-		UpdateAfterLastSuccess: 43200,
-		UpdateAfterLastFail:    10800,
-		cachedConvert:          make(map[string]currencyConvertCache),
-	}
 }
 
 func NewTestCurrencyContext() *CurrencyContext {
@@ -69,12 +59,12 @@ func NewTestCurrencyContext() *CurrencyContext {
 	}
 }
 
-func NewCurrencyContextWithConfig(c *Configuration, db *DatabaseContext) CurrencyService {
+func NewCurrencyContextWithConfig(apiKey string, fixerIoLastFetchSuccessfulPeriod int, fixerIoLastFetchFailedPeriod int, db *DatabaseContext) CurrencyService {
 	return &CurrencyContext{
-		ApiKey:                 c.FixerIoApiKey,
+		ApiKey:                 apiKey,
 		Db:                     db.DbObject,
-		UpdateAfterLastSuccess: c.FixerIoLastFetchSuccessfulPeriod,
-		UpdateAfterLastFail:    c.FixerIoLastFetchFailedPeriod,
+		UpdateAfterLastSuccess: fixerIoLastFetchSuccessfulPeriod,
+		UpdateAfterLastFail:    fixerIoLastFetchFailedPeriod,
 		cachedConvert:          make(map[string]currencyConvertCache),
 	}
 }
@@ -224,19 +214,26 @@ type CurrencySyncResult struct {
 	lastSyncSuccess bool
 }
 
-func (c *CurrencyContext) CurrencySyncRoutine() {
+func (c *CurrencyContext) CurrencySyncRoutine(ctx context.Context) {
 	go func() {
 		for {
 			log.Infoln("Starting another round of CurrencySyncWorker...")
-			_, err := c.CurrencySyncWorker()
-			if err != nil {
-				log.Warnf("CurrencySyncWorker ends with an error : %s", err.Error())
+			select {
+			case <-ctx.Done():
+				log.Infoln("Shutting down CurrencySyncRoutine")
+				return
+			default:
+				log.Infoln("Starting another round of CurrencySyncWorker...")
+				_, err := c.CurrencySyncWorker(ctx)
+				if err != nil {
+					log.Warnf("CurrencySyncWorker ends with an error : %s", err.Error())
+				}
 			}
 		}
 	}()
 }
 
-func (c *CurrencyContext) CurrencySyncWorker() (*CurrencySyncResult, error) {
+func (c *CurrencyContext) CurrencySyncWorker(_ context.Context) (*CurrencySyncResult, error) {
 
 	log.Printf("Database Object : %+v", c.Db)
 

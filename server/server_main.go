@@ -80,9 +80,11 @@ func main() {
 	_ = setupRouter(NewAKWrappedEngine(r, apiKeyManager), controller)
 
 	//Run daemon threads
+	//TODO: Implement cancel
+	ctx, _ := context.WithCancel(context.Background())
 	if config.CurrencyUpdateRoutine > 0 {
 		//TODO: Implement update timer
-		controller.CurrencyService.CurrencySyncRoutine()
+		controller.CurrencyService.CurrencySyncRoutine(ctx)
 		log.Infof("Starting Currency Sync Routine, update for every %d seconds", config.CurrencyUpdateRoutine)
 	} else {
 		log.Infof("Currency Update Routine is disabled.")

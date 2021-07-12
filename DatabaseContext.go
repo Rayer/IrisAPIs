@@ -50,14 +50,6 @@ func NewTestDatabaseContext(ctx context.Context) (*DatabaseContext, error) {
 		log.Debug("Initialized Test DB from environment")
 	}
 
-	//Fetch configuration file. It usually only exists in local test environment
-	if connStr == "" {
-		log.Debug("Trying initializing Test DB with configuration file...")
-		connStr = NewConfiguration().TestConnectionString
-	} else {
-		log.Debug("Initialized DB from parameter")
-	}
-
 	if connStr == "" {
 		dir, _ := os.Getwd()
 		log.Warn("Fail to initialize test database form any of source : ", dir)

@@ -58,7 +58,7 @@ func NewPbsTrafficDataService(databaseContext *DatabaseContext) PbsTrafficDataSe
 	return &PbsTrafficDataServiceImpl{engine: databaseContext.DbObject}
 }
 
-func (p *PbsTrafficDataServiceImpl) FetchPbsFromServer(ctx context.Context) ([]PbsParseJsonResult, error) {
+func (p *PbsTrafficDataServiceImpl) FetchPbsFromServer(_ context.Context) ([]PbsParseJsonResult, error) {
 	const (
 		DataSource = "https://od.moi.gov.tw/MOI/v1/pbs"
 	)
@@ -144,7 +144,7 @@ func (p *PbsTrafficDataServiceImpl) FetchPbsFromServer(ctx context.Context) ([]P
 	return ret, nil
 }
 
-func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []PbsParseJsonResult, progressCb func(total int, now int, updated int, inserted int, skipped int)) error {
+func (p *PbsTrafficDataServiceImpl) UpdateDatabase(_ context.Context, data []PbsParseJsonResult, progressCb func(total int, now int, updated int, inserted int, skipped int)) error {
 	e := p.engine
 	length := len(data)
 	updated := 0
@@ -202,10 +202,11 @@ func (p *PbsTrafficDataServiceImpl) UpdateDatabase(ctx context.Context, data []P
 	return nil
 }
 
-func (p *PbsTrafficDataServiceImpl) GetHistory(ctx context.Context, pastDuration time.Duration) (map[string][]PbsHistoryEntry, error) {
+func (p *PbsTrafficDataServiceImpl) GetHistory(_ context.Context, pastDuration time.Duration) (map[string][]PbsHistoryEntry, error) {
 	e := p.engine
 	var result []PbsHistoryEntry
-	err := e.Where(fmt.Sprintf("pbs_traffic_history.update_timestamp > NOW() - INTERVAL %v SECOND", pastDuration.Seconds())).Find(&result)
+	period := time.Now().Add(-pastDuration).Unix()
+	err := e.Where(fmt.Sprintf("pbs_traffic_history.update_timestamp > %d", period)).Find(&result)
 	if err != nil {
 		return nil, err
 	}

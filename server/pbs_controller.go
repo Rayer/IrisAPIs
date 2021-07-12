@@ -25,6 +25,7 @@ type GetRecentPBSDataResponse struct {
 // @Accept json
 // @Produce json
 // @Param period query string false "Period, in seconds(default = 3600)"
+// @Param format query string false "Format, either text or json(default = json)"
 // @Success 200 {array} GetRecentPBSDataResponse
 // @Failure 400 {object} problems.DefaultProblem
 // @Router /pbs/recent [get]
