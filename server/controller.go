@@ -30,6 +30,7 @@ type Controller struct {
 	PbsTrafficDataService   IrisAPIs.PbsTrafficDataService
 	BuildInfoService        IrisAPIs.BuildInfoService
 	teardownQueue           []IrisAPIs.TeardownableServices
+	cancelFunc              context.CancelFunc
 }
 
 type GenericResultResponse struct {
@@ -55,6 +56,10 @@ func (c *Controller) ReInitServices(ctx context.Context, config *IrisAPIs.Config
 		if err != nil {
 			logger.Warning("%v teardown failed!")
 		}
+	}
+
+	if c.cancelFunc != nil {
+		c.cancelFunc()
 	}
 
 	c.CurrencyService = c.registerService(IrisAPIs.NewCurrencyContextWithConfig(config.FixerIoApiKey,

@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -43,58 +45,23 @@ func main() {
 	r.Use(cors.Default())
 
 	config := &IrisAPIs.Configuration{}
+	var log *logrus.Logger
+	var controller *Controller
+	config.OnFinishedLoadConfig = func(config *IrisAPIs.Configuration) {
+		//Init logger
+		log, controller = initWithConfig(config, log, r, controller)
+	}
+
 	err := config.LoadConfiguration()
 	if err != nil {
 		panic(err.Error())
 	}
 
-	log := SetupLogger(config)
-
-	log.Debugf("Configuration : %+v", config)
-
-	//Init logger
-	//Swagger initialization
-	_, host, err := config.SplitSchemeAndHost()
-	if err != nil {
-		panic(err)
-	}
-	swaggerUrl := ginSwagger.URL(config.Host + "/swagger/doc.json")
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerUrl))
-
-	docs.SwaggerInfo.Host = host
-	//Only localhost supports http, for others, force to https
-	if strings.HasPrefix(host, "localhost") || strings.HasPrefix(host, "127") {
-		docs.SwaggerInfo.Schemes = []string{"http"}
-	} else {
-		docs.SwaggerInfo.Schemes = []string{"https"}
-	}
-
-	controller, err := NewController(config)
-	if err != nil {
-		panic(err.Error())
-	}
 	apiKeyManager := NewApiKeyValidator(controller.ApiKeyService, config.EnforceApiKey)
 	r.Use(InjectLoggerMiddleware(log))
 	r.Use(apiKeyManager.GetMiddleware())
 
 	_ = setupRouter(NewAKWrappedEngine(r, apiKeyManager), controller)
-
-	//Run daemon threads
-	//TODO: Implement cancel
-	ctx, _ := context.WithCancel(context.Background())
-	if config.CurrencyUpdateRoutine > 0 {
-		//TODO: Implement update timer
-		controller.CurrencyService.CurrencySyncRoutine(ctx)
-		log.Infof("Starting Currency Sync Routine, update for every %d seconds", config.CurrencyUpdateRoutine)
-	} else {
-		log.Infof("Currency Update Routine is disabled.")
-	}
-	if config.PBSUpdateRoutine > 0 {
-		controller.PbsTrafficDataService.ScheduledWorker(context.TODO(), time.Duration(config.PBSUpdateRoutine)*time.Second)
-		log.Infof("Starting PBS Sync Routine, update for every %d seconds", config.PBSUpdateRoutine)
-	} else {
-		log.Infof("PBS Update Routine is disabled.")
-	}
 
 	//Check other services
 	ret := controller.ServiceMgmt.CheckAllServerStatus()
@@ -104,6 +71,7 @@ func main() {
 		fmt.Printf(format, status.ID, status.Name, status.ServiceType, status.Status, status.Message)
 	}
 
+	// GRPC server can't reload while configuration changed
 	grpc := new(IrisAPIsGRPC.GRPCServerRoutine)
 	grpc.RunDetach(context.Background(), config)
 
@@ -111,6 +79,59 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
+}
+
+var once sync.Once
+var cancel context.CancelFunc
+
+func initWithConfig(config *IrisAPIs.Configuration, log *logrus.Logger, r *gin.Engine, controller *Controller) (*logrus.Logger, *Controller) {
+	log = SetupLogger(config)
+	log.Debugf("Configuration : %+v", config)
+
+	if cancel != nil {
+		cancel()
+	}
+
+	once.Do(func() {
+		//Swagger initialization
+		_, host, err := config.SplitSchemeAndHost()
+		if err != nil {
+			panic(err)
+		}
+		swaggerUrl := ginSwagger.URL(config.Host + "/swagger/doc.json")
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, swaggerUrl))
+
+		docs.SwaggerInfo.Host = host
+		//Only localhost supports http, for others, force to https
+		if strings.HasPrefix(host, "localhost") || strings.HasPrefix(host, "127") {
+			docs.SwaggerInfo.Schemes = []string{"http"}
+		} else {
+			docs.SwaggerInfo.Schemes = []string{"https"}
+		}
+		controller, err = NewController(config)
+		if err != nil {
+			panic(err.Error())
+		}
+	})
+
+	//Run daemon threads
+	//TODO: Implement cancel
+	var ctx context.Context
+	ctx, cancel = context.WithCancel(context.Background())
+	if config.CurrencyUpdateRoutine > 0 {
+		//TODO: Implement update timer
+		controller.CurrencyService.CurrencySyncRoutine(ctx)
+		log.Infof("Starting Currency Sync Routine, update for every %d seconds", config.CurrencyUpdateRoutine)
+	} else {
+		log.Infof("Currency Update Routine is disabled.")
+	}
+	if config.PBSUpdateRoutine > 0 {
+		controller.PbsTrafficDataService.ScheduledRoutine(ctx, time.Duration(config.PBSUpdateRoutine)*time.Second)
+		log.Infof("Starting PBS Sync Routine, update for every %d seconds", config.PBSUpdateRoutine)
+	} else {
+		log.Infof("PBS Update Routine is disabled.")
+	}
+	return log, controller
 }
 
 func setupRouter(wrapped *AKWrappedEngine, controller *Controller) error {

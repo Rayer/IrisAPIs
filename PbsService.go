@@ -47,7 +47,7 @@ type PbsTrafficDataService interface {
 	FetchPbsFromServer(ctx context.Context) ([]PbsParseJsonResult, error)
 	UpdateDatabase(ctx context.Context, data []PbsParseJsonResult, callback func(total int, now int, updated int, inserted int, skipped int)) error
 	GetHistory(ctx context.Context, pastDuration time.Duration) (map[string][]PbsHistoryEntry, error)
-	ScheduledWorker(ctx context.Context, updateRate time.Duration)
+	ScheduledRoutine(ctx context.Context, updateRate time.Duration)
 }
 
 type PbsTrafficDataServiceImpl struct {
@@ -223,7 +223,7 @@ func (p *PbsTrafficDataServiceImpl) GetHistory(_ context.Context, pastDuration t
 	return ret, nil
 }
 
-func (p *PbsTrafficDataServiceImpl) ScheduledWorker(ctx context.Context, updateRate time.Duration) {
+func (p *PbsTrafficDataServiceImpl) ScheduledRoutine(ctx context.Context, updateRate time.Duration) {
 	log.Infof("Starting PBS update service")
 	go func() {
 		timer := time.NewTicker(updateRate)
@@ -231,6 +231,7 @@ func (p *PbsTrafficDataServiceImpl) ScheduledWorker(ctx context.Context, updateR
 		for {
 			select {
 			case <-ctx.Done():
+				log.Infoln("Terminating PBS Schedule Worker")
 				return
 			case <-timer.C:
 				log.Debug("Updating PBS from server")

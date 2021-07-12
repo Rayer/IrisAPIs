@@ -2,6 +2,7 @@ package IrisAPIs
 
 import (
 	"fmt"
+	"github.com/fsnotify/fsnotify"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"net/url"
@@ -25,6 +26,8 @@ type Configuration struct {
 	PBSUpdateRoutine                 int    `doc:"PBS Update Routine time(seconds), <= 0 for no update"`
 	GRPCServerHost                   string `doc:"gRPC Server address for gRPC Server config, default is :8082"`
 	GRPCServerTarget                 string `doc:"gRPC Server address for gRPC Client config, default is :8082"`
+
+	OnFinishedLoadConfig func(config *Configuration)
 }
 
 func NewConfiguration() *Configuration {
@@ -64,6 +67,17 @@ func (c *Configuration) LoadConfiguration() error {
 	}
 
 	err = viper.Unmarshal(c)
+
+	if c.OnFinishedLoadConfig != nil {
+		c.OnFinishedLoadConfig(c)
+	}
+
+	viper.WatchConfig()
+	viper.OnConfigChange(func(in fsnotify.Event) {
+		if c.OnFinishedLoadConfig != nil {
+			c.OnFinishedLoadConfig(c)
+		}
+	})
 
 	if err != nil {
 		return err

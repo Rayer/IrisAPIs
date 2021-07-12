@@ -18,7 +18,7 @@ type CurrencyService interface {
 	GetMostRecentCurrencyDataRaw() (string, error)
 	SyncToDb() error
 	CurrencySyncRoutine(ctx context.Context)
-	CurrencySyncWorker(ctx context.Context) (*CurrencySyncResult, error)
+	CurrencySyncWorker() (*CurrencySyncResult, error)
 }
 
 type CurrencyContext struct {
@@ -224,7 +224,7 @@ func (c *CurrencyContext) CurrencySyncRoutine(ctx context.Context) {
 				return
 			default:
 				log.Infoln("Starting another round of CurrencySyncWorker...")
-				_, err := c.CurrencySyncWorker(ctx)
+				_, err := c.CurrencySyncWorker()
 				if err != nil {
 					log.Warnf("CurrencySyncWorker ends with an error : %s", err.Error())
 				}
@@ -233,7 +233,7 @@ func (c *CurrencyContext) CurrencySyncRoutine(ctx context.Context) {
 	}()
 }
 
-func (c *CurrencyContext) CurrencySyncWorker(_ context.Context) (*CurrencySyncResult, error) {
+func (c *CurrencyContext) CurrencySyncWorker() (*CurrencySyncResult, error) {
 
 	log.Printf("Database Object : %+v", c.Db)
 
