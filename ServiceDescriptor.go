@@ -100,7 +100,7 @@ func (d *DockerComponentDescriptor) IsAlive(ctx context.Context) (bool, error) {
 	}()
 
 	if imageName != container.Image {
-		return false, errors.Errorf("Continer %s found, but image mismatch : %s, expected %s", container.Names, container.Names, d.ImageName)
+		return false, errors.Errorf("Continer %s found, but image mismatch : %s, expected %s", container.Names, container.Image, d.ImageName)
 	}
 
 	return true, nil
