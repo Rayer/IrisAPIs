@@ -112,7 +112,7 @@ func (d *DockerComponentDescriptor) IsAlive(ctx context.Context) (bool, error) {
 	log.Infof("Get container info : %+v", container)
 
 	if d.isImageNameTagMatch() == false {
-		return false, errors.Errorf("Continer %s found, but image mismatch : %s, expected %s", container.Names, container.Image, d.ImageName)
+		return false, errors.Errorf("Continer %s found, but image mismatch : %s, expected %s(tag: %s)", container.Names, container.Image, d.ImageName, d.ImageTag)
 	}
 
 	return true, nil

@@ -126,8 +126,8 @@ func getTypeName(inVar interface{}) string {
 
 func (s *ServiceManagementContext) RegisterPresetServices(ctx context.Context) error {
 	return s.RegisterServices(ctx, []ServiceDescriptor{
-		NewDockerComponentDescriptor(ctx, "Iris Mainframe API", "APIService", "rayer/iris-apis", "release"),
-		NewDockerComponentDescriptor(ctx, "Iris Mainframe API(Test)", "APIService-Test", "rayer/iris-apis", "latest"),
+		NewDockerComponentDescriptor(ctx, "Iris Mainframe API", "APIService", "rayer/iris-apis", ""),
+		NewDockerComponentDescriptor(ctx, "Iris Mainframe API(Test)", "APIService-Test", "rayer/iris-apis", ""),
 		NewDockerComponentDescriptor(ctx, "OneIndex Service", "oneindex-service", "setzero/oneindex", ""),
 		NewDockerComponentDescriptor(ctx, "Jenkins Docker Service", "jenkins-service", "jenkins/jenkins", "alpine"),
 		NewDockerComponentDescriptor(ctx, "AppleNCCMonitor", "AppleProductMonitor", "rayer/apple-product-monitor", ""),
