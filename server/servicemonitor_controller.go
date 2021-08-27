@@ -24,7 +24,7 @@ type GetServiceStatusByIdResponse struct {
 // @Router /service [get]
 func (c *Controller) GetServiceStatus(ctx *gin.Context) {
 	ret := make([]GetServiceStatusByIdResponse, 0)
-	for _, stat := range c.ServiceMgmt.CheckAllServerStatus(nil) {
+	for _, stat := range c.ServiceMgmt.CheckAllServerStatus(ctx) {
 		ret = append(ret, GetServiceStatusByIdResponse{
 			Id:      stat.ID.String(),
 			Name:    stat.Name,
@@ -53,7 +53,7 @@ func (c *Controller) GetServiceStatusById(ctx *gin.Context) {
 		return
 	}
 
-	stat, err := c.ServiceMgmt.CheckServerStatus(nil, id)
+	stat, err := c.ServiceMgmt.CheckServerStatus(ctx, id)
 	if err != nil {
 		err404 := problems.NewDetailedProblem(http.StatusNotFound, "no such service bound with this id")
 		ctx.JSON(http.StatusNotFound, err404)
