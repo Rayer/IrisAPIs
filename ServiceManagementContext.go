@@ -2,8 +2,8 @@ package IrisAPIs
 
 import (
 	"github.com/docker/distribution/uuid"
-	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
+	"golang.org/x/net/context"
 	"reflect"
 )
 
@@ -24,74 +24,86 @@ type ServiceStatusRet struct {
 }
 
 type ServiceManagement interface {
-	RegisterService(service ServiceDescriptor) error
-	CheckAllServerStatus() []ServiceStatusRet
-	CheckServerStatus(id uuid.UUID) (ServiceStatusRet, error)
-	RegisterServices(services []ServiceDescriptor) error
-	RegisterPresetServices() error
+	RegisterService(ctx context.Context, service ServiceDescriptor) error
+	CheckAllServerStatus(ctx context.Context) []ServiceStatusRet
+	CheckServerStatus(ctx context.Context, id uuid.UUID) (ServiceStatusRet, error)
+	GetLogs(ctx context.Context, id uuid.UUID) (string, error)
+	RegisterServices(ctx context.Context, services []ServiceDescriptor) error
+	RegisterPresetServices(ctx context.Context) error
 }
 
 type ServiceManagementContext struct {
 	services map[uuid.UUID]ServiceDescriptor
 }
 
-func (s *ServiceManagementContext) CheckAllServerStatus() []ServiceStatusRet {
+func (s *ServiceManagementContext) CheckAllServerStatus(ctx context.Context) []ServiceStatusRet {
 	ret := make([]ServiceStatusRet, 0)
 	for k := range s.services {
-		s, _ := s.CheckServerStatus(k)
+		s, _ := s.CheckServerStatus(ctx, k)
 		ret = append(ret, s)
 	}
 	return ret
 }
 
-func (s *ServiceManagementContext) CheckServerStatus(id uuid.UUID) (ServiceStatusRet, error) {
+func (s *ServiceManagementContext) CheckServerStatus(ctx context.Context, id uuid.UUID) (ServiceStatusRet, error) {
 
-	if service, exists := s.services[id]; !exists {
+	service := s.getService(id)
+	if service == nil {
 		return ServiceStatusRet{}, errors.Errorf("no such service bound on id : %s", id.String())
-	} else {
-		alive, err := service.IsAlive()
-		return ServiceStatusRet{
-			ID: id,
-			Status: func() ServiceStatus {
-				if err != nil {
-					return StatusInternalError
-				}
-				if alive {
-					return StatusOK
-				}
-
-				return StatusDown
-			}(),
-			Name:        service.GetServiceName(),
-			ServiceType: getTypeName(service),
-			Message: func() string {
-				if err != nil {
-					return err.Error()
-				}
-				return ""
-			}(),
-		}, nil
 	}
+
+	alive, err := service.IsAlive(ctx)
+	return ServiceStatusRet{
+		ID: id,
+		Status: func() ServiceStatus {
+			if err != nil {
+				return StatusInternalError
+			}
+			if alive {
+				return StatusOK
+			}
+			return StatusDown
+		}(),
+		Name:        service.GetServiceName(),
+		ServiceType: getTypeName(service),
+		Message: func() string {
+			if err != nil {
+				return err.Error()
+			}
+			return ""
+		}(),
+	}, nil
 
 }
 
-func (s *ServiceManagementContext) RegisterService(service ServiceDescriptor) error {
-	//if _, exist := s.services[service.GetServiceName()]; exist {
-	//	return errors.New("duplicated service name is found!")
-	//}
-
+func (s *ServiceManagementContext) RegisterService(ctx context.Context, service ServiceDescriptor) error {
+	if service == nil {
+		return nil
+	}
 	s.services[uuid.Generate()] = service
 	return nil
 }
 
-func (s *ServiceManagementContext) RegisterServices(services []ServiceDescriptor) error {
+func (s *ServiceManagementContext) RegisterServices(ctx context.Context, services []ServiceDescriptor) error {
 	for _, v := range services {
-		err := s.RegisterService(v)
+		err := s.RegisterService(ctx, v)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func (s *ServiceManagementContext) GetLogs(ctx context.Context, id uuid.UUID) (string, error) {
+	return "", errors.New("Not yet implemented")
+}
+
+func (s *ServiceManagementContext) getService(id uuid.UUID) ServiceDescriptor {
+	if service, exists := s.services[id]; !exists {
+		return nil
+	} else {
+		return service
+	}
 }
 
 func NewServiceManagement() ServiceManagement {
@@ -107,54 +119,14 @@ func getTypeName(inVar interface{}) string {
 	}
 }
 
-func (s *ServiceManagementContext) RegisterPresetServices() error {
-	dc, err := client.NewEnvClient()
-	if err != nil {
-		return err
-	}
-	return s.RegisterServices([]ServiceDescriptor{
-		&DockerComponentDescriptor{
-			Name:          "IrisAPI",
-			ContainerName: "APIService",
-			ImageName:     "rayer/iris-apis",
-			ImageTag:      "release",
-			client:        dc,
-		},
-		&DockerComponentDescriptor{
-			Name:          "IrisAPI-Test",
-			ContainerName: "APIService-Test",
-			ImageName:     "rayer/iris-apis",
-			ImageTag:      "latest",
-			client:        dc,
-		},
-		&DockerComponentDescriptor{
-			Name:          "OneIndex",
-			ContainerName: "oneindex-service",
-			ImageName:     "setzero/oneindex",
-			ImageTag:      "",
-			client:        dc,
-		},
-		&DockerComponentDescriptor{
-			Name:          "Jenkins-Docker",
-			ContainerName: "jenkins-service",
-			ImageName:     "jenkins/jenkins",
-			ImageTag:      "alpine",
-			client:        dc,
-		},
-		&DockerComponentDescriptor{
-			Name:          "MTProxy",
-			ContainerName: "mtproxy",
-			ImageName:     "telegrammessenger/proxy",
-			ImageTag:      "",
-			client:        dc,
-		},
-		&DockerComponentDescriptor{
-			Name:          "AppleNCCMonitor",
-			ContainerName: "AppleProductMonitor",
-			ImageName:     "rayer/apple-product-monitor",
-			ImageTag:      "",
-			client:        dc,
-		},
+func (s *ServiceManagementContext) RegisterPresetServices(ctx context.Context) error {
+	return s.RegisterServices(ctx, []ServiceDescriptor{
+		NewDockerComponentDescriptor(ctx, "IrisAPI", "ApiService", "rayer/iris-apis", "release"),
+		NewDockerComponentDescriptor(ctx, "IrisAPI-Test", "ApiService", "rayer/iris-apis", "latest"),
+		NewDockerComponentDescriptor(ctx, "OneIndex", "oneindex-service", "setzero/oneindex", ""),
+		NewDockerComponentDescriptor(ctx, "Jenkins-Docker", "jenkins-service", "jenkins/jenkins", "alpine"),
+		NewDockerComponentDescriptor(ctx, "AppleNCCMonitor", "AppleProductMonitor", "rayer/apple-product-monitor", ""),
+		NewDockerComponentDescriptor(ctx, "MTProxy", "mtproxy", "telegrammessenger/proxy", ""),
 		&WebServiceDescriptor{
 			Name:    "WordPress",
 			PingUrl: "https://www.rayer.idv.tw/blog/wp-admin/install.php",

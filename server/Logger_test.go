@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestDnaMetaLogger(t *testing.T) {
+func TestMetaLogger(t *testing.T) {
 	tests := []struct {
 		name              string
 		url               string

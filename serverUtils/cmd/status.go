@@ -39,7 +39,7 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("status called")
-		ret := service.CheckAllServerStatus()
+		ret := service.CheckAllServerStatus(nil)
 		format := "%27s %20s %16s %8s %40s\n"
 		fmt.Printf(format, "ID", "Name", "Type", "Status", "Message")
 		for _, status := range ret {

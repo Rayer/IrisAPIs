@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
 	"testing"
+	"time"
 )
 
 type ServiceDescriptorSuite struct {
@@ -116,7 +117,6 @@ func (s *ServiceDescriptorSuite) TestDockerComponentDescriptor_IsAlive() {
 				ContainerName: "UTDocker",
 				ImageName:     "rayer/chatbot-server",
 				ImageTag:      "latest",
-				client:        s.dockerClient,
 			},
 			want:    true,
 			wantErr: false,
@@ -128,10 +128,9 @@ func (s *ServiceDescriptorSuite) TestDockerComponentDescriptor_IsAlive() {
 				ContainerName: "UTDockerNotHere",
 				ImageName:     "rayer/chatbot-server",
 				ImageTag:      "latest",
-				client:        s.dockerClient,
 			},
 			want:    false,
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "Wrong Image Name",
@@ -140,7 +139,6 @@ func (s *ServiceDescriptorSuite) TestDockerComponentDescriptor_IsAlive() {
 				ContainerName: "UTDocker",
 				ImageName:     "rayer/chatbot-server-Wrong",
 				ImageTag:      "latest",
-				client:        s.dockerClient,
 			},
 			want:    false,
 			wantErr: true,
@@ -153,14 +151,9 @@ func (s *ServiceDescriptorSuite) TestDockerComponentDescriptor_IsAlive() {
 
 	for _, tt := range tests {
 		s.T().Run(tt.name, func(t *testing.T) {
-			d := &DockerComponentDescriptor{
-				Name:          tt.fields.Name,
-				ContainerName: tt.fields.ContainerName,
-				ImageName:     tt.fields.ImageName,
-				ImageTag:      tt.fields.ImageTag,
-				client:        tt.fields.client,
-			}
-			got, err := d.IsAlive()
+			d := NewDockerComponentDescriptor(context.Background(), tt.fields.Name, tt.fields.ContainerName, tt.fields.ImageName, tt.fields.ImageTag)
+
+			got, err := d.IsAlive(context.TODO())
 			if (err != nil) != tt.wantErr {
 				t.Errorf("IsAlive() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -217,13 +210,64 @@ func (s *ServiceDescriptorSuite) TestWebServiceDescriptor_IsAlive() {
 				Name:    tt.fields.Name,
 				PingUrl: tt.fields.PingUrl,
 			}
-			got, err := r.IsAlive()
+			got, err := r.IsAlive(nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("IsAlive() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
 				t.Errorf("IsAlive() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func (s *ServiceDescriptorSuite) TestDockerComponentDescriptor_Logs() {
+	type fields struct {
+		Name          string
+		ContainerName string
+		ImageName     string
+		ImageTag      string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		haveLog bool
+		wantErr bool
+	}{
+		{
+			name: "LogSuccess",
+			fields: fields{
+				Name:          "TestDocker",
+				ContainerName: "UTDocker",
+				ImageName:     "rayer/chatbot-server",
+				ImageTag:      "latest",
+			},
+			haveLog: true,
+			wantErr: false,
+		},
+		{
+			name: "NoContainer",
+			fields: fields{
+				Name:          "TestDockerNotHere",
+				ContainerName: "UTDockerNotHere",
+				ImageName:     "rayer/chatbot-server",
+				ImageTag:      "latest",
+			},
+			haveLog: false,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		s.T().Run(tt.name, func(t *testing.T) {
+			d := NewDockerComponentDescriptor(context.Background(), tt.fields.Name, tt.fields.ContainerName, tt.fields.ImageName, tt.fields.ImageTag)
+			time.Sleep(2 * time.Second)
+			got, err := d.Logs(context.Background())
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Logs() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if len(got) > 1 != tt.haveLog {
+				t.Errorf("Expected haveLog == %v but it's %v", tt.haveLog, len(got) > 1)
 			}
 		})
 	}

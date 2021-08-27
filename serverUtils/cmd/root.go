@@ -70,7 +70,7 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	service = IrisAPIs.NewServiceManagement()
-	err := service.RegisterPresetServices()
+	err := service.RegisterPresetServices(nil)
 	if err != nil {
 		panic(err)
 	}

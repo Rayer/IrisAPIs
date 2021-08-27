@@ -64,7 +64,7 @@ func main() {
 	_ = setupRouter(NewAKWrappedEngine(r, apiKeyManager), controller)
 
 	//Check other services
-	ret := controller.ServiceMgmt.CheckAllServerStatus()
+	ret := controller.ServiceMgmt.CheckAllServerStatus(context.Background())
 	format := "%38s %20s %16s %8s %40s\n"
 	fmt.Printf(format, "ID", "Name", "Type", "Status", "Message")
 	for _, status := range ret {
@@ -144,6 +144,7 @@ func setupRouter(wrapped *AKWrappedEngine, controller *Controller) error {
 	{
 		system.GET("", IrisAPIs.ApiKeyNotPresented, controller.GetServiceStatus)
 		system.GET("/:id", IrisAPIs.ApiKeyNotPresented, controller.GetServiceStatusById)
+		system.GET("/:id/logs", IrisAPIs.ApiKeyNotPresented, controller.GetServiceLogs)
 	}
 
 	apiKey := wrapped.Group("/apiKey")
