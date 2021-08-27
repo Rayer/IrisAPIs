@@ -76,7 +76,7 @@ func (s *ServiceManagementContext) CheckServerStatus(ctx context.Context, id uui
 
 }
 
-func (s *ServiceManagementContext) RegisterService(ctx context.Context, service ServiceDescriptor) error {
+func (s *ServiceManagementContext) RegisterService(_ context.Context, service ServiceDescriptor) error {
 	if service == nil {
 		return nil
 	}
@@ -95,7 +95,12 @@ func (s *ServiceManagementContext) RegisterServices(ctx context.Context, service
 }
 
 func (s *ServiceManagementContext) GetLogs(ctx context.Context, id uuid.UUID) (string, error) {
-	return "", errors.New("Not yet implemented")
+	service := s.getService(id)
+	if service == nil {
+		return "", errors.Errorf("No such service with id have been found : %s", id)
+	}
+	return service.Logs(ctx)
+
 }
 
 func (s *ServiceManagementContext) getService(id uuid.UUID) ServiceDescriptor {
@@ -121,8 +126,8 @@ func getTypeName(inVar interface{}) string {
 
 func (s *ServiceManagementContext) RegisterPresetServices(ctx context.Context) error {
 	return s.RegisterServices(ctx, []ServiceDescriptor{
-		NewDockerComponentDescriptor(ctx, "Iris Mainframe API", "IrisAPI", "rayer/iris-apis", "release"),
-		NewDockerComponentDescriptor(ctx, "Iris Mainframe API(Test)", "IrisAPI-Test", "rayer/iris-apis", "latest"),
+		NewDockerComponentDescriptor(ctx, "Iris Mainframe API", "APIService", "rayer/iris-apis", "release"),
+		NewDockerComponentDescriptor(ctx, "Iris Mainframe API(Test)", "APIService-Test", "rayer/iris-apis", "latest"),
 		NewDockerComponentDescriptor(ctx, "OneIndex Service", "oneindex-service", "setzero/oneindex", ""),
 		NewDockerComponentDescriptor(ctx, "Jenkins Docker Service", "jenkins-service", "jenkins/jenkins", "alpine"),
 		NewDockerComponentDescriptor(ctx, "AppleNCCMonitor", "AppleProductMonitor", "rayer/apple-product-monitor", ""),
