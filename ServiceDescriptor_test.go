@@ -28,7 +28,7 @@ func (s *ServiceDescriptorSuite) SetupSuite() {
 	log.SetLevel(log.DebugLevel)
 	var err error
 	s.dockerAvailable = true
-	s.dockerClient, err = client.NewEnvClient()
+	s.dockerClient, err = client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		log.Warnf("Error creating docker client! (%s)", err.Error())
 		s.dockerAvailable = false
@@ -142,6 +142,17 @@ func (s *ServiceDescriptorSuite) TestDockerComponentDescriptor_IsAlive() {
 			},
 			want:    false,
 			wantErr: true,
+		},
+		{
+			name: "Success With Tag Waive",
+			fields: fields{
+				Name:          "TestDockerTagWaive",
+				ContainerName: "UTDocker",
+				ImageName:     "rayer/chatbot-server",
+				ImageTag:      "",
+			},
+			want:    true,
+			wantErr: false,
 		},
 	}
 

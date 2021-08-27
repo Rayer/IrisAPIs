@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type ServiceDescriptor interface {
@@ -79,6 +80,24 @@ func (d *DockerComponentDescriptor) refreshDockerParameters(ctx context.Context)
 	return nil
 }
 
+func (d *DockerComponentDescriptor) isImageNameTagMatch() bool {
+	imageNameInDocker := d.containerParam.Image
+	expectedImageName := d.ImageName
+	expectedImageTag := d.ImageTag
+	slice := strings.Split(imageNameInDocker, ":")
+	imageName := slice[0]
+	tagName := ""
+	if len(slice) > 1 {
+		tagName = slice[1]
+	}
+	if expectedImageTag == "" {
+		//It doesn't care about tag name, just compare image name
+		return imageName == expectedImageName
+	} else {
+		return imageName == expectedImageName && tagName == expectedImageTag
+	}
+}
+
 func (d *DockerComponentDescriptor) GetServiceName() string {
 	return d.Name
 }
@@ -92,14 +111,7 @@ func (d *DockerComponentDescriptor) IsAlive(ctx context.Context) (bool, error) {
 	container := d.containerParam
 	log.Infof("Get container info : %+v", container)
 
-	imageName := func() string {
-		if d.ImageTag == "" {
-			return d.ImageName
-		}
-		return fmt.Sprintf("%s:%s", d.ImageName, d.ImageTag)
-	}()
-
-	if imageName != container.Image {
+	if d.isImageNameTagMatch() == false {
 		return false, errors.Errorf("Continer %s found, but image mismatch : %s, expected %s", container.Names, container.Image, d.ImageName)
 	}
 
