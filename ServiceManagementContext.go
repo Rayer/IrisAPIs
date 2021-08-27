@@ -121,12 +121,12 @@ func getTypeName(inVar interface{}) string {
 
 func (s *ServiceManagementContext) RegisterPresetServices(ctx context.Context) error {
 	return s.RegisterServices(ctx, []ServiceDescriptor{
-		NewDockerComponentDescriptor(ctx, "IrisAPI", "ApiService", "rayer/iris-apis", "release"),
-		NewDockerComponentDescriptor(ctx, "IrisAPI-Test", "ApiService", "rayer/iris-apis", "latest"),
-		NewDockerComponentDescriptor(ctx, "OneIndex", "oneindex-service", "setzero/oneindex", ""),
-		NewDockerComponentDescriptor(ctx, "Jenkins-Docker", "jenkins-service", "jenkins/jenkins", "alpine"),
+		NewDockerComponentDescriptor(ctx, "Iris Mainframe API", "IrisAPI", "rayer/iris-apis", "release"),
+		NewDockerComponentDescriptor(ctx, "Iris Mainframe API(Test)", "IrisAPI-Test", "rayer/iris-apis", "latest"),
+		NewDockerComponentDescriptor(ctx, "OneIndex Service", "oneindex-service", "setzero/oneindex", ""),
+		NewDockerComponentDescriptor(ctx, "Jenkins Docker Service", "jenkins-service", "jenkins/jenkins", "alpine"),
 		NewDockerComponentDescriptor(ctx, "AppleNCCMonitor", "AppleProductMonitor", "rayer/apple-product-monitor", ""),
-		NewDockerComponentDescriptor(ctx, "MTProxy", "mtproxy", "telegrammessenger/proxy", ""),
+		//NewDockerComponentDescriptor(ctx, "MTProxy", "mtproxy", "telegrammessenger/proxy", ""),
 		&WebServiceDescriptor{
 			Name:    "WordPress",
 			PingUrl: "https://www.rayer.idv.tw/blog/wp-admin/install.php",
