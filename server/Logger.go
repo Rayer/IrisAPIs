@@ -54,6 +54,16 @@ func InjectLoggerMiddleware(logger logrus.FieldLogger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		ipAddr := ctx.ClientIP()
 
+		//TODO: 目前ClientIP()拿X-Forwarded-To需要設定他們自己的私有engine.trustedCIDRs
+		//      以目前1.7.4版來講根本沒地方設定進去，這個是他們自己用來做test的後門，所以還是得自己parse先
+
+		remoteIpHeaders := []string{"X-Forwarded-For", "X-Real-Ip"}
+		for _, header := range remoteIpHeaders {
+			if addr := ctx.GetHeader(header); addr != "" {
+				ipAddr = addr
+			}
+		}
+
 		correlationId := ""
 
 		correlationIdHeader := ctx.Request.Header["X-Correlation-ID"]

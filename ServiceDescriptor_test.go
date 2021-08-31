@@ -64,7 +64,7 @@ func (s *ServiceDescriptorSuite) SetupSuite() {
 		cr, err := s.dockerClient.ContainerCreate(context.TODO(), &container.Config{
 			Image: "rayer/chatbot-server:latest",
 			//Cmd: []string{"echo", "Running UT Docker container..."},
-		}, nil, nil, "UTDocker")
+		}, nil, nil, nil, "UTDocker")
 		if err != nil {
 			//log.Warnf("Fail to create container from image : %s", err.Error())
 			panic(err)
