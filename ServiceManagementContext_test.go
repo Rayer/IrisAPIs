@@ -1,6 +1,7 @@
 package IrisAPIs
 
 import (
+	"context"
 	"github.com/docker/distribution/uuid"
 	log "github.com/sirupsen/logrus"
 	"testing"
@@ -8,11 +9,12 @@ import (
 
 func TestServiceManagementContext_CheckAllServerStatus(t *testing.T) {
 	s := NewServiceManagement()
-	err := s.RegisterPresetServices()
+	ctx := context.Background()
+	err := s.RegisterPresetServices(ctx)
 	if err != nil {
 		log.Warn(err.Error())
 	}
-	result := s.CheckAllServerStatus()
+	result := s.CheckAllServerStatus(ctx)
 	for _, v := range result {
 		t.Logf("%s - %s - %s - %s - %s\n", v.ID, v.Name, v.Status, v.ServiceType, v.Message)
 	}
@@ -50,7 +52,7 @@ func TestServiceManagementContext_RegisterService(t *testing.T) {
 			s := &ServiceManagementContext{
 				services: tt.fields.services,
 			}
-			if err := s.RegisterService(tt.args.service); (err != nil) != tt.wantErr {
+			if err := s.RegisterService(nil, tt.args.service); (err != nil) != tt.wantErr {
 				t.Errorf("RegisterService() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

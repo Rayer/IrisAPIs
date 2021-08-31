@@ -70,7 +70,7 @@ func (c *Controller) ReInitServices(ctx context.Context, config *IrisAPIs.Config
 	c.ApiKeyService = c.registerService(IrisAPIs.NewApiKeyService(db)).(IrisAPIs.ApiKeyService)
 	c.ServiceMgmt = c.registerService(func() IrisAPIs.ServiceManagement {
 		service := IrisAPIs.NewServiceManagement()
-		_ = service.RegisterPresetServices()
+		_ = service.RegisterPresetServices(ctx)
 		return service
 	}()).(IrisAPIs.ServiceManagement)
 	c.ArticleProcessorService = c.registerService(IrisAPIs.NewArticleProcessorContext()).(IrisAPIs.ArticleProcessorService)
