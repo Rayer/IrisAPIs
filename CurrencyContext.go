@@ -217,7 +217,6 @@ type CurrencySyncResult struct {
 func (c *CurrencyContext) CurrencySyncRoutine(ctx context.Context) {
 	go func() {
 		for {
-			log.Infoln("Starting another round of CurrencySyncWorker...")
 			select {
 			case <-ctx.Done():
 				log.Infoln("Shutting down CurrencySyncRoutine")

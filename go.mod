@@ -31,6 +31,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/mux v1.7.4 // indirect
+	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/magiconair/properties v1.8.5
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
@@ -44,6 +45,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rayer/chatbot v0.5.0
 	github.com/schollz/progressbar/v3 v3.8.0
+	github.com/sevlyar/go-daemon v0.1.5 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
