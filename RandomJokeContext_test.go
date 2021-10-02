@@ -7,6 +7,7 @@ import (
 )
 
 func Test_fetchRandomJoke(t *testing.T) {
+	t.SkipNow()
 	c, err := fetchRandomJoke(context.TODO())
 	assert.Equal(t, err, nil)
 	t.Logf("Fetched random joke : %+v", c)
