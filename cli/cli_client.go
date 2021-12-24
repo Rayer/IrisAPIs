@@ -1,9 +1,9 @@
 package main
 
 import (
-	"IrisAPIs"
 	"bufio"
 	"fmt"
+	"github.com/Rayer/IrisAPIs"
 	"github.com/sirupsen/logrus"
 	"os"
 	"strings"

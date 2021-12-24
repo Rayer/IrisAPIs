@@ -1,9 +1,9 @@
 package main
 
 import (
-	"IrisAPIs"
 	"bytes"
 	"fmt"
+	"github.com/Rayer/IrisAPIs"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"

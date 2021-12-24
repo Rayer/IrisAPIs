@@ -1,8 +1,8 @@
 package main
 
 import (
-	"IrisAPIs"
 	"fmt"
+	"github.com/Rayer/IrisAPIs"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"

@@ -1,6 +1,6 @@
 package main
 
-import "IrisAPIs/apikey_cli/cmd"
+import "github.com/Rayer/IrisAPIs/apikey_cli/cmd"
 
 func main() {
 	cmd.Execute()

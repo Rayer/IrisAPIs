@@ -1,11 +1,11 @@
 package main
 
 import (
-	"IrisAPIs"
-	IrisAPIsGRPC "IrisAPIs/grpc"
-	"IrisAPIs/server/docs"
 	"context"
 	"fmt"
+	"github.com/Rayer/IrisAPIs"
+	IrisAPIsGRPC "github.com/Rayer/IrisAPIs/grpc"
+	"github.com/Rayer/IrisAPIs/server/docs"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

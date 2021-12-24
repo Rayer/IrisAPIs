@@ -5,7 +5,7 @@
 package mock_IrisAPIs
 
 import (
-	IrisAPIs "IrisAPIs"
+	IrisAPIs "github.com/Rayer/IrisAPIs"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )

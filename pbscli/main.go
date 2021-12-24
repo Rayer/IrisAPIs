@@ -16,7 +16,7 @@ limitations under the License.
 package main
 
 import (
-	"IrisAPIs/pbscli/cmd"
+	"github.com/Rayer/IrisAPIs/pbscli/cmd"
 	"time"
 )
 

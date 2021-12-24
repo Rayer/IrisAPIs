@@ -1,4 +1,4 @@
-module IrisAPIs
+module github.com/Rayer/IrisAPIs
 
 go 1.16
 
