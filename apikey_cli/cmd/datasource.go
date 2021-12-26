@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"IrisAPIs"
-	IrisAPIsGRPC "IrisAPIs/grpc"
 	"context"
+	"github.com/Rayer/IrisAPIs"
+	IrisAPIsGRPC "github.com/Rayer/IrisAPIs/grpc"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"time"

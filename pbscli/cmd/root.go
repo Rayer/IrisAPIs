@@ -2,9 +2,9 @@
 package cmd
 
 import (
-	"IrisAPIs"
 	"context"
 	"fmt"
+	"github.com/Rayer/IrisAPIs"
 	"github.com/spf13/cobra"
 	"github.com/xormplus/xorm/log"
 	"os"

@@ -1,4 +1,4 @@
-module IrisAPIs
+module github.com/Rayer/IrisAPIs
 
 go 1.16
 
@@ -45,7 +45,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/rayer/chatbot v0.5.0
 	github.com/schollz/progressbar/v3 v3.8.0
-	github.com/sevlyar/go-daemon v0.1.5 // indirect
+	github.com/sevlyar/go-daemon v0.1.5
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect

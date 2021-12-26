@@ -1,8 +1,8 @@
 package IrisAPIsGRPC
 
 import (
-	"IrisAPIs"
 	"context"
+	"github.com/Rayer/IrisAPIs"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -16,7 +16,7 @@ func NewArticleProcessorServiceServiceGRPC() *ArticleProcessorServiceServiceGRPC
 	return &ArticleProcessorServiceServiceGRPC{}
 }
 
-func (a *ArticleProcessorServiceServiceGRPC) ProcessText(ctx context.Context, req *ProcessTextRequest) (*ProcessTextResponse, error) {
+func (a *ArticleProcessorServiceServiceGRPC) ProcessText(_ context.Context, req *ProcessTextRequest) (*ProcessTextResponse, error) {
 	service := IrisAPIs.NewArticleProcessorContext()
 	res, err := service.Transform(IrisAPIs.ProcessParameters{BytesPerLine: int(req.BytesPerLine)}, req.Text)
 	if err != nil {

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"IrisAPIs"
-	IrisAPIsGRPC "IrisAPIs/grpc"
+	"github.com/Rayer/IrisAPIs"
+	IrisAPIsGRPC "github.com/Rayer/IrisAPIs/grpc"
 )
 
 func main() {

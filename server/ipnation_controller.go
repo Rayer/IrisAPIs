@@ -1,7 +1,7 @@
 package main
 
 import (
-	"IrisAPIs"
+	"github.com/Rayer/IrisAPIs"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
 	"net/http"

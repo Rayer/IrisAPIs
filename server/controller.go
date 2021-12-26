@@ -1,9 +1,9 @@
 package main
 
 import (
-	"IrisAPIs"
 	"context"
 	"fmt"
+	"github.com/Rayer/IrisAPIs"
 	"github.com/gin-gonic/gin"
 	"github.com/moogar0880/problems"
 	"github.com/pkg/errors"

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"IrisAPIs"
-	mock_IrisAPIs "IrisAPIs/server/mock"
 	"encoding/json"
 	"github.com/Pallinder/go-randomdata"
+	"github.com/Rayer/IrisAPIs"
+	mock_IrisAPIs "github.com/Rayer/IrisAPIs/server/mock"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"

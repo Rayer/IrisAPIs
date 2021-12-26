@@ -16,8 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"IrisAPIs"
 	"fmt"
+	"github.com/Rayer/IrisAPIs"
 	"github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

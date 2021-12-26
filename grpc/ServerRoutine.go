@@ -1,8 +1,8 @@
 package IrisAPIsGRPC
 
 import (
-	"IrisAPIs"
 	"context"
+	"github.com/Rayer/IrisAPIs"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
@@ -23,7 +23,7 @@ func (g *GRPCServerRoutine) Run(conf *IrisAPIs.Configuration) {
 	g.runImpl(conf)
 }
 
-func (g *GRPCServerRoutine) RunDetach(ctx context.Context, conf *IrisAPIs.Configuration) chan Events {
+func (g *GRPCServerRoutine) RunDetach(_ context.Context, conf *IrisAPIs.Configuration) chan Events {
 	events := make(chan Events)
 	go func() {
 		g.runImpl(conf)

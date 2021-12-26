@@ -1,7 +1,7 @@
 package main
 
 import (
-	"IrisAPIs"
+	"github.com/Rayer/IrisAPIs"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
