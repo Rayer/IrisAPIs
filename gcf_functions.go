@@ -2,7 +2,6 @@ package IrisAPIs
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
@@ -11,10 +10,6 @@ import (
 // PubSubMessage is the payload of a Pub/Sub event. Please refer to the docs for
 // additional information regarding Pub/Sub events.
 type PubSubMessage struct {
-	Data []byte `json:"data"`
-}
-
-type UpdateCurrencyDatabaseSecretPathPayload struct {
 	SecretPath string `json:"secret_path"`
 }
 
@@ -24,15 +19,10 @@ type UpdateCurrencyDatabaseConfig struct {
 }
 
 func UpdateCurrencyDatabase(ctx context.Context, m PubSubMessage) error {
-	secretPathPayload := UpdateCurrencyDatabaseSecretPathPayload{}
-	err := json.Unmarshal(m.Data, &secretPathPayload)
-	if err != nil {
-		return errors.Errorf("update PubSubMessage doesn't contain correct Secret Path data : %v", err)
-	}
 
-	b, err := ioutil.ReadFile(secretPathPayload.SecretPath)
+	b, err := ioutil.ReadFile(m.SecretPath)
 	if err != nil {
-		return errors.Errorf("secret path brought from PubSubMessage is incorrect, which is %v, err : %v", secretPathPayload.SecretPath, err)
+		return errors.Errorf("secret path brought from PubSubMessage is incorrect, which is %v, err : %v", m.SecretPath, err)
 	}
 
 	config := UpdateCurrencyDatabaseConfig{}
