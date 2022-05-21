@@ -124,7 +124,9 @@ func (a *ApiKeyControllerTestSuite) TestController_GetKey() {
 	for _, tt := range tests {
 		a.T().Run(tt.name, func(t *testing.T) {
 			c := &Controller{
-				ApiKeyService: tt.fields.ApiKeyService,
+				ServiceMonolith: &IrisAPIs.ServiceMonolith{
+					ApiKeyService: tt.fields.ApiKeyService,
+				},
 			}
 			g, r := createGinTestItems()
 			g.Request = httptest.NewRequest("GET", "/apiKey", nil)
@@ -205,7 +207,9 @@ func (a *ApiKeyControllerTestSuite) TestController_IssueApiKey() {
 	for _, tt := range tests {
 		a.T().Run(tt.name, func(t *testing.T) {
 			c := &Controller{
-				ApiKeyService: tt.fields.ApiKeyService,
+				ServiceMonolith: &IrisAPIs.ServiceMonolith{
+					ApiKeyService: tt.fields.ApiKeyService,
+				},
 			}
 			g, r := createGinTestItems()
 			payload := strings.NewReader(tt.args.payload)
@@ -247,7 +251,9 @@ func (a *ApiKeyControllerTestSuite) TestController_GetAllKeys() {
 	for _, tt := range tests {
 		a.T().Run(tt.name, func(t *testing.T) {
 			c := &Controller{
-				ApiKeyService: tt.fields.ApiKeyService,
+				ServiceMonolith: &IrisAPIs.ServiceMonolith{
+					ApiKeyService: tt.fields.ApiKeyService,
+				},
 			}
 			g, r := createGinTestItems()
 			c.GetAllKeys(g)
@@ -279,7 +285,9 @@ func (a *ApiKeyControllerTestSuite) TestController_GetApiUsage() {
 	for _, tt := range tests {
 		a.T().Run(tt.name, func(t *testing.T) {
 			_ = &Controller{
-				ApiKeyService: mockService,
+				ServiceMonolith: &IrisAPIs.ServiceMonolith{
+					ApiKeyService: mockService,
+				},
 			}
 		})
 	}

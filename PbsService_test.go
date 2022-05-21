@@ -1,3 +1,6 @@
+//go:build ignored_test
+// +build ignored_test
+
 package IrisAPIs
 
 import (
