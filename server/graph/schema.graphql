@@ -1,0 +1,414 @@
+type Query {
+  """
+  Get service status with specified ID
+
+  Equivalent to GET /service/{id}
+  """
+  mainGetServiceStatusByIdResponse(
+    """Service ID"""
+    id: String!
+  ): MainGetServiceStatusByIdResponse
+
+  """
+  Detect client IP address and look up information
+
+  Equivalent to GET /ip2nation/myip
+  """
+  mainIpNationMyIPResponse: MainIpNationMyIPResponse
+
+  """
+  Ping for Iris health check
+
+  Equivalent to GET /ping
+  """
+  mainPingResponse: MainPingResponse
+
+  """
+  Get most PBS data, default value is 3600 seconds
+
+  Equivalent to GET /pbs/recent
+  """
+  pbsRecent(
+    """Format, either text or json(default = json)"""
+    format: String
+
+    """Period, in seconds(default = 3600)"""
+    period: String
+  ): [MainGetRecentPBSDataResponse]
+
+  """
+  Get all service status upon registered ones
+
+  Equivalent to GET /service
+  """
+  service: [MainGetServiceStatusByIdResponse]
+
+  """
+  Get service logs with specified ID
+
+  Equivalent to GET /service/{id}/logs
+  """
+  serviceLogs(
+    """Service ID"""
+    id: String!
+  ): String
+
+  """
+  A viewer that wraps all operations authenticated via security scheme 'ApiKeyAuth', which is of type 'apiKey'
+  """
+  viewerApiKey(apiKey: String!): ViewerApiKey
+
+  """
+  A viewer that wraps operations for all available authentication mechanisms
+  """
+  viewerAnyAuth(apiKeyAuth: ApiKeyAuthInput): ViewerAnyAuth
+}
+
+type MainGetServiceStatusByIdResponse {
+  id: String
+  message: String
+  name: String
+  status: String
+  type: String
+}
+
+type MainIpNationMyIPResponse {
+  country: String
+  countrySymbol: String
+  ipAddr: String
+  lat: Float
+  lon: Float
+}
+
+type MainPingResponse {
+  buildTimestamp: Int
+  hostname: String
+  imageTag: String
+  jenkinsUrl: String
+  message: String
+  time: String
+  timezone: String
+}
+
+type MainGetRecentPBSDataResponse {
+  events: [MainSinglePBSEventInfo]
+  id: String
+}
+
+type MainSinglePBSEventInfo {
+  message: String
+  time: String
+}
+
+"""A viewer for security scheme 'ApiKeyAuth'"""
+type ViewerApiKey {
+  """
+  Get current api keys
+
+  Equivalent to GET /apiKey
+  """
+  apiKey: [MainApiKeyBrief]
+
+  """
+  Get most recent raw data fetching from fixer.io
+
+  Equivalent to GET /currency
+  """
+  currency: String
+
+  """
+  Get destinated API Key detail
+
+  Equivalent to GET /apiKey/{id}
+  """
+  mainApiKeyDetail(
+    """Api Key ID"""
+    id: Int!
+  ): MainApiKeyDetail
+
+  """
+  Get API Usages, can pass timestamp into thee
+
+  Equivalent to GET /apiKey/{id}/usage
+  """
+  mainApiKeyUsage(
+    """From(timestamp)"""
+    from: Int
+
+    """Api Key ID"""
+    id: Int!
+
+    """To(timestamp)"""
+    to: Int
+  ): MainApiKeyUsage
+
+  """
+  Sync server cache with Fixer.io with most recent raw data
+
+  Equivalent to GET /currency/sync
+  """
+  mainGenericResultResponse: MainGenericResultResponse
+
+  """
+  Look up in database, find which nation belongs to an IP
+
+  Equivalent to GET /ip2nation
+  """
+  mainIpNationCountries(
+    """IP address"""
+    ip: String!
+  ): JSON
+}
+
+type MainApiKeyBrief {
+  id: Int
+  key: String
+  privileged: Boolean
+}
+
+type MainApiKeyDetail {
+  application: String
+  id: Int
+  issueBy: String
+  key: String
+  privileged: Boolean
+}
+
+type MainApiKeyUsage {
+  access: [MainAccessRecord]
+  id: Int
+}
+
+type MainAccessRecord {
+  ip: String
+  path: String
+  time: String
+}
+
+type MainGenericResultResponse {
+  result: Boolean
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+"""Warning: Not every request will work with this viewer type"""
+type ViewerAnyAuth {
+  """
+  Get current api keys
+
+  Equivalent to GET /apiKey
+  """
+  apiKey: [MainApiKeyBrief]
+
+  """
+  Get most recent raw data fetching from fixer.io
+
+  Equivalent to GET /currency
+  """
+  currency: String
+
+  """
+  Get destinated API Key detail
+
+  Equivalent to GET /apiKey/{id}
+  """
+  mainApiKeyDetail(
+    """Api Key ID"""
+    id: Int!
+  ): MainApiKeyDetail
+
+  """
+  Get API Usages, can pass timestamp into thee
+
+  Equivalent to GET /apiKey/{id}/usage
+  """
+  mainApiKeyUsage(
+    """From(timestamp)"""
+    from: Int
+
+    """Api Key ID"""
+    id: Int!
+
+    """To(timestamp)"""
+    to: Int
+  ): MainApiKeyUsage
+
+  """
+  Sync server cache with Fixer.io with most recent raw data
+
+  Equivalent to GET /currency/sync
+  """
+  mainGenericResultResponse: MainGenericResultResponse
+
+  """
+  Look up in database, find which nation belongs to an IP
+
+  Equivalent to GET /ip2nation
+  """
+  mainIpNationCountries(
+    """IP address"""
+    ip: String!
+  ): JSON
+}
+
+"""API key credentials for the security protocol 'ApiKeyAuth'"""
+input ApiKeyAuthInput {
+  apiKey: String
+}
+
+type Mutation {
+  """
+  Transform Article, including split by bytes...etc
+
+  Equivalent to POST /article_process
+  """
+  postArticleProcess(mainTransformArticleRequestInput: MainTransformArticleRequestInput!): MainTransformArticleResponse
+
+  """
+  Convert currency from most recent data
+
+  Equivalent to POST /currency/convert
+  """
+  postCurrencyConvert(mainCurrencyConvertInput: MainCurrencyConvertInput!): MainCurrencyConvert
+
+  """
+  A viewer that wraps all operations authenticated via security scheme 'ApiKeyAuth', which is of type 'apiKey'
+  """
+  mutationViewerApiKey(apiKey: String!): MutationViewerApiKey
+
+  """
+  A viewer that wraps operations for all available authentication mechanisms
+  """
+  mutationViewerAnyAuth(apiKeyAuth: ApiKeyAuthInput): MutationViewerAnyAuth
+}
+
+type MainTransformArticleResponse {
+  text: String
+}
+
+input MainTransformArticleRequestInput {
+  bytesPerLine: Int
+  text: String
+}
+
+type MainCurrencyConvert {
+  amount: Float
+  from: String
+  result: Float
+  to: String
+}
+
+input MainCurrencyConvertInput {
+  amount: Float
+  from: String
+  result: Float
+  to: String
+}
+
+"""A viewer for security scheme 'ApiKeyAuth'"""
+type MutationViewerApiKey {
+  """
+  Reset user status to initial
+
+  Equivalent to DELETE /chatbot/{user}
+  """
+  deleteChatbotUser(
+    """User name to reset"""
+    user: String!
+  ): MainChatbotResetUserResponse
+
+  """
+  Issue an API Key to user, this endpoint requires privileges
+
+  Equivalent to POST /apiKey
+  """
+  postApiKey(mainIssueApiKeyPayloadInput: MainIssueApiKeyPayloadInput!): MainIssueApiKeyResponse
+
+  """
+  Main Chatter interface for ChatBot
+
+  Equivalent to POST /chatbot
+  """
+  postChatbot(mainChatbotConversationInput: MainChatbotConversationInput!): MainChatbotReactResponse
+
+  """
+  Look up in database, find which nation belongs to an IP
+
+  Equivalent to POST /ip2nation/bulk
+  """
+  postIp2nationBulk(mainIpNationCountriesBulkInput: MainIpNationCountriesBulkInput!): MainIpNationCountriesBulkResponse
+}
+
+type MainChatbotResetUserResponse {
+  message: String
+  user: String
+}
+
+type MainIssueApiKeyResponse {
+  key: String
+}
+
+input MainIssueApiKeyPayloadInput {
+  application: String
+  useInHeader: Boolean
+  useInQueryParam: Boolean
+}
+
+type MainChatbotReactResponse {
+  error: String
+  invalidKeywords: [String]
+  keywords: [String]
+  message: String
+  next: String
+  prompt: String
+}
+
+input MainChatbotConversationInput {
+  input: String
+  user: String
+}
+
+type MainIpNationCountriesBulkResponse {
+  ipAddrResult: JSON
+}
+
+input MainIpNationCountriesBulkInput {
+  ipAddrList: [String]
+}
+
+"""Warning: Not every request will work with this viewer type"""
+type MutationViewerAnyAuth {
+  """
+  Reset user status to initial
+
+  Equivalent to DELETE /chatbot/{user}
+  """
+  deleteChatbotUser(
+    """User name to reset"""
+    user: String!
+  ): MainChatbotResetUserResponse
+
+  """
+  Issue an API Key to user, this endpoint requires privileges
+
+  Equivalent to POST /apiKey
+  """
+  postApiKey(mainIssueApiKeyPayloadInput: MainIssueApiKeyPayloadInput!): MainIssueApiKeyResponse
+
+  """
+  Main Chatter interface for ChatBot
+
+  Equivalent to POST /chatbot
+  """
+  postChatbot(mainChatbotConversationInput: MainChatbotConversationInput!): MainChatbotReactResponse
+
+  """
+  Look up in database, find which nation belongs to an IP
+
+  Equivalent to POST /ip2nation/bulk
+  """
+  postIp2nationBulk(mainIpNationCountriesBulkInput: MainIpNationCountriesBulkInput!): MainIpNationCountriesBulkResponse
+}

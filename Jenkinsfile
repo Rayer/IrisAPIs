@@ -7,7 +7,8 @@ pipeline {
 
                 slackSend message: "${BUILD_TAG} start to build."
                 sh label: 'go version', script: 'go version'
-                sh label: 'install gocover-cobertura', script: 'go get github.com/t-yuki/gocover-cobertura'
+                sh label: 'install gocover-cobertura', script: 'go install github.com/boumenot/gocover-cobertura@v1.2.0'
+                sh label: 'tidy', script: 'go mod tidy'
                 sh label: 'generate mocks', script: 'go generate ./...'
                 lock(quantity: 1, resource: 'IrisAPI_UT') {
                     withCredentials([string(credentialsId: 'fixerioApiKey', variable: 'FIXERIO_KEY'), string(credentialsId: 'testConnectionString', variable: 'TEST_DB_CONN_STR')]) {

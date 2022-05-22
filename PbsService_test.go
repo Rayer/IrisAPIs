@@ -1,3 +1,5 @@
+//go:build NoJenkinsBuild
+
 package IrisAPIs
 
 import (

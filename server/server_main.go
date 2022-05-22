@@ -1,11 +1,18 @@
+//go:build !gql_demoserver
+// +build !gql_demoserver
+
 package main
 
 import (
 	"IrisAPIs"
 	IrisAPIsGRPC "IrisAPIs/grpc"
 	"IrisAPIs/server/docs"
+	"IrisAPIs/server/graph"
+	"IrisAPIs/server/graph/generated"
 	"context"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -36,9 +43,11 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @host api.rayer.idv.tw
-//go:generate go get -u github.com/golang/mock/mockgen@v1.4.4
-//go:generate go get -u github.com/swaggo/swag/cmd/swag@v1.6.7
+//go:generate go install github.com/golang/mock/mockgen@v1.4.4
+//go:generate go install github.com/swaggo/swag/cmd/swag@v1.6.7
 //go:generate ${GOPATH}/bin/swag init -g server_main.go
+//go:generate go get github.com/99designs/gqlgen@v0.17.5
+//go:generate go run github.com/99designs/gqlgen generate
 func main() {
 
 	r := gin.Default()
@@ -185,6 +194,14 @@ func setupRouter(wrapped *AKWrappedEngine, controller *Controller) error {
 		pbs.GET("/recent", IrisAPIs.ApiKeyNotPresented, controller.GetRecentPBSData)
 	}
 
+	//http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	//http.Handle("/query", srv)
+	gql := wrapped.Group("/graph")
+	{
+		gql.GET("/", IrisAPIs.ApiKeyNotPresented, playgroundHandler())
+		gql.POST("/", IrisAPIs.ApiKeyNotPresented, graphqlHandler(controller.ServiceMonolith))
+	}
+
 	gLogger.Info("Listing privilege endpoints : ")
 	privilegeEndpoints := wrapped.GetPrivilegeMap()
 	for path, level := range privilegeEndpoints {
@@ -192,4 +209,26 @@ func setupRouter(wrapped *AKWrappedEngine, controller *Controller) error {
 	}
 
 	return nil
+}
+
+//TODO: Move them into GQL controller
+func graphqlHandler(services *IrisAPIs.ServiceMonolith) gin.HandlerFunc {
+	// NewExecutableSchema and Config are in the generated.go file
+	// Resolver is in the resolver.go file
+	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
+		Services: services,
+	}}))
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
+// Defining the Playground handler
+func playgroundHandler() gin.HandlerFunc {
+	h := playground.Handler("GraphQL Test Dashboard", "/graph")
+
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
 }

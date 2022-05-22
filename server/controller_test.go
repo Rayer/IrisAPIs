@@ -25,7 +25,9 @@ func (c *ControllerTestSuite) SetupTest() {
 	c.responseRecorder = httptest.NewRecorder()
 	c.gin, _ = gin.CreateTestContext(c.responseRecorder)
 	c.controller = &Controller{
-		BuildInfoService: IrisAPIs.NewBuildInfoService(),
+		ServiceMonolith: &IrisAPIs.ServiceMonolith{
+			BuildInfoService: IrisAPIs.NewBuildInfoService(),
+		},
 	}
 }
 
