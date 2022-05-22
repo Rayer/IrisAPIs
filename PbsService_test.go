@@ -1,5 +1,4 @@
-//go:build ignored_test
-// +build ignored_test
+//go:build NoJenkinsBuild
 
 package IrisAPIs
 
