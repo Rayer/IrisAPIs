@@ -50,10 +50,10 @@ func (r *queryResolver) Service(ctx context.Context) ([]*model.MainGetServiceSta
 	for _, s := range serviceStatusList {
 		ret = append(ret, &model.MainGetServiceStatusByIDResponse{
 			ID:      IrisAPIs.PString(s.ID.String()),
-			Message: &s.Message,
-			Name:    &s.Name,
+			Message: IrisAPIs.PValue(s.Message),
+			Name:    IrisAPIs.PValue(s.Name),
 			Status:  IrisAPIs.PString(string(s.Status)),
-			Type:    &s.ServiceType,
+			Type:    IrisAPIs.PValue(s.ServiceType),
 		})
 	}
 	return ret, nil
