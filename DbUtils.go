@@ -27,7 +27,7 @@ func PTime(value time.Time) *time.Time {
 	return &value
 }
 
-func PValue(value interface{}) *interface{} {
+func PValue[T any](value T) *T {
 	return &value
 }
 
