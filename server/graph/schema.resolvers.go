@@ -13,11 +13,11 @@ import (
 )
 
 func (r *mutationResolver) PostArticleProcess(ctx context.Context, mainTransformArticleRequestInput model.MainTransformArticleRequestInput) (*model.MainTransformArticleResponse, error) {
-	panic(fmt.Errorf("not implemented"))
+	return nil, fmt.Errorf("not supported")
 }
 
 func (r *mutationResolver) PostCurrencyConvert(ctx context.Context, mainCurrencyConvertInput model.MainCurrencyConvertInput) (*model.MainCurrencyConvert, error) {
-	panic(fmt.Errorf("not implemented"))
+	return nil, fmt.Errorf("not supported")
 }
 
 func (r *mutationResolver) MutationViewerAPIKey(ctx context.Context, apiKey string) (*model.MutationViewerAPIKey, error) {
@@ -49,11 +49,11 @@ func (r *queryResolver) Service(ctx context.Context) ([]*model.MainGetServiceSta
 	serviceStatusList := r.Services.ServiceMgmt.CheckAllServerStatus(ctx)
 	for _, s := range serviceStatusList {
 		ret = append(ret, &model.MainGetServiceStatusByIDResponse{
-			ID:      IrisAPIs.PString(s.ID.String()),
-			Message: &s.Message,
-			Name:    &s.Name,
-			Status:  IrisAPIs.PString(string(s.Status)),
-			Type:    &s.ServiceType,
+			ID:      IrisAPIs.PValue(s.ID.String()),
+			Message: IrisAPIs.PValue(s.Message),
+			Name:    IrisAPIs.PValue(s.Name),
+			Status:  IrisAPIs.PValue(string(s.Status)),
+			Type:    IrisAPIs.PValue(s.ServiceType),
 		})
 	}
 	return ret, nil
