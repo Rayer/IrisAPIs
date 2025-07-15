@@ -27,7 +27,7 @@ type GetRecentPBSDataResponse struct {
 // @Param period query string false "Period, in seconds(default = 3600)"
 // @Param format query string false "Format, either text or json(default = json)"
 // @Success 200 {array} GetRecentPBSDataResponse
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /pbs/recent [get]
 func (c *Controller) GetRecentPBSData(ctx *gin.Context) {
 	p, _ := ctx.GetQuery("period")

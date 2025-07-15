@@ -3,8 +3,8 @@ package IrisAPIs
 import (
 	"bytes"
 	"context"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
@@ -44,7 +44,7 @@ func (s *ServiceDescriptorSuite) SetupSuite() {
 		log.Warn("Docker client initialization failed, will skip all docker test cases.")
 	} else {
 		//Download and init docker tester
-		p, err := s.dockerClient.ImagePull(context.TODO(), "docker.io/rayer/chatbot-server:latest", types.ImagePullOptions{})
+		p, err := s.dockerClient.ImagePull(context.TODO(), "docker.io/rayer/chatbot-server:latest", image.PullOptions{})
 		defer func() {
 			err := p.Close()
 			if err != nil {
@@ -73,7 +73,7 @@ func (s *ServiceDescriptorSuite) SetupSuite() {
 			s.dockerContainerId = cr.ID
 		}
 
-		err = s.dockerClient.ContainerStart(context.TODO(), cr.ID, types.ContainerStartOptions{})
+		err = s.dockerClient.ContainerStart(context.TODO(), cr.ID, container.StartOptions{})
 
 		if err != nil {
 			panic(err)
@@ -88,7 +88,7 @@ func (s *ServiceDescriptorSuite) SetupSuite() {
 func (s *ServiceDescriptorSuite) TearDownSuite() {
 	if s.dockerClient != nil {
 		//s.dockerClient.ImageRemove(context.TODO(), )
-		err := s.dockerClient.ContainerRemove(context.TODO(), s.dockerContainerId, types.ContainerRemoveOptions{Force: true})
+		err := s.dockerClient.ContainerRemove(context.TODO(), s.dockerContainerId, container.RemoveOptions{Force: true})
 		if err != nil {
 			log.Warnf("Error removing container %s! - %s", s.dockerContainerId, err.Error())
 		}
@@ -162,9 +162,10 @@ func (s *ServiceDescriptorSuite) TestDockerComponentDescriptor_IsAlive() {
 
 	for _, tt := range tests {
 		s.T().Run(tt.name, func(t *testing.T) {
-			d := NewDockerComponentDescriptor(context.Background(), tt.fields.Name, tt.fields.ContainerName, tt.fields.ImageName, tt.fields.ImageTag)
+			ctx := context.Background()
+			d := NewDockerComponentDescriptor(ctx, tt.fields.Name, tt.fields.ContainerName, tt.fields.ImageName, tt.fields.ImageTag)
 
-			got, err := d.IsAlive(context.TODO())
+			got, err := d.IsAlive(ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("IsAlive() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -221,7 +222,8 @@ func (s *ServiceDescriptorSuite) TestWebServiceDescriptor_IsAlive() {
 				Name:    tt.fields.Name,
 				PingUrl: tt.fields.PingUrl,
 			}
-			got, err := r.IsAlive(nil)
+			ctx := context.Background()
+			got, err := r.IsAlive(ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("IsAlive() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -271,9 +273,10 @@ func (s *ServiceDescriptorSuite) TestDockerComponentDescriptor_Logs() {
 	}
 	for _, tt := range tests {
 		s.T().Run(tt.name, func(t *testing.T) {
-			d := NewDockerComponentDescriptor(context.Background(), tt.fields.Name, tt.fields.ContainerName, tt.fields.ImageName, tt.fields.ImageTag)
+			ctx := context.Background()
+			d := NewDockerComponentDescriptor(ctx, tt.fields.Name, tt.fields.ContainerName, tt.fields.ImageName, tt.fields.ImageTag)
 			time.Sleep(2 * time.Second)
-			got, err := d.Logs(context.Background())
+			got, err := d.Logs(ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Logs() error = %v, wantErr %v", err, tt.wantErr)
 			}

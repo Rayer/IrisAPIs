@@ -21,7 +21,7 @@ type CurrencyConvert struct {
 // @Produce json
 // @Security ApiKeyAuth
 // @Success 200 {string} string "...Data from source"
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /currency [get]
 func (c *Controller) GetCurrencyRaw(ctx *gin.Context) {
 	result, err := c.CurrencyService.GetMostRecentCurrencyDataRaw()
@@ -42,7 +42,7 @@ func (c *Controller) GetCurrencyRaw(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Success 200 {object} CurrencyConvert
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /currency/convert [post]
 func (c *Controller) ConvertCurrency(ctx *gin.Context) {
 
@@ -78,7 +78,7 @@ func (c *Controller) ConvertCurrency(ctx *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Success 200 {object} GenericResultResponse
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /currency/sync [get]
 func (c *Controller) SyncData(ctx *gin.Context) {
 	err := c.CurrencyService.SyncToDb()

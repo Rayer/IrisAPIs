@@ -34,7 +34,7 @@ type ChatbotConversation struct {
 // @param input body ChatbotConversation true "Input info"
 // @Security ApiKeyAuth
 // @Success 200 {object} ChatbotReactResponse
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /chatbot [post]
 func (c *Controller) ChatBotReact(ctx *gin.Context) {
 	var conv ChatbotConversation
@@ -64,7 +64,7 @@ func (c *Controller) ChatBotReact(ctx *gin.Context) {
 // @Param user path string true "User name to reset"
 // @Security ApiKeyAuth
 // @Success 200 {object} ChatbotResetUserResponse
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /chatbot/{user} [delete]
 func (c *Controller) ChatBotResetUser(ctx *gin.Context) {
 	user := ctx.Param("user")

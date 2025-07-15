@@ -50,7 +50,7 @@ type ApiKeyUsage struct {
 // @param input body IssueApiKeyPayload true "Input info"
 // @Security ApiKeyAuth
 // @Success 200 {object} IssueApiKeyResponse
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /apiKey [post]
 func (c *Controller) IssueApiKey(ctx *gin.Context) {
 	input := &IssueApiKeyPayload{}
@@ -78,7 +78,7 @@ func (c *Controller) IssueApiKey(ctx *gin.Context) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Success 200 {array} ApiKeyBrief
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /apiKey [get]
 func (c *Controller) GetAllKeys(ctx *gin.Context) {
 	entities, err := c.ApiKeyService.GetAllKeys(ctx)
@@ -109,7 +109,7 @@ func (c *Controller) GetAllKeys(ctx *gin.Context) {
 // @Param id path integer true "Api Key ID"
 // @Security ApiKeyAuth
 // @Success 200 {object} ApiKeyDetail
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /apiKey/{id} [get]
 func (c *Controller) GetKey(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
@@ -155,7 +155,7 @@ func (c *Controller) GetKey(ctx *gin.Context) {
 // @Param to query integer false "To(timestamp)"
 // @Security ApiKeyAuth
 // @Success 200 {object} ApiKeyUsage
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /apiKey/{id}/usage [get]
 func (c *Controller) GetApiUsage(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
