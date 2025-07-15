@@ -24,7 +24,7 @@ type TransformArticleResponse struct {
 // @Accept json
 // @Produce json
 // @Success 200 {object} TransformArticleResponse
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /article_process [post]
 func (c *Controller) TransformArticle(ctx *gin.Context) {
 	var req TransformArticleRequest

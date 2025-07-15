@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -26,7 +27,11 @@ type ServiceDescriptor interface {
 var gDockerClient *client.Client
 
 func init() {
-	gDockerClient, _ = client.NewClientWithOpts(client.FromEnv)
+	var err error
+	gDockerClient, err = client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		log.Warnf("Failed to initialize Docker client: %v", err)
+	}
 }
 
 type DockerComponentDescriptor struct {
@@ -58,7 +63,7 @@ func (d *DockerComponentDescriptor) refreshDockerParameters(ctx context.Context)
 
 	f := filters.NewArgs()
 	f.Add("name", fmt.Sprintf("^/%s$", d.ContainerName))
-	ret, err := d.client.ContainerList(ctx, types.ContainerListOptions{
+	ret, err := d.client.ContainerList(ctx, container.ListOptions{
 		All:     false,
 		Filters: f,
 	})
@@ -112,38 +117,38 @@ func (d *DockerComponentDescriptor) IsAlive(ctx context.Context) (bool, error) {
 	log.Infof("Get container info : %+v", container)
 
 	if d.isImageNameTagMatch() == false {
-		return false, errors.Errorf("Continer %s found, but image mismatch : %s, expected %s(tag: %s)", container.Names, container.Image, d.ImageName, d.ImageTag)
+		return false, errors.Errorf("Container %s found, but image mismatch: %s, expected %s(tag: %s)", container.Names, container.Image, d.ImageName, d.ImageTag)
 	}
 
 	return true, nil
 }
 
 func (d *DockerComponentDescriptor) Install() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for DockerComponentDescriptor")
 }
 
 func (d *DockerComponentDescriptor) Shutdown() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for DockerComponentDescriptor")
 }
 
 func (d *DockerComponentDescriptor) Startup() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for DockerComponentDescriptor")
 }
 
 func (d *DockerComponentDescriptor) Restart() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for DockerComponentDescriptor")
 }
 
 func (d *DockerComponentDescriptor) Logs(ctx context.Context) (string, error) {
-	options := types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true}
+	options := container.LogsOptions{ShowStdout: true, ShowStderr: true}
 	op, err := d.client.ContainerLogs(ctx, d.containerParam.ID, options)
 	if err != nil {
 		return "", err
 	}
-	logs, err := ioutil.ReadAll(op)
 	defer func() {
 		_ = op.Close()
 	}()
+	logs, err := io.ReadAll(op)
 	if err != nil {
 		return "", err
 	}
@@ -171,23 +176,23 @@ func (r *WebServiceDescriptor) IsAlive(context.Context) (bool, error) {
 }
 
 func (r *WebServiceDescriptor) Install() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for WebServiceDescriptor")
 }
 
 func (r *WebServiceDescriptor) Shutdown() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for WebServiceDescriptor")
 }
 
 func (r *WebServiceDescriptor) Startup() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for WebServiceDescriptor")
 }
 
 func (r *WebServiceDescriptor) Restart() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for WebServiceDescriptor")
 }
 
 func (r *WebServiceDescriptor) Logs(context.Context) (string, error) {
-	return "", errors.New("not support this operation")
+	return "", errors.New("operation not supported for WebServiceDescriptor")
 }
 
 type DatabaseComponentDescriptor struct {
@@ -199,26 +204,29 @@ func (d *DatabaseComponentDescriptor) GetServiceName() string {
 	return d.Name
 }
 
-func (d *DatabaseComponentDescriptor) IsAlive(context.Context) (bool, error) {
-	panic("implement me")
+func (d *DatabaseComponentDescriptor) IsAlive(ctx context.Context) (bool, error) {
+	// This is a placeholder implementation
+	// In a real implementation, you would check the database connection
+	// For example, by pinging the database or executing a simple query
+	return false, errors.New("database connectivity check not implemented")
 }
 
 func (d *DatabaseComponentDescriptor) Install() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for DatabaseComponentDescriptor")
 }
 
 func (d *DatabaseComponentDescriptor) Shutdown() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for DatabaseComponentDescriptor")
 }
 
 func (d *DatabaseComponentDescriptor) Startup() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for DatabaseComponentDescriptor")
 }
 
 func (d *DatabaseComponentDescriptor) Restart() error {
-	return errors.New("not support this operation")
+	return errors.New("operation not supported for DatabaseComponentDescriptor")
 }
 
 func (d *DatabaseComponentDescriptor) Logs(context.Context) (string, error) {
-	return "", errors.New("not support this operation")
+	return "", errors.New("operation not supported for DatabaseComponentDescriptor")
 }

@@ -43,7 +43,7 @@ func (c *Controller) GetServiceStatus(ctx *gin.Context) {
 // @Param id path string true "Service ID"
 // @Produce json
 // @Success 200 {object} GetServiceStatusByIdResponse
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /service/{id} [get]
 func (c *Controller) GetServiceStatusById(ctx *gin.Context) {
 	id, err := uuid.Parse(ctx.Param("id"))
@@ -76,7 +76,7 @@ func (c *Controller) GetServiceStatusById(ctx *gin.Context) {
 // @Param id path string true "Service ID"
 // @Produce plain
 // @Success 200 {string} string "logs here"
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /service/{id}/logs [get]
 func (c *Controller) GetServiceLogs(ctx *gin.Context) {
 	id, err := uuid.Parse(ctx.Param("id"))

@@ -17,6 +17,8 @@ type SystemDefaultController interface {
 	PingHandler(c *gin.Context)
 }
 
+type DefaultProblem problems.DefaultProblem
+
 type Controller struct {
 	SystemDefaultController
 	*IrisAPIs.ServiceMonolith
@@ -62,8 +64,8 @@ type PingResponse struct {
 // @Accept json
 // @Produce json
 // @Success 200 {object} PingResponse
-// @Failure 400 {object} problems.DefaultProblem
-// @Failure 500 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
+// @Failure 500 {object} DefaultProblem
 // @Router /ping [get]
 func (c *Controller) PingHandler(ctx *gin.Context) {
 	ctx.Copy()

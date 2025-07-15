@@ -35,7 +35,7 @@ type IpNationMyIPResponse struct {
 // @Produce json
 // @Security ApiKeyAuth
 // @Success 200 {object} main.IpNationCountries
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /ip2nation [get]
 func (c *Controller) IpToNation(ctx *gin.Context) {
 	ipAddr := ctx.Query("ip")
@@ -61,7 +61,7 @@ func (c *Controller) IpToNation(ctx *gin.Context) {
 // @param input body IpNationCountriesBulk true "IP Addresses"
 // @Security ApiKeyAuth
 // @Success 200 {object} IpNationCountriesBulkResponse
-// @Failure 400 {object} problems.DefaultProblem
+// @Failure 400 {object} DefaultProblem
 // @Router /ip2nation/bulk [post]
 func (c *Controller) IpToNationBulk(ctx *gin.Context) {
 	bulkInput := IpNationCountriesBulk{}
@@ -93,7 +93,7 @@ func (c *Controller) IpToNationBulk(ctx *gin.Context) {
 // @Tags Ip2Nation
 // @Produce json
 // @Success 200 {object} IpNationMyIPResponse
-// @Failure 500 {object} problems.DefaultProblem
+// @Failure 500 {object} DefaultProblem
 // @Router /ip2nation/myip [get]
 func (c *Controller) IpToNationMyIP(ctx *gin.Context) {
 	ipAddr := ctx.GetHeader("X-Forwarded-For")
