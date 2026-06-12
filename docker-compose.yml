@@ -1,6 +1,6 @@
 services:
   iris-apis:
-    build: .
+    image: ghcr.io/rayer/irisapis:latest
     container_name: iris-apis
     restart: always
     ports:
