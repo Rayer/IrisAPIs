@@ -44,6 +44,9 @@ func main() {
 	// Single service status
 	mux.HandleFunc("GET /api/status/{name}", handleServiceStatus)
 
+	// System metrics (CPU, memory, disk, load)
+	mux.HandleFunc("GET /api/system", handleSystem)
+
 	// Middleware: JSON content type + request logging
 	handler := withJSON(withLogging(mux))
 
@@ -91,6 +94,10 @@ func handleServiceStatus(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	writeJSON(w, http.StatusNotFound, map[string]string{"error": "service not found: " + name})
+}
+
+func handleSystem(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, http.StatusOK, GetSystemInfo())
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
