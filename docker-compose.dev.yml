@@ -1,0 +1,11 @@
+services:
+  iris-apis:
+    image: ghcr.io/rayer/irisapis:dev
+    container_name: iris-apis-dev
+    restart: always
+    ports:
+      - "127.0.0.1:8801:8800"
+    volumes:
+      - ./config.dev.yaml:/app/config.yaml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

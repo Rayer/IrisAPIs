@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [master]
+    branches: [master, dev]
   workflow_dispatch:
 
 env:
@@ -42,9 +42,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,format=short
             type=ref,event=branch
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            type=raw,value=dev,enable=${{ github.ref == 'refs/heads/dev' }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -55,12 +55,12 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
 
-  deploy:
+  deploy-prod:
     needs: build-and-push
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
-      - name: Deploy to IrisNode
+      - name: Deploy to api.rayer.idv.tw
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -70,4 +70,23 @@ jobs:
             cd ~/iris-apis
             docker compose pull
             docker compose up -d --remove-orphans
-            echo "Deployed: $(docker inspect iris-apis --format '{{.Created}}')"
+            docker image prune -f
+            echo "PROD deployed: $(date -u)"
+
+  deploy-dev:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    steps:
+      - name: Deploy to api-test.rayer.idv.tw
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/iris-apis-dev
+            docker compose pull
+            docker compose up -d --remove-orphans
+            docker image prune -f
+            echo "DEV deployed: $(date -u)"
