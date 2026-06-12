@@ -1,0 +1,9 @@
+apiVersion: 1
+datasources:
+  - name: IrisAPIs
+    type: yesoreyeram-infinity-datasource
+    url: https://api.rayer.idv.tw
+    access: proxy
+    isDefault: true
+    jsonData:
+      httpMethod: GET

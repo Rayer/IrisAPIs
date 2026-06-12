@@ -18,7 +18,7 @@ services:
     timeout: 10s
 
   - name: "MariaDB"
-    url: "tcp://127.0.0.1:3306"
+    url: "tcp://host.docker.internal:3306"
     timeout: 5s
 
   - name: "GitHub"
