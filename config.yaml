@@ -1,0 +1,26 @@
+# IrisAPIs v2 Configuration
+# Services to monitor
+
+host: "127.0.0.1:8800"
+version: "2.0.0"
+
+services:
+  - name: "WordPress"
+    url: "https://www.rayer.idv.tw/blog/wp-admin/install.php"
+    timeout: 15s
+
+  - name: "Backup Dashboard"
+    url: "https://backup-dashboard-548190020191.asia-east1.run.app/"
+    timeout: 10s
+
+  - name: "Backup Dashboard API (health check)"
+    url: "https://backup-dashboard-548190020191.asia-east1.run.app/"
+    timeout: 10s
+
+  - name: "MariaDB"
+    url: "tcp://127.0.0.1:3306"
+    timeout: 5s
+
+  - name: "GitHub"
+    url: "https://github.com"
+    timeout: 10s
