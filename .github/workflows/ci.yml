@@ -89,8 +89,8 @@ jobs:
           script: |
             bash -c '
             cd ~/iris-apis-dev
-            docker compose pull
-            docker compose up -d --remove-orphans
+            docker compose -f docker-compose.dev.yml pull
+            docker compose -f docker-compose.dev.yml up -d --remove-orphans
             docker image prune -f
             echo "DEV deployed: $(date -u)"
             '
