@@ -67,11 +67,13 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            bash -c '
             cd ~/iris-apis
             docker compose pull
             docker compose up -d --remove-orphans
             docker image prune -f
             echo "PROD deployed: $(date -u)"
+            '
 
   deploy-dev:
     needs: build-and-push
@@ -85,8 +87,10 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            bash -c '
             cd ~/iris-apis-dev
             docker compose pull
             docker compose up -d --remove-orphans
             docker image prune -f
             echo "DEV deployed: $(date -u)"
+            '
