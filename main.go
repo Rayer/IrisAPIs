@@ -47,6 +47,17 @@ func main() {
 	// System metrics (CPU, memory, disk, load)
 	mux.HandleFunc("GET /api/system", handleSystem)
 
+	// Prometheus metrics endpoint
+	mux.Handle("GET /metrics", metricsHandler())
+
+	// Background metrics collection every 15s
+	go func() {
+		for {
+			collectMetrics()
+			time.Sleep(15 * time.Second)
+		}
+	}()
+
 	// Middleware: JSON content type + request logging
 	handler := withJSON(withLogging(mux))
 
